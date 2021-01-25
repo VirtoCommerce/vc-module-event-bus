@@ -6,9 +6,7 @@
   <platformVersion>3.0.0</platformVersion>
   <title>EventBus</title>
   <description></description>
-  <authors>
-    
-  </authors>
+  <authors></authors>
   <owners>
     <owner>Virto Commerce</owner>
   </owners>
@@ -18,8 +16,6 @@
   <tags>eventbus module</tags>
   <assemblyFile>VirtoCommerce.EventBusModule.Web.dll</assemblyFile>
   <moduleType>VirtoCommerce.EventBusModule.Web.Module, VirtoCommerce.EventBusModule.Web</moduleType>
-  <dependencies>
-    <dependency id="VirtoCommerce.Core" version="3.0.0" />
-  </dependencies>
+  <dependencies></dependencies>
   <useFullTypeNameInSwagger>false</useFullTypeNameInSwagger>
 </module>
