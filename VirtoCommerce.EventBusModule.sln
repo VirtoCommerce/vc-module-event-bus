@@ -7,9 +7,45 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{8F73706F-0D6
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{2730C95F-AA1F-4537-8999-5755B347CAA6}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "VirtoCommerce.EventBusModule.Core", "src\VirtoCommerce.EventBusModule.Core\VirtoCommerce.EventBusModule.Core.csproj", "{34EA233E-B01B-4A9E-A1D6-6A238E55750A}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "VirtoCommerce.EventBusModule.Data", "src\VirtoCommerce.EventBusModule.Data\VirtoCommerce.EventBusModule.Data.csproj", "{8FD03302-9C39-4E46-9E5B-4D9349F0939F}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "VirtoCommerce.EventBusModule.Web", "src\VirtoCommerce.EventBusModule.Web\VirtoCommerce.EventBusModule.Web.csproj", "{1884F8D8-4F90-4C21-B565-5A501233309B}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "VirtoCommerce.EventBusModule.Tests", "tests\VirtoCommerce.EventBusModule.Tests\VirtoCommerce.EventBusModule.Tests.csproj", "{46B3BFD8-8E38-4FD0-852E-633A8382F376}"
+EndProject
 Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{34EA233E-B01B-4A9E-A1D6-6A238E55750A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{34EA233E-B01B-4A9E-A1D6-6A238E55750A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{34EA233E-B01B-4A9E-A1D6-6A238E55750A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{34EA233E-B01B-4A9E-A1D6-6A238E55750A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8FD03302-9C39-4E46-9E5B-4D9349F0939F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8FD03302-9C39-4E46-9E5B-4D9349F0939F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8FD03302-9C39-4E46-9E5B-4D9349F0939F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8FD03302-9C39-4E46-9E5B-4D9349F0939F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1884F8D8-4F90-4C21-B565-5A501233309B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1884F8D8-4F90-4C21-B565-5A501233309B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1884F8D8-4F90-4C21-B565-5A501233309B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1884F8D8-4F90-4C21-B565-5A501233309B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{46B3BFD8-8E38-4FD0-852E-633A8382F376}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{46B3BFD8-8E38-4FD0-852E-633A8382F376}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{46B3BFD8-8E38-4FD0-852E-633A8382F376}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{46B3BFD8-8E38-4FD0-852E-633A8382F376}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{34EA233E-B01B-4A9E-A1D6-6A238E55750A} = {8F73706F-0D6A-4E50-AB78-160F32AACC1F}
+		{8FD03302-9C39-4E46-9E5B-4D9349F0939F} = {8F73706F-0D6A-4E50-AB78-160F32AACC1F}
+		{1884F8D8-4F90-4C21-B565-5A501233309B} = {8F73706F-0D6A-4E50-AB78-160F32AACC1F}
+		{46B3BFD8-8E38-4FD0-852E-633A8382F376} = {2730C95F-AA1F-4537-8999-5755B347CAA6}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {7B210E9B-6F7E-46A8-9BCE-895F06B1D01A}

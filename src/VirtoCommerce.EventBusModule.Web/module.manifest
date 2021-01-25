@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<module xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+  <id>VirtoCommerce.EventBus</id>
+  <version>0.1.0</version>
+  <version-tag />
+  <platformVersion>3.0.0</platformVersion>
+  <title>EventBus</title>
+  <description></description>
+  <authors>
+    
+  </authors>
+  <owners>
+    <owner>Virto Commerce</owner>
+  </owners>
+  <requireLicenseAcceptance>false</requireLicenseAcceptance>
+  <releaseNotes />
+  <copyright>Copyright © 2021 . All rights reserved</copyright>
+  <tags>eventbus module</tags>
+  <assemblyFile>VirtoCommerce.EventBusModule.Web.dll</assemblyFile>
+  <moduleType>VirtoCommerce.EventBusModule.Web.Module, VirtoCommerce.EventBusModule.Web</moduleType>
+  <dependencies>
+    <dependency id="VirtoCommerce.Core" version="3.0.0" />
+  </dependencies>
+  <useFullTypeNameInSwagger>false</useFullTypeNameInSwagger>
+</module>
