@@ -14,7 +14,7 @@ namespace VirtoCommerce.EventBusModule.Tests
     {
 
         [Fact]
-        public async Task AddSubscription_SubscribeAndGetEvents()
+        public async Task AddSubscription_SubscribeAndGetEventSubscriptions()
         {
             //Arrange
             var eventBus = new InProcessBus();
@@ -24,7 +24,7 @@ namespace VirtoCommerce.EventBusModule.Tests
 
             //Act
             await eventBus.Publish(new FakeEvent());
-            var subcriptions = eventBusManager.GetEvents(0, int.MaxValue);
+            var subcriptions = eventBusManager.GetEventSubscriptions(0, int.MaxValue);
 
             //Assert
             Assert.NotNull(subcriptions);

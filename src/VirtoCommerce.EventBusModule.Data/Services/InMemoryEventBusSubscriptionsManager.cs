@@ -27,7 +27,7 @@ namespace VirtoCommerce.EventBusModule.Data.Services
 
             foreach (var registeredEvent in allRegisteredEvents)
             {
-                InvokeHandler(registeredEvent.Value, _eventHandlerRegistrar);
+                InvokeHandler(registeredEvent, _eventHandlerRegistrar);
             }
         }
 
@@ -42,6 +42,12 @@ namespace VirtoCommerce.EventBusModule.Data.Services
         }
 
         public virtual string[] GetEvents(int skip, int take)
+        {
+            var allRegisteredEvents = DiscoverAllDomainEvents();
+            return allRegisteredEvents.Skip(skip).Take(take).Select(x => x.FullName).ToArray();
+        }
+
+        public virtual string[] GetEventSubscriptions(int skip, int take)
         {
             return _subscriptions.Skip(skip).Take(take).Select(x => x.FullName).ToArray();
         }
@@ -80,7 +86,7 @@ namespace VirtoCommerce.EventBusModule.Data.Services
             registerExecutorMethod.Invoke(registrar, new object[] { del });            
         }
 
-        private static Dictionary<string, Type> DiscoverAllDomainEvents()
+        private static Type[] DiscoverAllDomainEvents()
         {
             var eventBaseType = typeof(DomainEvent);
 
@@ -89,13 +95,8 @@ namespace VirtoCommerce.EventBusModule.Data.Services
                 .Where(x => !(x.FullName.StartsWith("Microsoft.") || x.FullName.StartsWith("System.")))
                 .SelectMany(x => GetTypesSafe(x))
                 .Where(x => !x.IsAbstract && !x.IsGenericTypeDefinition && x.IsSubclassOf(eventBaseType))
-                .Select(x => new 
-                {
-                    Id = x.FullName,
-                    EventType = x,
-                })
                 .Distinct()
-                .ToDictionary(k => k.Id, v => v.EventType);
+                .ToArray();
             return result;
         }
 

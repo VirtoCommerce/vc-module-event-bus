@@ -11,5 +11,6 @@ namespace VirtoCommerce.EventBusModule.Core.Services
         void AddSubscription<T>() where T : IEvent;
         void RemoveSubscription<T>() where T : IEvent;
         string[] GetEvents(int skip, int take);
+        string[] GetEventSubscriptions(int skip, int take);
     }
 }
