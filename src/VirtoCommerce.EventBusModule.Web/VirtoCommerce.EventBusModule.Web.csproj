@@ -16,6 +16,10 @@
         <None Remove="dist\**" />
         <None Remove="node_modules\**" />
     </ItemGroup>
+    <ItemGroup>
+      <ProjectReference Include="..\VirtoCommerce.EventBusModule.Core\VirtoCommerce.EventBusModule.Core.csproj" />
+      <ProjectReference Include="..\VirtoCommerce.EventBusModule.Data\VirtoCommerce.EventBusModule.Data.csproj" />
+    </ItemGroup>
     <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
         <NoWarn>1701;1702;1705;1591</NoWarn>
     </PropertyGroup>

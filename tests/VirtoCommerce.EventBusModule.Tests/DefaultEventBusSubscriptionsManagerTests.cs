@@ -2,6 +2,8 @@ using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Moq;
+using VirtoCommerce.EventBusModule.Core.Models;
+using VirtoCommerce.EventBusModule.Core.Services;
 using VirtoCommerce.EventBusModule.Data.Services;
 using VirtoCommerce.Platform.Core.Bus;
 using VirtoCommerce.Platform.Core.Caching;
@@ -10,7 +12,7 @@ using Xunit;
 
 namespace VirtoCommerce.EventBusModule.Tests
 {
-    public class InMemoryEventBusSubscriptionsManagerTests
+    public class DefaultEventBusSubscriptionsManagerTests
     {
 
         [Fact]
@@ -20,24 +22,26 @@ namespace VirtoCommerce.EventBusModule.Tests
             var eventBus = new InProcessBus();
             var eventBusManager = GetEventBusSubscriptionsManager(eventBus);
             eventBusManager.RegisterEvents();
-            eventBusManager.AddSubscription<FakeEvent>();
+            var request = new SubscriptionRequest() { EventIds = new[] { typeof(FakeEvent).FullName } };
 
             //Act
-            await eventBus.Publish(new FakeEvent());
-            var subcriptions = eventBusManager.GetEventSubscriptions(0, int.MaxValue);
+            var result = await eventBusManager.AddSubscriptionAsync(request);
 
             //Assert
-            Assert.Contains(nameof(FakeEvent), subcriptions);
+            Assert.NotNull(result);
         }
         
 
-        private InMemoryEventBusSubscriptionsManager GetEventBusSubscriptionsManager(IHandlerRegistrar handlerRegistrar)
+        private DefaultEventBusSubscriptionsManager GetEventBusSubscriptionsManager(IHandlerRegistrar handlerRegistrar)
         {
             var registeredEventServiceMock = new Mock<RegisteredEventService>(Mock.Of<IPlatformMemoryCache>());
-            var eventTypes = new Dictionary<string, Type> { { nameof(FakeEvent), typeof(FakeEvent) } };
+            var eventTypes = new Dictionary<string, Type> { { typeof(FakeEvent).FullName, typeof(FakeEvent) } };
             registeredEventServiceMock.Setup(x => x.GetAllEvents()).Returns(eventTypes);
 
-            return new InMemoryEventBusSubscriptionsManager(handlerRegistrar, registeredEventServiceMock.Object);
+            return new DefaultEventBusSubscriptionsManager(handlerRegistrar,
+                registeredEventServiceMock.Object,
+                Mock.Of<ISubscriptionService>(),
+                Mock.Of<ISubscriptionSearchService>());
         }
     }
 
