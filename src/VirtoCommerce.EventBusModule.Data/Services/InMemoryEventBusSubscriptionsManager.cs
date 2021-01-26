@@ -14,23 +14,17 @@ namespace VirtoCommerce.EventBusModule.Data.Services
     {
         private readonly HashSet<Type> _subscriptions;
         private readonly IHandlerRegistrar _eventHandlerRegistrar;
+        private readonly RegisteredEventService _registeredEventService;
 
-        public InMemoryEventBusSubscriptionsManager(IHandlerRegistrar eventHandlerRegistrar)
+        public InMemoryEventBusSubscriptionsManager(IHandlerRegistrar eventHandlerRegistrar, RegisteredEventService registeredEventService)
         {
             _subscriptions = new HashSet<Type>();
             _eventHandlerRegistrar = eventHandlerRegistrar;
+            _registeredEventService = registeredEventService;
         }
 
-        public virtual void RegisterEvents()
-        {
-            var allRegisteredEvents = DiscoverAllDomainEvents();
-
-            foreach (var registeredEvent in allRegisteredEvents)
-            {
-                InvokeHandler(registeredEvent, _eventHandlerRegistrar);
-            }
-        }
-
+        #region Subcription
+        
         public virtual void AddSubscription<T>() where T : IEvent
         {
             var eventType = typeof(T);
@@ -41,10 +35,19 @@ namespace VirtoCommerce.EventBusModule.Data.Services
             }
         }
 
+        public virtual void AddSubscription(string eventName)
+        {
+            var allEvents = _registeredEventService.GetAllEvents();
+            if (allEvents.TryGetValue(eventName, out var eventType) && !_subscriptions.Any(x => x == eventType))
+            {
+                _subscriptions.Add(eventType);
+            }
+        }
+
         public virtual string[] GetEvents(int skip, int take)
         {
-            var allRegisteredEvents = DiscoverAllDomainEvents();
-            return allRegisteredEvents.Skip(skip).Take(take).Select(x => x.FullName).ToArray();
+            var allRegisteredEvents = _registeredEventService.GetAllEvents();
+            return allRegisteredEvents.Skip(skip).Take(take).Select(x => x.Key).ToArray();
         }
 
         public virtual string[] GetEventSubscriptions(int skip, int take)
@@ -56,6 +59,30 @@ namespace VirtoCommerce.EventBusModule.Data.Services
         {
             _subscriptions.Remove(typeof(T));
         }
+
+        public virtual void RemoveSubscription(string eventName)
+        {
+            var allEvents = _registeredEventService.GetAllEvents();
+            if (allEvents.TryGetValue(eventName, out var eventType) && !_subscriptions.Any(x => x == eventType))
+            {
+                _subscriptions.Remove(eventType);
+            }
+        }
+
+        #endregion Subcription
+
+        #region HandleEvent
+
+        public virtual void RegisterEvents()
+        {
+            var allEvents = _registeredEventService.GetAllEvents();
+
+            foreach (var @event in allEvents)
+            {
+                InvokeHandler(@event.Value, _eventHandlerRegistrar);
+            }
+        }
+
 
         protected virtual Task HandleEvent(DomainEvent domainEvent, CancellationToken cancellationToken)
         {
@@ -86,34 +113,6 @@ namespace VirtoCommerce.EventBusModule.Data.Services
             registerExecutorMethod.Invoke(registrar, new object[] { del });            
         }
 
-        private static Type[] DiscoverAllDomainEvents()
-        {
-            var eventBaseType = typeof(DomainEvent);
-
-            var result = AppDomain.CurrentDomain.GetAssemblies()
-                // Maybe there is a way to find platform- and modules- related assemblies
-                .Where(x => !(x.FullName.StartsWith("Microsoft.") || x.FullName.StartsWith("System.")))
-                .SelectMany(x => GetTypesSafe(x))
-                .Where(x => !x.IsAbstract && !x.IsGenericTypeDefinition && x.IsSubclassOf(eventBaseType))
-                .Distinct()
-                .ToArray();
-            return result;
-        }
-
-        private static Type[] GetTypesSafe(Assembly assembly)
-        {
-            var result = Array.Empty<Type>();
-
-            try
-            {
-                result = assembly.GetTypes();
-            }
-            catch (Exception ex) when (ex is ReflectionTypeLoadException || ex is TypeLoadException)
-            {
-                // No need to trow as we could have exceptions when loading types
-            }
-
-            return result;
-        }
+        #endregion HandleEvent
     }
 }
