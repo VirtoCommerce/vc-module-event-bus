@@ -67,6 +67,11 @@ namespace VirtoCommerce.EventBusModule.Data.Services
         {
             var query = repository.Subscriptions;
 
+            if (!string.IsNullOrEmpty(searchCriteria.Provider))
+            {
+                query = query.Where(x => x.Provider.Contains(searchCriteria.Provider));
+            }
+
             if (!searchCriteria.EventIds.IsNullOrEmpty())
             {
                 query = query.Where(x => x.Events.Any(y => searchCriteria.EventIds.Contains(y.EventId)));
