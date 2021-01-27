@@ -11,11 +11,22 @@
         <NoWarn>1701;1702;1705;1591</NoWarn>
     </PropertyGroup>
     <ItemGroup>
-      <PackageReference Include="Azure.Messaging.EventGrid" Version="4.0.0-beta.4" />
-      <PackageReference Include="VirtoCommerce.Platform.Core" Version="3.39.0" />
+      <ProjectReference Include="..\VirtoCommerce.EventBusModule.Core\VirtoCommerce.EventBusModule.Core.csproj" />
     </ItemGroup>
     <ItemGroup>
-      <ProjectReference Include="..\VirtoCommerce.EventBusModule.Core\VirtoCommerce.EventBusModule.Core.csproj" />
+		<PackageReference Include="Azure.Messaging.EventGrid" Version="4.0.0-beta.4" />
+        <PackageReference Include="Microsoft.EntityFrameworkCore" Version="3.1.8" />
+        <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="3.1.8">
+            <PrivateAssets>all</PrivateAssets>
+            <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+        </PackageReference>
+        <PackageReference Include="Microsoft.EntityFrameworkCore.Relational" Version="3.1.8" />
+        <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="3.1.8" />
+        <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="3.1.8">
+            <PrivateAssets>all</PrivateAssets>
+            <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+        </PackageReference>
+        <PackageReference Include="VirtoCommerce.Platform.Data" Version="3.30.0" />
     </ItemGroup>
 
 </Project>
