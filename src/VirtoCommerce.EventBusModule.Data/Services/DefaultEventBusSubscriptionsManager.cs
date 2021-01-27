@@ -34,25 +34,22 @@ namespace VirtoCommerce.EventBusModule.Data.Services
 
         #region Subcription
 
-        public virtual async Task<SubscriptionInfo> AddSubscriptionAsync(SubscriptionRequest request)
+        public virtual async Task<SubscriptionInfo> SaveSubscriptionAsync(SubscriptionRequest request)
         {
-            var allEvents = _registeredEventService.GetAllEvents();
-            if (allEvents.Keys.All(x => request.EventIds.Contains(x)))
+            SubscriptionInfo result = null;
+            if (CheckEvents(request.EventIds))
             {
-                var subscriptionInfo = new SubscriptionInfo
+                result = new SubscriptionInfo
                 {
+                    Id = request.SubscriptionId,
                     Provider = request.Provider,
                     ConnectionString = request.ConnectionString,
-                    SubscriptionEvents = request.EventIds.Select(x => new SubscriptionEvent { EventId = x }).ToArray()
+                    Events = request.EventIds.Select(x => new SubscriptionEvent { EventId = x }).ToArray()
                 };
-                await _subscriptionService.SaveChangesAsync(new[] { subscriptionInfo });
-                return subscriptionInfo;
+                await _subscriptionService.SaveChangesAsync(new[] { result });
             }
-            else
-            {
-                var notRegisteredEvents = request.EventIds.Where(e => !allEvents.Keys.Any(all => all == e));
-                throw new PlatformException($"Not registered events: {string.Join(",", notRegisteredEvents)}");
-            }
+
+            return result;
         }
 
         #endregion Subcription
@@ -111,5 +108,20 @@ namespace VirtoCommerce.EventBusModule.Data.Services
         }
 
         #endregion HandleEvent
+
+
+        private bool CheckEvents(string[] eventIds)
+        {
+            var allEvents = _registeredEventService.GetAllEvents();
+            if (eventIds.All(x => allEvents.Keys.Contains(x)))
+            {
+                return true;
+            }
+            else
+            {
+                var notRegisteredEvents = eventIds.Where(e => !allEvents.Keys.Any(all => all == e));
+                throw new PlatformException($"The events are not registered: {string.Join(",", notRegisteredEvents)}");
+            }
+        }
     }
 }

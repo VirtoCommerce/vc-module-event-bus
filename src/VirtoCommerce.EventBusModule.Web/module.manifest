@@ -5,8 +5,11 @@
   <version-tag />
   <platformVersion>3.0.0</platformVersion>
   <title>EventBus</title>
-  <description></description>
-  <authors></authors>
+  <description>The module manage/handle subscriptions of events</description>
+  <authors>
+      <author>Andrei Kostyrin</author>
+      <author>Konstantin Savosteev</author>
+  </authors>
   <owners>
     <owner>Virto Commerce</owner>
   </owners>

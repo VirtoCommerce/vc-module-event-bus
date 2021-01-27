@@ -25,7 +25,7 @@ namespace VirtoCommerce.EventBusModule.Tests
             var request = new SubscriptionRequest() { EventIds = new[] { typeof(FakeEvent).FullName } };
 
             //Act
-            var result = await eventBusManager.AddSubscriptionAsync(request);
+            var result = await eventBusManager.SaveSubscriptionAsync(request);
 
             //Assert
             Assert.NotNull(result);
