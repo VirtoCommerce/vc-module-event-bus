@@ -10,5 +10,12 @@
     <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
         <NoWarn>1701;1702;1705;1591</NoWarn>
     </PropertyGroup>
+    <ItemGroup>
+      <PackageReference Include="Azure.Messaging.EventGrid" Version="4.0.0-beta.4" />
+      <PackageReference Include="VirtoCommerce.Platform.Core" Version="3.39.0" />
+    </ItemGroup>
+    <ItemGroup>
+      <ProjectReference Include="..\VirtoCommerce.EventBusModule.Core\VirtoCommerce.EventBusModule.Core.csproj" />
+    </ItemGroup>
 
 </Project>
