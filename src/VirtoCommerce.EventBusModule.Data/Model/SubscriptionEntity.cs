@@ -13,6 +13,8 @@ namespace VirtoCommerce.EventBusModule.Data.Model
         public string Provider { get; set; }
         [StringLength(512)]
         public string ConnectionString { get; set; }
+        [StringLength(512)]
+        public string AccessKey { get; set; }
         public int Status { get; set; }
         [StringLength(1024)]
         public string ErrorMessage { get; set; }
@@ -30,6 +32,7 @@ namespace VirtoCommerce.EventBusModule.Data.Model
             subscription.ModifiedDate = ModifiedDate;
             subscription.Provider = Provider;
             subscription.ConnectionString = ConnectionString;
+            subscription.AccessKey = AccessKey;
             subscription.Status = Status;
             subscription.ErrorMessage = ErrorMessage;
 
@@ -50,6 +53,7 @@ namespace VirtoCommerce.EventBusModule.Data.Model
             ModifiedDate = subscription.ModifiedDate;
             Provider = subscription.Provider;
             ConnectionString = subscription.ConnectionString;
+            AccessKey = subscription.AccessKey;
             Status = subscription.Status;
             ErrorMessage = subscription.ErrorMessage;
 
@@ -66,6 +70,7 @@ namespace VirtoCommerce.EventBusModule.Data.Model
         {
             target.Provider = Provider;
             target.ConnectionString = ConnectionString;
+            target.AccessKey = AccessKey;
             target.Status = Status;
             target.ErrorMessage = ErrorMessage;
 

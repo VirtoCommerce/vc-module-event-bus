@@ -30,7 +30,7 @@ namespace VirtoCommerce.EventBusModule.Tests
             //Assert
             Assert.NotNull(result);
         }
-        
+
 
         private DefaultEventBusSubscriptionsManager GetEventBusSubscriptionsManager(IHandlerRegistrar handlerRegistrar)
         {
@@ -41,7 +41,8 @@ namespace VirtoCommerce.EventBusModule.Tests
             return new DefaultEventBusSubscriptionsManager(handlerRegistrar,
                 registeredEventServiceMock.Object,
                 Mock.Of<ISubscriptionService>(),
-                Mock.Of<ISubscriptionSearchService>());
+                Mock.Of<ISubscriptionSearchService>(),
+                Mock.Of<IEventBusFactory>());
         }
     }
 

@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using Azure;
 using Azure.Messaging.EventGrid;
@@ -10,30 +11,30 @@ namespace VirtoCommerce.EventBusModule.Data.Services
 {
     public class AzureEventBusProvider : IEventBusProvider
     {
-        public virtual async Task<SendEventResult> SendEventAsync()
+        public virtual async Task<SendEventResult> SendEventAsync(SubscriptionInfo subscription, IList<EventData> events)
         {
             var result = new SendEventResult();
 
-            var client = CreateClient();
+            var client = CreateClient(subscription);
 
             if (client != null)
             {
-                //todo: create from event
-                var events = new List<CloudEvent>();
-                //var cloudEvent = new CloudEvent("", "", null);
+                var cloudEvents = events.Select(x => new CloudEvent(subscription.Id ?? nameof(AzureEventBusProvider), x.EventId, x)).ToList();
 
                 try
                 {
-                    var eventGridResponse = await client.SendEventsAsync(events);
+                    var eventGridResponse = await client.SendEventsAsync(cloudEvents);
 
-                    result.StatusCode = eventGridResponse.Status;
-                    result.ResponseResult = eventGridResponse.ReasonPhrase;
+                    result.Status = eventGridResponse.Status;
                 }
                 catch (RequestFailedException requestFailedEx)
                 {
-                    result.StatusCode = requestFailedEx.Status;
-                    result.ResponseResult = requestFailedEx.ErrorCode;
+                    result.Status = requestFailedEx.Status;
                     result.ErrorMessage = requestFailedEx.Message;
+                }
+                catch (Exception ex)
+                {
+                    result.ErrorMessage = ex.Message;
                 }
             }
             else
@@ -44,13 +45,12 @@ namespace VirtoCommerce.EventBusModule.Data.Services
             return result;
         }
 
-        private EventGridPublisherClient CreateClient()
+        private EventGridPublisherClient CreateClient(SubscriptionInfo subscription)
         {
-            //todo: get from event
-            var topicEndpoint = "";
-            var topicAccessKey = "";
+            var topicEndpoint = subscription.ConnectionString;
+            var topicAccessKey = subscription.AccessKey;
 
-            EventGridPublisherClient result = null;
+            var result = default(EventGridPublisherClient);
 
             if (!string.IsNullOrEmpty(topicEndpoint) && !string.IsNullOrEmpty(topicAccessKey))
             {

@@ -6,8 +6,9 @@ namespace VirtoCommerce.EventBusModule.Core.Models
     {
         public string Provider { get; set; }
         public string ConnectionString { get; set; }
+        public string AccessKey { get; set; }
         public int Status { get; set; }
         public string ErrorMessage { get; set; }
-        public SubscriptionEvent[] Events { get; set; } 
+        public SubscriptionEvent[] Events { get; set; }
     }
 }

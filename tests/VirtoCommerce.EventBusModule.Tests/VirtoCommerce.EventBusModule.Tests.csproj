@@ -3,13 +3,12 @@
   <PropertyGroup>
     <TargetFramework>netcoreapp3.1</TargetFramework>
     <NoWarn>1591</NoWarn>
-    <UserSecretsId>e44966f4-4c41-4ff9-98f6-5e28631502d6</UserSecretsId>
   </PropertyGroup>
 
     <ItemGroup>
 		<PackageReference Include="Azure.Messaging.EventGrid" Version="4.0.0-beta.4" />
 		<PackageReference Include="Microsoft.Extensions.Configuration.UserSecrets" Version="3.1.0" />
-		<PackageReference Include="Microsoft.Extensions.Caching.Memory" Version="5.0.0" />
+        <PackageReference Include="Microsoft.Extensions.Caching.Memory" Version="5.0.0" />
         <PackageReference Include="Microsoft.NET.Test.Sdk" Version="16.5.0" />
         <PackageReference Include="Moq" Version="4.13.1" />
         <PackageReference Include="MSTest.TestAdapter" Version="2.1.0" />
@@ -25,6 +24,13 @@
     <ItemGroup>
 		<ProjectReference Include="..\..\src\VirtoCommerce.EventBusModule.Core\VirtoCommerce.EventBusModule.Core.csproj" />
 		<ProjectReference Include="..\..\src\VirtoCommerce.EventBusModule.Data\VirtoCommerce.EventBusModule.Data.csproj" />
+    </ItemGroup>
+
+    <PropertyGroup>
+        <UserSecretsId>VirtoCommerce.EventBusModule.Tests-e44966f4-4c41-4ff9-98f6-5e28631502d6</UserSecretsId>
+    </PropertyGroup>
+    <ItemGroup>
+        <DotNetCliToolReference Include="Microsoft.Extensions.SecretManager.Tools" Version="1.0.1" />
     </ItemGroup>
 
 </Project>

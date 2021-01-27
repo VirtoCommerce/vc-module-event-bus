@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using System.Threading;
@@ -20,16 +19,19 @@ namespace VirtoCommerce.EventBusModule.Data.Services
         private readonly IHandlerRegistrar _eventHandlerRegistrar;
         private readonly RegisteredEventService _registeredEventService;
         private readonly ISubscriptionSearchService _subscriptionSearchService;
+        private readonly IEventBusFactory _eventBusFactory;
 
         public DefaultEventBusSubscriptionsManager(IHandlerRegistrar eventHandlerRegistrar,
             RegisteredEventService registeredEventService,
             ISubscriptionService subscriptionService,
-            ISubscriptionSearchService subscriptionSearchService)
+            ISubscriptionSearchService subscriptionSearchService,
+            IEventBusFactory eventBusFactory)
         {
             _eventHandlerRegistrar = eventHandlerRegistrar;
             _registeredEventService = registeredEventService;
             _subscriptionService = subscriptionService;
             _subscriptionSearchService = subscriptionSearchService;
+            _eventBusFactory = eventBusFactory;
         }
 
         #region Subcription
@@ -44,6 +46,7 @@ namespace VirtoCommerce.EventBusModule.Data.Services
                     Id = request.SubscriptionId,
                     Provider = request.Provider,
                     ConnectionString = request.ConnectionString,
+                    AccessKey = request.AccessKey,
                     Events = request.EventIds.Select(x => new SubscriptionEvent { EventId = x }).ToArray()
                 };
                 await _subscriptionService.SaveChangesAsync(new[] { result });
@@ -80,11 +83,24 @@ namespace VirtoCommerce.EventBusModule.Data.Services
 
             if (searchResult.TotalCount > 0)
             {
-                var objectEvent = domainEvent.GetEntityWithInterface<IEntity>()
-                                             .Select(x => new { objectId = x.Id, objectType = x.GetType().FullName })
+                var events = domainEvent.GetEntityWithInterface<IEntity>()
+                                             .Select(x => new EventData { ObjectId = x.Id, ObjectType = x.GetType().FullName, EventId = eventId })
                                              .ToArray();
 
-                //TODO call eventBusProvider
+                foreach (var subscription in searchResult.Results)
+                {
+                    var provider = _eventBusFactory.CreateProvider(subscription.Provider);
+
+                    var result = await provider.SendEventAsync(subscription, events);
+
+                    subscription.Status = result.Status;
+                    if (!string.IsNullOrEmpty(result.ErrorMessage))
+                    {
+                        subscription.ErrorMessage = new string(result.ErrorMessage.Take(1024).ToArray());
+                    }
+                }
+
+                await _subscriptionService.SaveChangesAsync(searchResult.Results.ToArray());
             }
         }
 
@@ -104,7 +120,7 @@ namespace VirtoCommerce.EventBusModule.Data.Services
                 return HandleEvent(x, token);
             };
 
-            registerExecutorMethod.Invoke(registrar, new object[] { del });            
+            registerExecutorMethod.Invoke(registrar, new object[] { del });
         }
 
         #endregion HandleEvent

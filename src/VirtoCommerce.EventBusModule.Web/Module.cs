@@ -8,10 +8,8 @@ using VirtoCommerce.EventBusModule.Core;
 using VirtoCommerce.EventBusModule.Core.Services;
 using VirtoCommerce.EventBusModule.Data.Repositories;
 using VirtoCommerce.EventBusModule.Data.Services;
-using VirtoCommerce.Platform.Core.Common;
 using VirtoCommerce.Platform.Core.Modularity;
 using VirtoCommerce.Platform.Core.Security;
-using VirtoCommerce.Platform.Data.Extensions;
 
 namespace VirtoCommerce.EventBusModule.Web
 {
@@ -29,6 +27,7 @@ namespace VirtoCommerce.EventBusModule.Web
             serviceCollection.AddTransient<IEventBusSubscriptionsManager, DefaultEventBusSubscriptionsManager>();
             serviceCollection.AddTransient<ISubscriptionSearchService, SubscriptionSearchService>();
             serviceCollection.AddTransient<ISubscriptionService, SubscriptionService>();
+            serviceCollection.AddTransient<IEventBusFactory, EventBusFactory>();
             serviceCollection.AddSingleton<RegisteredEventService>();
         }
 
