@@ -17,7 +17,7 @@ namespace VirtoCommerce.EventBusModule.Tests
     {
 
         [Fact]
-        public async Task SaveSubscriptionAsync_TrySaveKnownType()
+        public async Task SaveSubscriptionAsync_TrySaveKnownType_Saved()
         {
             //Arrange
             var subcriptionServiceMock = new Mock<ISubscriptionService>();
@@ -35,7 +35,7 @@ namespace VirtoCommerce.EventBusModule.Tests
         }
 
         [Fact]
-        public async Task SaveSubscriptionAsync_TrySaveUnknownType()
+        public async Task SaveSubscriptionAsync_TrySaveUnknownType_ThrowException()
         {
             //Arrange
             var subcriptionServiceMock = new Mock<ISubscriptionService>();
