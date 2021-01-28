@@ -6,7 +6,7 @@ using VirtoCommerce.EventBusModule.Core;
 using VirtoCommerce.EventBusModule.Core.Models;
 using VirtoCommerce.EventBusModule.Core.Services;
 using VirtoCommerce.EventBusModule.Data.Services;
-
+using VirtoCommerce.Platform.Core.Exceptions;
 
 namespace VirtoCommerce.EventBusModule.Web.Controllers.Api
 {
@@ -51,8 +51,19 @@ namespace VirtoCommerce.EventBusModule.Web.Controllers.Api
         [Authorize(ModuleConstants.Security.Permissions.Create)]
         public async Task<ActionResult<string>> Create([FromBody] SubscriptionRequest request)
         {
-            var result = await _eventBusSubscriptionsManager.SaveSubscriptionAsync(request);
-            return Ok(result?.Id);
+            var limit = 20;
+            var searchResult = await _subscriptionSearchService.SearchAsync(new SubscriptionSearchCriteria { Skip = 0, Take = 0 });
+            if (searchResult.TotalCount <= limit)
+            {
+                var result = await _eventBusSubscriptionsManager.SaveSubscriptionAsync(request);
+                return Ok(result?.Id);
+            }
+            else
+            {
+                throw new PlatformException($"The subscription is not created, there are subscriptions almost more then {limit}. Please delete some subscriptions.");
+            }
+
+            
         }
 
         [HttpPut("subscriptions")]
