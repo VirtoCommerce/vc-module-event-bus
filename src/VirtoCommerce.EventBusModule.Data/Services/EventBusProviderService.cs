@@ -24,7 +24,7 @@ namespace VirtoCommerce.EventBusModule.Data.Services
 
         public virtual EventBusProvider CreateProvider(string providerName)
         {
-            return AbstractTypeFactory<EventBusProvider>.TryCreateInstance(providerName);
+            return AbstractTypeFactory<EventBusProvider>.TryCreateInstance(providerName, default(EventBusProvider));
         }
     }
 }
