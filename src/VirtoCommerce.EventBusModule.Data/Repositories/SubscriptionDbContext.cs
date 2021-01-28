@@ -1,4 +1,3 @@
-using System;
 using EntityFrameworkCore.Triggers;
 using Microsoft.EntityFrameworkCore;
 using VirtoCommerce.EventBusModule.Data.Model;
