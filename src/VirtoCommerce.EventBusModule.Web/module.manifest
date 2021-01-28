@@ -13,6 +13,7 @@
   <owners>
     <owner>Virto Commerce</owner>
   </owners>
+  <iconUrl>Modules/$(VirtoCommerce.EventBus)/Content/logo.svg</iconUrl>
   <requireLicenseAcceptance>false</requireLicenseAcceptance>
   <releaseNotes />
   <copyright>Copyright © 2021 . All rights reserved</copyright>
