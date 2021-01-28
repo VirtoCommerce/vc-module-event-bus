@@ -3,7 +3,7 @@
   <id>VirtoCommerce.EventBus</id>
   <version>0.1.0</version>
   <version-tag />
-  <platformVersion>3.0.0</platformVersion>
+  <platformVersion>3.30.0</platformVersion>
   <title>EventBus</title>
   <description>The module manage/handle subscriptions of events</description>
   <authors>
