@@ -64,7 +64,7 @@ namespace VirtoCommerce.EventBusModule.Tests
                 registeredEventServiceMock.Object,
                 subscriptionService,
                 Mock.Of<ISubscriptionSearchService>(),
-                Mock.Of<IEventBusFactory>());
+                Mock.Of<IEventBusProviderService>());
         }
     }
 

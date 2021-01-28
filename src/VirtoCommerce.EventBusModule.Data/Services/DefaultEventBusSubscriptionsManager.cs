@@ -19,13 +19,13 @@ namespace VirtoCommerce.EventBusModule.Data.Services
         private readonly IHandlerRegistrar _eventHandlerRegistrar;
         private readonly RegisteredEventService _registeredEventService;
         private readonly ISubscriptionSearchService _subscriptionSearchService;
-        private readonly IEventBusFactory _eventBusFactory;
+        private readonly IEventBusProviderService _eventBusFactory;
 
         public DefaultEventBusSubscriptionsManager(IHandlerRegistrar eventHandlerRegistrar,
             RegisteredEventService registeredEventService,
             ISubscriptionService subscriptionService,
             ISubscriptionSearchService subscriptionSearchService,
-            IEventBusFactory eventBusFactory)
+            IEventBusProviderService eventBusFactory)
         {
             _eventHandlerRegistrar = eventHandlerRegistrar;
             _registeredEventService = registeredEventService;
@@ -84,12 +84,15 @@ namespace VirtoCommerce.EventBusModule.Data.Services
                 {
                     var provider = _eventBusFactory.CreateProvider(subscription.Provider);
 
-                    var result = await provider.SendEventAsync(subscription, events);
-
-                    subscription.Status = result.Status;
-                    if (!string.IsNullOrEmpty(result.ErrorMessage))
+                    if (provider != null)
                     {
-                        subscription.ErrorMessage = new string(result.ErrorMessage.Take(1024).ToArray());
+                        var result = await provider.SendEventAsync(subscription, events);
+
+                        subscription.Status = result.Status;
+                        if (!string.IsNullOrEmpty(result.ErrorMessage))
+                        {
+                            subscription.ErrorMessage = new string(result.ErrorMessage.Take(1024).ToArray());
+                        }
                     }
                 }
 

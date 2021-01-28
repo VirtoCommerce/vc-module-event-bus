@@ -4,8 +4,8 @@ using VirtoCommerce.EventBusModule.Core.Models;
 
 namespace VirtoCommerce.EventBusModule.Core.Services
 {
-    public interface IEventBusProvider
+    public abstract class EventBusProvider
     {
-        Task<SendEventResult> SendEventAsync(SubscriptionInfo subscriptionInfo, IList<EventData> events);
+        public abstract Task<SendEventResult> SendEventAsync(SubscriptionInfo subscriptionInfo, IList<EventData> events);
     }
 }

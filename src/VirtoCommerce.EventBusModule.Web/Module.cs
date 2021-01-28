@@ -27,7 +27,7 @@ namespace VirtoCommerce.EventBusModule.Web
             serviceCollection.AddTransient<IEventBusSubscriptionsManager, DefaultEventBusSubscriptionsManager>();
             serviceCollection.AddTransient<ISubscriptionSearchService, SubscriptionSearchService>();
             serviceCollection.AddTransient<ISubscriptionService, SubscriptionService>();
-            serviceCollection.AddTransient<IEventBusFactory, EventBusFactory>();
+            serviceCollection.AddTransient<IEventBusProviderService, EventBusProviderService>();
             serviceCollection.AddSingleton<RegisteredEventService>();
         }
 
@@ -48,6 +48,10 @@ namespace VirtoCommerce.EventBusModule.Web
                 dbContext.Database.EnsureCreated();
                 dbContext.Database.Migrate();
             }
+
+            //register Azure Event Grid provider
+            var eventBusProviderService = appBuilder.ApplicationServices.GetRequiredService<IEventBusProviderService>();
+            eventBusProviderService.RegisterProvider<AzureEventBusProvider>("AzureEventGrid");
         }
 
         public void Uninstall()

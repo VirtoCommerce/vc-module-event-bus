@@ -4,14 +4,15 @@ using System.Linq;
 using System.Threading.Tasks;
 using Azure;
 using Azure.Messaging.EventGrid;
+using Microsoft.AspNetCore.Http;
 using VirtoCommerce.EventBusModule.Core.Models;
 using VirtoCommerce.EventBusModule.Core.Services;
 
 namespace VirtoCommerce.EventBusModule.Data.Services
 {
-    public class AzureEventBusProvider : IEventBusProvider
+    public class AzureEventBusProvider : EventBusProvider
     {
-        public virtual async Task<SendEventResult> SendEventAsync(SubscriptionInfo subscription, IList<EventData> events)
+        public override async Task<SendEventResult> SendEventAsync(SubscriptionInfo subscription, IList<EventData> events)
         {
             var result = new SendEventResult();
 
@@ -34,11 +35,13 @@ namespace VirtoCommerce.EventBusModule.Data.Services
                 }
                 catch (Exception ex)
                 {
+                    result.Status = StatusCodes.Status500InternalServerError;
                     result.ErrorMessage = ex.Message;
                 }
             }
             else
             {
+                result.Status = StatusCodes.Status400BadRequest;
                 result.ErrorMessage = "Either key or endpoint are empty";
             }
 
