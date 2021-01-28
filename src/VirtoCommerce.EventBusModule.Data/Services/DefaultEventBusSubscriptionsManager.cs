@@ -59,7 +59,7 @@ namespace VirtoCommerce.EventBusModule.Data.Services
 
             foreach (var @event in allEvents)
             {
-                InvokeHandler(@event.Value, _eventHandlerRegistrar);
+                InvokeHandler(@event.Type, _eventHandlerRegistrar);
             }
         }
 
@@ -130,13 +130,13 @@ namespace VirtoCommerce.EventBusModule.Data.Services
         private bool CheckEvents(string[] eventIds)
         {
             var allEvents = _registeredEventService.GetAllEvents();
-            if (eventIds.All(x => allEvents.Keys.Contains(x)))
+            if (eventIds.All(x => allEvents.Any(e => e.Id == x)))
             {
                 return true;
             }
             else
             {
-                var notRegisteredEvents = eventIds.Where(e => !allEvents.Keys.Any(all => all == e));
+                var notRegisteredEvents = eventIds.Where(e => !allEvents.Any(all => all.Id == e));
                 throw new PlatformException($"The events are not registered: {string.Join(",", notRegisteredEvents)}");
             }
         }

@@ -22,8 +22,8 @@ namespace VirtoCommerce.EventBusModule.Tests
             var events = service.GetAllEvents();
 
             //Assert
-            Assert.Contains(typeof(FakeEvent), events.Values);
-            Assert.DoesNotContain(typeof(DomainEvent), events.Values);
+            Assert.Contains(events, x => x.Type == typeof(FakeEvent));
+            Assert.DoesNotContain(events, x => x.Type == typeof(DomainEvent));
         }
 
 

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using Microsoft.Extensions.Caching.Memory;
+using VirtoCommerce.EventBusModule.Core.Models;
 using VirtoCommerce.EventBusModule.Data.Caching;
 using VirtoCommerce.Platform.Core.Caching;
 using VirtoCommerce.Platform.Core.Events;
@@ -18,7 +19,7 @@ namespace VirtoCommerce.EventBusModule.Data.Services
             _platformMemoryCache = platformMemoryCache;
         }
 
-        public virtual Dictionary<string, Type> GetAllEvents()
+        public virtual IList<PlatformEventInfo> GetAllEvents()
         {
             var cacheKey = CacheKey.With(GetType(), nameof(GetAllEvents));
             return _platformMemoryCache.GetOrCreateExclusive(cacheKey, (cacheEntry) =>
@@ -28,7 +29,7 @@ namespace VirtoCommerce.EventBusModule.Data.Services
             });
         }
 
-        private static Dictionary<string, Type> DiscoverAllDomainEvents()
+        private static IList<PlatformEventInfo> DiscoverAllDomainEvents()
         {
             var eventType = typeof(IEvent);
 
@@ -37,7 +38,9 @@ namespace VirtoCommerce.EventBusModule.Data.Services
                 .SelectMany(x => GetTypesSafe(x))
                 .Where(x => !x.IsAbstract && !x.IsGenericTypeDefinition && x != typeof(DomainEvent) && x.GetInterfaces().Contains(eventType))
                 .Distinct()
-                .ToDictionary(k => k.FullName, v => v);
+                .Select(k => new PlatformEventInfo { Id = k.FullName, Type = k })
+                .ToList();
+
             return result;
         }
 

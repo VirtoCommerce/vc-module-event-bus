@@ -1,4 +1,3 @@
-using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Moq;
@@ -21,7 +20,7 @@ namespace VirtoCommerce.EventBusModule.Tests
         {
             //Arrange
             var subcriptionServiceMock = new Mock<ISubscriptionService>();
-            
+
             var eventBus = new InProcessBus();
             var eventBusManager = GetEventBusSubscriptionsManager(eventBus, subcriptionServiceMock.Object);
             eventBusManager.RegisterEvents();
@@ -57,7 +56,10 @@ namespace VirtoCommerce.EventBusModule.Tests
         private DefaultEventBusSubscriptionsManager GetEventBusSubscriptionsManager(IHandlerRegistrar handlerRegistrar, ISubscriptionService subscriptionService)
         {
             var registeredEventServiceMock = new Mock<RegisteredEventService>(Mock.Of<IPlatformMemoryCache>());
-            var eventTypes = new Dictionary<string, Type> { { typeof(FakeEvent).FullName, typeof(FakeEvent) } };
+            var eventTypes = new List<PlatformEventInfo>
+            {
+                new PlatformEventInfo { Id = typeof(FakeEvent).FullName, Type = typeof(FakeEvent) }
+            };
             registeredEventServiceMock.Setup(x => x.GetAllEvents()).Returns(eventTypes);
 
             return new DefaultEventBusSubscriptionsManager(handlerRegistrar,

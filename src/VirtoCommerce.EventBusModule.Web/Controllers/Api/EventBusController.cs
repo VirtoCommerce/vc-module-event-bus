@@ -36,7 +36,7 @@ namespace VirtoCommerce.EventBusModule.Web.Controllers.Api
         public ActionResult<string[]> Get(int skip, int take = 20)
         {
             var allEvents = _registeredEventService.GetAllEvents();
-            return Ok(allEvents.Keys.Skip(skip).Take(take).ToArray());
+            return Ok(allEvents.Skip(skip).Take(take).ToArray());
         }
 
         [HttpPost("subscriptions/search")]
