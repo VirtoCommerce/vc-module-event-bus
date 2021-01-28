@@ -18,6 +18,7 @@ namespace VirtoCommerce.EventBusModule.Core.Models
                 Id = SubscriptionId,
                 Provider = Provider,
                 ConnectionString = ConnectionString,
+                AccessKey = AccessKey,
                 Events = EventIds.Select(x => new SubscriptionEvent { EventId = x }).ToArray()
             };
         }
