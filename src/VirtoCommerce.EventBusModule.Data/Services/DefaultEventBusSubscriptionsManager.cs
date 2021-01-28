@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using System.Threading;
@@ -80,6 +81,8 @@ namespace VirtoCommerce.EventBusModule.Data.Services
                                              .Select(x => new EventData { ObjectId = x.Id, ObjectType = x.GetType().FullName, EventId = eventId })
                                              .ToArray();
 
+                var activeSubscritions = new List<SubscriptionInfo>();
+
                 foreach (var subscription in searchResult.Results)
                 {
                     var provider = _eventBusFactory.CreateProvider(subscription.Provider);
@@ -93,10 +96,12 @@ namespace VirtoCommerce.EventBusModule.Data.Services
                         {
                             subscription.ErrorMessage = new string(result.ErrorMessage.Take(1024).ToArray());
                         }
+
+                        activeSubscritions.Add(subscription);
                     }
                 }
 
-                await _subscriptionService.SaveChangesAsync(searchResult.Results.ToArray());
+                await _subscriptionService.SaveChangesAsync(activeSubscritions.ToArray());
             }
         }
 
