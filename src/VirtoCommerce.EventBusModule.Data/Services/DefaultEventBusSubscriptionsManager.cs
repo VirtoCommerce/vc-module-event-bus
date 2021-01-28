@@ -39,13 +39,7 @@ namespace VirtoCommerce.EventBusModule.Data.Services
             SubscriptionInfo result = null;
             if (CheckEvents(request.EventIds))
             {
-                result = new SubscriptionInfo
-                {
-                    Id = request.SubscriptionId,
-                    Provider = request.Provider,
-                    ConnectionString = request.ConnectionString,
-                    Events = request.EventIds.Select(x => new SubscriptionEvent { EventId = x }).ToArray()
-                };
+                result = request.ToModel();
                 await _subscriptionService.SaveChangesAsync(new[] { result });
             }
 

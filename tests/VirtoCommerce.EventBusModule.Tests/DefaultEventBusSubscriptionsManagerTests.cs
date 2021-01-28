@@ -8,6 +8,7 @@ using VirtoCommerce.EventBusModule.Data.Services;
 using VirtoCommerce.Platform.Core.Bus;
 using VirtoCommerce.Platform.Core.Caching;
 using VirtoCommerce.Platform.Core.Events;
+using VirtoCommerce.Platform.Core.Exceptions;
 using Xunit;
 
 namespace VirtoCommerce.EventBusModule.Tests
@@ -16,11 +17,13 @@ namespace VirtoCommerce.EventBusModule.Tests
     {
 
         [Fact]
-        public async Task AddSubscription_KnownType_SubscribeAndGetEventFromSubscriptions()
+        public async Task SaveSubscriptionAsync_TrySaveKnownType()
         {
             //Arrange
+            var subcriptionServiceMock = new Mock<ISubscriptionService>();
+            
             var eventBus = new InProcessBus();
-            var eventBusManager = GetEventBusSubscriptionsManager(eventBus);
+            var eventBusManager = GetEventBusSubscriptionsManager(eventBus, subcriptionServiceMock.Object);
             eventBusManager.RegisterEvents();
             var request = new SubscriptionRequest() { EventIds = new[] { typeof(FakeEvent).FullName } };
 
@@ -30,9 +33,28 @@ namespace VirtoCommerce.EventBusModule.Tests
             //Assert
             Assert.NotNull(result);
         }
-        
 
-        private DefaultEventBusSubscriptionsManager GetEventBusSubscriptionsManager(IHandlerRegistrar handlerRegistrar)
+        [Fact]
+        public async Task SaveSubscriptionAsync_TrySaveUnknownType()
+        {
+            //Arrange
+            var subcriptionServiceMock = new Mock<ISubscriptionService>();
+
+            var eventBus = new InProcessBus();
+            var eventBusManager = GetEventBusSubscriptionsManager(eventBus, subcriptionServiceMock.Object);
+            eventBusManager.RegisterEvents();
+            var request = new SubscriptionRequest() { EventIds = new[] { typeof(UnknownEvent).FullName } };
+
+            //Act
+            var ex = await Assert.ThrowsAsync<PlatformException>(() => eventBusManager.SaveSubscriptionAsync(request));
+
+            //Assert
+            Assert.Equal(typeof(PlatformException), ex.GetType());
+            Assert.Equal("The events are not registered: VirtoCommerce.EventBusModule.Tests.UnknownEvent", ex.Message);
+        }
+
+
+        private DefaultEventBusSubscriptionsManager GetEventBusSubscriptionsManager(IHandlerRegistrar handlerRegistrar, ISubscriptionService subscriptionService)
         {
             var registeredEventServiceMock = new Mock<RegisteredEventService>(Mock.Of<IPlatformMemoryCache>());
             var eventTypes = new Dictionary<string, Type> { { typeof(FakeEvent).FullName, typeof(FakeEvent) } };
@@ -40,10 +62,11 @@ namespace VirtoCommerce.EventBusModule.Tests
 
             return new DefaultEventBusSubscriptionsManager(handlerRegistrar,
                 registeredEventServiceMock.Object,
-                Mock.Of<ISubscriptionService>(),
+                subscriptionService,
                 Mock.Of<ISubscriptionSearchService>());
         }
     }
 
     class FakeEvent : DomainEvent { }
+    class UnknownEvent { }
 }
