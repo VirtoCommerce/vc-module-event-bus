@@ -39,7 +39,7 @@ Alternatively, you can use Event Grid with Logic Apps to process data anywhere, 
 
 ## Destinations
 
-### Azure Event Grid Destination
+### Azure Event Grid
 
 [Azure Event Grid](https://azure.microsoft.com/en-us/services/event-grid/) can be used to push messages to Azure Functions, HTTP endpoints (webhooks), and several other Azure tools.
 
@@ -56,7 +56,7 @@ To setup a subscription with Azure Event Grid you first need to create a Topic i
 ## Scenarios
 
 !!! note
-    All operations are accessible via Rest API only. You will need create [API Key or grant permission before the call](https://virtocommerce.com/docs/latest/user-guide/security/#generate-api-key).
+    All operations are accessible via Rest API only. You will need create [an API Key and grant permission before the call](https://virtocommerce.com/docs/latest/user-guide/security/#generate-api-key).
 
 ### List of actual event/resources
 As an API Client, I want to List of actual event/resources, so that I can get list of the events and create a subscription.
@@ -198,9 +198,6 @@ Error:
     "status": 401,
     "errorMessage": "Service request failed.\r\nStatus: 401 (The request authorization key is not authorized for QA-VC-AZUREEVENTGRID.EASTUS-1.EVENTGRID.AZURE.NET. This is due to the reason: The input is not a valid Base-64 string as it contains a non-base 64 character, more than two padding characters, or an illegal character among the padding characters. . Report '085078ab-df03-49f7-bdde-c1cead053943:9:1/29/2021 11:56:00 AM (UTC)' to our forums for assistance or raise a support ticket.)\r\n\r\nContent:\r\n{\r\n    \"error\": {\r\n        \"code\": \"Unauthorized\",\r\n        \"message\": \"The request authorization key is not authorized for QA-VC-AZUREEVENTGRID.EASTUS-1.EVENTGRID.AZURE.NET. This is due to the reason: The input is not a valid Base-64 string as it contains a non-base 64 character, more than two padding characters, or an illegal character among the padding characters. . Report '085078ab-df03-49f7-bdde-c1cead053943:9:1/29/2021 11:56:00 AM (UTC)' to our forums for assistance or raise a support ticket.\",\r\n        \"details\": [{\r\n          ",
 ```
-
-
-## Benchmark results
 
 
 ## Data Model
