@@ -3,13 +3,17 @@
   <id>VirtoCommerce.EventBus</id>
   <version>0.1.0</version>
   <version-tag />
-  <platformVersion>3.0.0</platformVersion>
+  <platformVersion>3.30.0</platformVersion>
   <title>EventBus</title>
-  <description></description>
-  <authors></authors>
+  <description>The module manage/handle subscriptions of events</description>
+  <authors>
+      <author>Andrei Kostyrin</author>
+      <author>Konstantin Savosteev</author>
+  </authors>
   <owners>
     <owner>Virto Commerce</owner>
   </owners>
+  <iconUrl>Modules/$(VirtoCommerce.EventBus)/Content/logo.svg</iconUrl>
   <requireLicenseAcceptance>false</requireLicenseAcceptance>
   <releaseNotes />
   <copyright>Copyright © 2021 . All rights reserved</copyright>
