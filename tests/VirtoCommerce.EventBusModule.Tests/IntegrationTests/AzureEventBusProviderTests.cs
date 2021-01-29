@@ -7,6 +7,7 @@ using Xunit;
 
 namespace VirtoCommerce.EventBusModule.Tests.IntegrationTests
 {
+    [Trait("Category", "IntegrationTest")]
     public class AzureEventBusProviderTests
     {
         public IConfiguration Configuration { get; set; }
