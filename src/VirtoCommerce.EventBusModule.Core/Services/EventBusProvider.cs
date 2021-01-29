@@ -6,6 +6,6 @@ namespace VirtoCommerce.EventBusModule.Core.Services
 {
     public abstract class EventBusProvider
     {
-        public abstract Task<SendEventResult> SendEventAsync(SubscriptionInfo subscriptionInfo, IList<EventData> events);
+        public abstract Task<SendEventResult> SendEventAsync(SubscriptionInfo subscription, IList<EventData> events);
     }
 }
