@@ -1,37 +1,36 @@
 # Virto Commerce Event Bus Module
 
-The module allows you to be notified of new messages or changes via a Message Queue of your choice.
+The module enables you to be notified of new messages or changes via a Message Queue of your choice.
 
 The module is used to trigger an asynchronous background process in response to an event on the Virto Commerce platform.
 
 As a payload, an Event delivers one of the predefined Messages or any Change to a resource.
 
-That enables event-driven, reactive programming. It uses a publish-subscribe model.  Publishers emit events but have no expectation about which events are handled. Subscribers decide which events they want to handle.
+That enables event-driven, reactive programming. It uses a publish-subscribe model. Publishers emit events but have no expectation about which events are handled. Subscribers decide which events they want to handle.
 
-The events are described in CloudEvents common way.
+The event description is based on CloudEvents: "specification for describing event data in a common way".
 
 ## Key features
-* Notified of new messages or changes from any module
+* Notify of new messages or changes from any module
 * Destination to
   * [Azure Event Grid](https://azure.microsoft.com/en-us/services/event-grid)
   * !!! Coming Soon !!! - AWS SQS, AWS SNS, Azure Service Bus, Google Cloud Pub/Sub
 * [CloudEvents](https://cloudevents.io/) format
-* Supports multiple destination provider
+* Support multiple destination providers
 * Configurable via API
-* Performance
+* High Performance
 
 ## Documentation
-* [Catalog Module Documentation](https://virtocommerce.com/docs/latest/modules/event-bus/)
+* [Module Documentation](https://virtocommerce.com/docs/latest/modules/event-bus/)
 * [View on GitHub](docs/index.md)
 
 
 ## References
-
 * Deploy: https://virtocommerce.com/docs/latest/developer-guide/deploy-module-from-source-code/
 * Installation: https://www.virtocommerce.com/docs/latest/user-guide/modules/
 * Home: https://virtocommerce.com
 * Community: https://www.virtocommerce.org
-* [Download Latest Release](https://github.com/VirtoCommerce/vc-module-catalog/releases/latest)
+* [Download Latest Release](https://github.com/VirtoCommerce/vc-module-event-bus/releases/latest)
 
 ## License
 
