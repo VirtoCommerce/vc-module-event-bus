@@ -7,7 +7,7 @@ namespace VirtoCommerce.EventBusModule.Core
             public static class Permissions
             {
                 public const string Access = "eventbus:subscriptions:access";
-                public const string Create = "eventbus:subscriptions:Create";
+                public const string Create = "eventbus:subscriptions:сreate";
                 public const string Read = "eventbus:subscriptions:read";
                 public const string ReadEvent = "eventbus:events:read";
                 public const string Update = "eventbus:subscriptions:update";
