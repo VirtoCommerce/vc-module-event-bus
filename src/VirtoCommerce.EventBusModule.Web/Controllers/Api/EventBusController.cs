@@ -47,6 +47,14 @@ namespace VirtoCommerce.EventBusModule.Web.Controllers.Api
             return Ok(searchResult);
         }
 
+        [HttpGet("subscriptions/{id}")]
+        [Authorize(ModuleConstants.Security.Permissions.Read)]
+        public async Task<ActionResult<SubscriptionInfo>> GetById(string id)
+        {
+            var subscriptions = await _subscriptionService.GetByIdsAsync(new[] { id });
+            return Ok(subscriptions.FirstOrDefault());
+        }
+
         [HttpPost("subscriptions")]
         [Authorize(ModuleConstants.Security.Permissions.Create)]
         public async Task<ActionResult<string>> Create([FromBody] SubscriptionRequest request)
@@ -62,8 +70,6 @@ namespace VirtoCommerce.EventBusModule.Web.Controllers.Api
             {
                 throw new PlatformException($"The subscription is not created, there are subscriptions almost more then {limit}. Please delete some subscriptions.");
             }
-
-            
         }
 
         [HttpPut("subscriptions")]
