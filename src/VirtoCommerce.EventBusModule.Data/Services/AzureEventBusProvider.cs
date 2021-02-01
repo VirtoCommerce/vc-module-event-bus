@@ -16,15 +16,15 @@ namespace VirtoCommerce.EventBusModule.Data.Services
         {
             var result = new SendEventResult();
 
-            var client = CreateClient(subscription);
+            var clientCreateResult = CreateClient(subscription);
 
-            if (client != null)
+            if (clientCreateResult.Client != null)
             {
                 var cloudEvents = events.Select(x => new CloudEvent(subscription.Id ?? nameof(AzureEventBusProvider), x.EventId, x)).ToList();
 
                 try
                 {
-                    var eventGridResponse = await client.SendEventsAsync(cloudEvents);
+                    var eventGridResponse = await clientCreateResult.Client.SendEventsAsync(cloudEvents);
 
                     result.Status = eventGridResponse.Status;
                 }
@@ -42,27 +42,45 @@ namespace VirtoCommerce.EventBusModule.Data.Services
             else
             {
                 result.Status = StatusCodes.Status400BadRequest;
-                result.ErrorMessage = "Either key or endpoint are empty";
+                result.ErrorMessage = clientCreateResult.Error;
             }
 
             return result;
         }
 
-        private EventGridPublisherClient CreateClient(SubscriptionInfo subscription)
+        private PublisherClientCreateResult CreateClient(SubscriptionInfo subscription)
         {
             var topicEndpoint = subscription.ConnectionString;
             var topicAccessKey = subscription.AccessKey;
 
-            var result = default(EventGridPublisherClient);
+            var result = new PublisherClientCreateResult();
 
             if (!string.IsNullOrEmpty(topicEndpoint) && !string.IsNullOrEmpty(topicAccessKey))
             {
-                result = new EventGridPublisherClient(
-                    new Uri(topicEndpoint),
-                    new AzureKeyCredential(topicAccessKey));
+                if (Uri.TryCreate(topicEndpoint, UriKind.Absolute, out var topicEndpointUri)
+                    && (topicEndpointUri.Scheme == Uri.UriSchemeHttp || topicEndpointUri.Scheme == Uri.UriSchemeHttps))
+                {
+                    result.Client = new EventGridPublisherClient(topicEndpointUri, new AzureKeyCredential(topicAccessKey));
+                }
+                else
+                {
+                    result.Error = "Invalid endpoint URI format";
+                }
+            }
+            else
+            {
+                result.Error = "Either key or endpoint are empty";
             }
 
             return result;
+        }
+
+
+        private class PublisherClientCreateResult
+        {
+            public EventGridPublisherClient Client { get; set; }
+
+            public string Error { get; set; }
         }
     }
 }
