@@ -11,15 +11,17 @@ namespace VirtoCommerce.EventBusModule.Core.Extensions
     public static class DomainEventExtensions
     {
         //Need to move the extension to the Platform
-        public static TResult[] GetEntityWithInterface<TResult>(this IEvent obj)
+        public static TResult[] GetObjectsWithDerived<TResult>(this IEvent obj)
         {
             var result = new List<TResult>();
 
             var objectType = obj.GetType();
             var properties = objectType.GetProperties(BindingFlags.Public | BindingFlags.Instance);
 
-            var objects = properties.Where(p => (p.Name.Equals(nameof(GenericChangedEntryEvent<TResult>.ChangedEntries)) && p.GetIndexParameters().Length == 0
-                                                || p.PropertyType.GetInterfaces().Contains(typeof(TResult))))
+            var objects = properties.Where(p => p.Name.Equals(nameof(GenericChangedEntryEvent<TResult>.ChangedEntries)) && p.GetIndexParameters().Length == 0
+                                                || (typeof(TResult).IsInterface && p.PropertyType.GetInterfaces().Contains(typeof(TResult)))
+                                                || (typeof(TResult).IsClass && p.PropertyType.IsSubclassOf(typeof(TResult)))
+                                                )
                                         .Select(x => x.GetValue(obj, null))
                                         .Where(x => !(x is string));
 

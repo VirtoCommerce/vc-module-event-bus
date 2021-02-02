@@ -77,13 +77,13 @@ namespace VirtoCommerce.EventBusModule.Data.Services
 
             if (searchResult.TotalCount > 0)
             {
-                var entities = domainEvent.GetEntityWithInterface<IEntity>()
+                var entities = domainEvent.GetObjectsWithDerived<IEntity>()
                                              .Select(x => new EventData { ObjectId = x.Id, ObjectType = x.GetType().FullName, EventId = eventId })
                                              .ToArray();
-                var valueObjects = domainEvent.GetEntityWithInterface<IValueObject>()
-                                             .Select(x => new EventData { ObjectId = ((ValueObject)x).GetCacheKey(), ObjectType = x.GetType().FullName, EventId = eventId })
+                var valueObjects = domainEvent.GetObjectsWithDerived<ValueObject>()
+                                             .Select(x => new EventData { ObjectId = x.GetCacheKey(), ObjectType = x.GetType().FullName, EventId = eventId })
                                              .ToArray();
-                var eventDatas = entities.Union(valueObjects).ToArray();
+                var eventData = entities.Union(valueObjects).ToArray();
 
                 var activeSubscritions = new List<SubscriptionInfo>();
 
@@ -93,7 +93,7 @@ namespace VirtoCommerce.EventBusModule.Data.Services
 
                     if (provider != null)
                     {
-                        var result = await provider.SendEventAsync(subscription, eventDatas);
+                        var result = await provider.SendEventAsync(subscription, eventData);
 
                         subscription.Status = result.Status;
                         if (!string.IsNullOrEmpty(result.ErrorMessage))
