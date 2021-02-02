@@ -16,50 +16,35 @@ namespace VirtoCommerce.EventBusModule.Data.Services
         {
             var result = new SendEventResult();
 
-            var client = CreateClient(subscription);
-
-            if (client != null)
+            try
             {
+                var client = new EventGridPublisherClient(new Uri(subscription.ConnectionString), new AzureKeyCredential(subscription.AccessKey));
+
                 var cloudEvents = events.Select(x => new CloudEvent(subscription.Id ?? nameof(AzureEventBusProvider), x.EventId, x)).ToList();
 
-                try
-                {
-                    var eventGridResponse = await client.SendEventsAsync(cloudEvents);
+                var eventGridResponse = await client.SendEventsAsync(cloudEvents);
 
-                    result.Status = eventGridResponse.Status;
-                }
-                catch (RequestFailedException requestFailedEx)
-                {
-                    result.Status = requestFailedEx.Status;
-                    result.ErrorMessage = requestFailedEx.Message;
-                }
-                catch (Exception ex)
-                {
-                    result.Status = StatusCodes.Status500InternalServerError;
-                    result.ErrorMessage = ex.Message;
-                }
+                result.Status = eventGridResponse.Status;
             }
-            else
+            catch (ArgumentException)
             {
                 result.Status = StatusCodes.Status400BadRequest;
                 result.ErrorMessage = "Either key or endpoint are empty";
             }
-
-            return result;
-        }
-
-        private EventGridPublisherClient CreateClient(SubscriptionInfo subscription)
-        {
-            var topicEndpoint = subscription.ConnectionString;
-            var topicAccessKey = subscription.AccessKey;
-
-            var result = default(EventGridPublisherClient);
-
-            if (!string.IsNullOrEmpty(topicEndpoint) && !string.IsNullOrEmpty(topicAccessKey))
+            catch (UriFormatException)
             {
-                result = new EventGridPublisherClient(
-                    new Uri(topicEndpoint),
-                    new AzureKeyCredential(topicAccessKey));
+                result.Status = StatusCodes.Status400BadRequest;
+                result.ErrorMessage = "Invalid endpoint URI format";
+            }
+            catch (RequestFailedException requestFailedEx)
+            {
+                result.Status = requestFailedEx.Status;
+                result.ErrorMessage = requestFailedEx.Message;
+            }
+            catch (Exception ex)
+            {
+                result.Status = StatusCodes.Status500InternalServerError;
+                result.ErrorMessage = ex.Message;
             }
 
             return result;
