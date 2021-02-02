@@ -16,71 +16,38 @@ namespace VirtoCommerce.EventBusModule.Data.Services
         {
             var result = new SendEventResult();
 
-            var clientCreateResult = CreateClient(subscription);
-
-            if (clientCreateResult.Client != null)
+            try
             {
+                var client = new EventGridPublisherClient(new Uri(subscription.ConnectionString), new AzureKeyCredential(subscription.AccessKey));
+
                 var cloudEvents = events.Select(x => new CloudEvent(subscription.Id ?? nameof(AzureEventBusProvider), x.EventId, x)).ToList();
 
-                try
-                {
-                    var eventGridResponse = await clientCreateResult.Client.SendEventsAsync(cloudEvents);
+                var eventGridResponse = await client.SendEventsAsync(cloudEvents);
 
-                    result.Status = eventGridResponse.Status;
-                }
-                catch (RequestFailedException requestFailedEx)
-                {
-                    result.Status = requestFailedEx.Status;
-                    result.ErrorMessage = requestFailedEx.Message;
-                }
-                catch (Exception ex)
-                {
-                    result.Status = StatusCodes.Status500InternalServerError;
-                    result.ErrorMessage = ex.Message;
-                }
+                result.Status = eventGridResponse.Status;
             }
-            else
+            catch (ArgumentException)
             {
                 result.Status = StatusCodes.Status400BadRequest;
-                result.ErrorMessage = clientCreateResult.Error;
+                result.ErrorMessage = "Either key or endpoint are empty";
+            }
+            catch (UriFormatException)
+            {
+                result.Status = StatusCodes.Status400BadRequest;
+                result.ErrorMessage = "Invalid endpoint URI format";
+            }
+            catch (RequestFailedException requestFailedEx)
+            {
+                result.Status = requestFailedEx.Status;
+                result.ErrorMessage = requestFailedEx.Message;
+            }
+            catch (Exception ex)
+            {
+                result.Status = StatusCodes.Status500InternalServerError;
+                result.ErrorMessage = ex.Message;
             }
 
             return result;
-        }
-
-        private PublisherClientCreateResult CreateClient(SubscriptionInfo subscription)
-        {
-            var topicEndpoint = subscription.ConnectionString;
-            var topicAccessKey = subscription.AccessKey;
-
-            var result = new PublisherClientCreateResult();
-
-            if (!string.IsNullOrEmpty(topicEndpoint) && !string.IsNullOrEmpty(topicAccessKey))
-            {
-                if (Uri.TryCreate(topicEndpoint, UriKind.Absolute, out var topicEndpointUri)
-                    && (topicEndpointUri.Scheme == Uri.UriSchemeHttp || topicEndpointUri.Scheme == Uri.UriSchemeHttps))
-                {
-                    result.Client = new EventGridPublisherClient(topicEndpointUri, new AzureKeyCredential(topicAccessKey));
-                }
-                else
-                {
-                    result.Error = "Invalid endpoint URI format";
-                }
-            }
-            else
-            {
-                result.Error = "Either key or endpoint are empty";
-            }
-
-            return result;
-        }
-
-
-        private class PublisherClientCreateResult
-        {
-            public EventGridPublisherClient Client { get; set; }
-
-            public string Error { get; set; }
         }
     }
 }
