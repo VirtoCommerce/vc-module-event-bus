@@ -29,7 +29,7 @@ namespace VirtoCommerce.EventBusModule.Data.Services
 
         public virtual bool IsProviderRegistered(string providerName)
         {
-            return AbstractTypeFactory<EventBusProvider>.FindTypeInfoByName(providerName) != null;
+            return AbstractTypeFactory<EventBusProvider>.AllTypeInfos.Any(x => x.TypeName.EqualsInvariant(providerName));
         }
     }
 }

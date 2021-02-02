@@ -144,9 +144,14 @@ namespace VirtoCommerce.EventBusModule.Data.Services
 
         private bool CheckProvider(string providerName)
         {
-            return _eventBusFactory.IsProviderRegistered(providerName)
-                ? true
-                : throw new PlatformException($"The provider {providerName} is not registered");
+            if (_eventBusFactory.IsProviderRegistered(providerName))
+            {
+                return true;
+            }
+            else
+            {
+                throw new PlatformException($"The provider {providerName} is not registered");
+            }
         }
     }
 }
