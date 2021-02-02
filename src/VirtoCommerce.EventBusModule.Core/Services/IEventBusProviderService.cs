@@ -7,5 +7,7 @@ namespace VirtoCommerce.EventBusModule.Core.Services
         void RegisterProvider<T>(string providerName, Func<T> factory = null) where T : EventBusProvider;
 
         EventBusProvider CreateProvider(string providerName);
+
+        bool IsProviderRegistered(string providerName);
     }
 }

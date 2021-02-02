@@ -40,7 +40,8 @@ namespace VirtoCommerce.EventBusModule.Data.Services
         public virtual async Task<SubscriptionInfo> SaveSubscriptionAsync(SubscriptionRequest request)
         {
             SubscriptionInfo result = null;
-            if (CheckEvents(request.EventIds))
+            if (CheckEvents(request.EventIds) &&
+                CheckProvider(request.Provider))
             {
                 result = request.ToModel();
                 await _subscriptionService.SaveChangesAsync(new[] { result });
@@ -139,6 +140,13 @@ namespace VirtoCommerce.EventBusModule.Data.Services
                 var notRegisteredEvents = eventIds.Where(e => !allEvents.Any(all => all.Id == e));
                 throw new PlatformException($"The events are not registered: {string.Join(",", notRegisteredEvents)}");
             }
+        }
+
+        private bool CheckProvider(string providerName)
+        {
+            return _eventBusFactory.IsProviderRegistered(providerName)
+                ? true
+                : throw new PlatformException($"The provider {providerName} is not registered");
         }
     }
 }

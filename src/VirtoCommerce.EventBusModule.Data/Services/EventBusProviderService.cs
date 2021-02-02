@@ -26,5 +26,10 @@ namespace VirtoCommerce.EventBusModule.Data.Services
         {
             return AbstractTypeFactory<EventBusProvider>.TryCreateInstance(providerName, default(EventBusProvider));
         }
+
+        public virtual bool IsProviderRegistered(string providerName)
+        {
+            return AbstractTypeFactory<EventBusProvider>.FindTypeInfoByName(providerName) != null;
+        }
     }
 }
