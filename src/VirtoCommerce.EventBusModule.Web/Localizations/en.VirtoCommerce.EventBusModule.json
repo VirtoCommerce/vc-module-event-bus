@@ -1,10 +1,10 @@
 {
   "permissions": {
-    "eventbus:subscriptions:access": "Access to subscritions",
-    "eventbus:subscriptions:read": "View subscritions related data",
+    "eventbus:subscriptions:access": "Access to subscriptions",
+    "eventbus:subscriptions:read": "View subscriptions related data",
     "eventbus:subscriptions:сreate": "Create a subscription",
     "eventbus:events:read": "View events related data",
-    "eventbus:subscriptions:update": "Update subscritions",
-    "eventbus:subscriptions:delete": "Delete subscritions"
+    "eventbus:subscriptions:update": "Update subscriptions",
+    "eventbus:subscriptions:delete": "Delete subscriptions"
   }
 }
