@@ -61,7 +61,7 @@ namespace VirtoCommerce.EventBusModule.Web.Controllers.Api
         {
             var limit = 20;
             var searchResult = await _subscriptionSearchService.SearchAsync(new SubscriptionSearchCriteria { Skip = 0, Take = 0 });
-            if (searchResult.TotalCount <= limit)
+            if (searchResult.TotalCount < limit)
             {
                 var result = await _eventBusSubscriptionsManager.SaveSubscriptionAsync(request);
                 return Ok(result?.Id);
