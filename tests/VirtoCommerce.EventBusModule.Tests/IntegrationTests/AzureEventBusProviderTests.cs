@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using Microsoft.Extensions.Configuration;
 using VirtoCommerce.EventBusModule.Core.Models;
 using VirtoCommerce.EventBusModule.Data.Services;
@@ -27,7 +28,7 @@ namespace VirtoCommerce.EventBusModule.Tests.IntegrationTests
         }
 
         [Fact]
-        public async void AzureEventBusProviderSendTest()
+        public async Task AzureEventBusProviderSendTest()
         {
             // Arrange
             var subscription = new SubscriptionInfo()
@@ -53,7 +54,7 @@ namespace VirtoCommerce.EventBusModule.Tests.IntegrationTests
         }
 
         [Fact]
-        public async void AzureEventBusProviderSendErrorTest()
+        public async Task AzureEventBusProviderSendErrorTest()
         {
             // Arrange
             var subscription = new SubscriptionInfo()
@@ -80,7 +81,7 @@ namespace VirtoCommerce.EventBusModule.Tests.IntegrationTests
         }
 
         [Fact]
-        public async void AzureEventBusProviderEmptyCredentials()
+        public async Task AzureEventBusProviderEmptyCredentials()
         {
             // Arrange
             var subscription = new SubscriptionInfo()
