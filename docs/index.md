@@ -51,7 +51,7 @@ To connect Azure Event Grid, you will need to set:
 * `connectionString` - String - The URI of the Topic
 * `accessKey` - String - Partially hidden on retrieval
 
-To set up a subscription with Azure Event Grid you first need to create a Topic in the [Azure Portal](https://azure.microsoft.com/en-us/services/event-grid/). To allow Virto Commerce platform to push messages to your Topic, you need to provide an access key. These can also be found in the Azure Portal after creating the Topic in the section Access Keys.
+To set up a subscription with Azure Event Grid you first need to create a Topic in the [Azure Portal](https://azure.microsoft.com/en-us/services/event-grid/). When creating your Event Grid topic, you need to set the input schema to “CloudEvents v1.0” in the “Advanced” tab. To allow Virto Commerce platform to push messages to your Topic, you need to provide an access key. These can also be found in the Azure Portal after creating the Topic in the section Access Keys.
 
 ## Scenarios
 
