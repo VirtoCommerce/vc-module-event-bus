@@ -235,7 +235,7 @@ Error:
 * `Provider` - String - Required - Provider Name. Ex: AzureEventGrid
 * `ConnectionString` - String - Required - Connection string for specific provider. Ex: The URI of the Topic.
 * `Status` - Int - Optional - Subscription health status. Http response status code from the last operation for specific provider. Ex: 200.
-* `ConnectionString` - String - Optional - Error message from the last operation.
+* `ErrorMessage` - String - Optional - Error message from the last operation.
 * `SubscriptionEvent` - String - Required - Array of the events.
 
 
