@@ -84,7 +84,12 @@ namespace VirtoCommerce.EventBusModule.Data.Services
                 var valueObjects = domainEvent.GetObjectsWithDerived<ValueObject>()
                                              .Select(x => new EventData { ObjectId = x.GetCacheKey(), ObjectType = x.GetType().FullName, EventId = eventId })
                                              .ToArray();
+                var customEventData = domainEvent.GetObjectsWithDerived<IEventData>()
+                                             .Select(x => x.GetEventData)
+                                             .ToArray();
                 var eventData = entities.Union(valueObjects).ToArray();
+
+                eventData = eventData.Union(customEventData).ToArray();
 
                 var activeSubscritions = new List<SubscriptionInfo>();
 
