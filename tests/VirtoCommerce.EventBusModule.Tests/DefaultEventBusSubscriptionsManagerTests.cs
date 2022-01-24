@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using Microsoft.Extensions.Logging;
 using Moq;
 using VirtoCommerce.EventBusModule.Core.Models;
 using VirtoCommerce.EventBusModule.Core.Services;
@@ -16,13 +17,18 @@ namespace VirtoCommerce.EventBusModule.Tests
     public class DefaultEventBusSubscriptionsManagerTests
     {
 
+        public ILogger<T> GetLogger<T>()
+        {
+            return new Mock<ILogger<T>>().Object;
+        }
+
         [Fact]
         public async Task SaveSubscriptionAsync_TrySaveKnownType_Saved()
         {
             //Arrange
             var subcriptionServiceMock = new Mock<ISubscriptionService>();
 
-            var eventBus = new InProcessBus();
+            var eventBus = new InProcessBus(GetLogger<InProcessBus>());
             var eventBusManager = GetEventBusSubscriptionsManager(eventBus, subcriptionServiceMock.Object);
             eventBusManager.RegisterEvents();
             var request = new SubscriptionRequest() { EventIds = new[] { typeof(FakeEvent).FullName } };
@@ -40,7 +46,7 @@ namespace VirtoCommerce.EventBusModule.Tests
             //Arrange
             var subcriptionServiceMock = new Mock<ISubscriptionService>();
 
-            var eventBus = new InProcessBus();
+            var eventBus = new InProcessBus(GetLogger<InProcessBus>());
             var eventBusManager = GetEventBusSubscriptionsManager(eventBus, subcriptionServiceMock.Object);
             eventBusManager.RegisterEvents();
             var request = new SubscriptionRequest() { EventIds = new[] { typeof(UnknownEvent).FullName } };
@@ -108,7 +114,7 @@ namespace VirtoCommerce.EventBusModule.Tests
             var eventBusProviderServiceMock = new Mock<IEventBusProviderService>();
             eventBusProviderServiceMock.Setup(x => x.IsProviderRegistered(It.Is<string>(x => x == "Known_Provider"))).Returns(true);
 
-            return new DefaultEventBusSubscriptionsManager(new InProcessBus(),
+            return new DefaultEventBusSubscriptionsManager(new InProcessBus(GetLogger<InProcessBus>()),
                 new Mock<RegisteredEventService>(Mock.Of<IPlatformMemoryCache>()).Object,
                 Mock.Of<ISubscriptionService>(),
                 Mock.Of<ISubscriptionSearchService>(),
