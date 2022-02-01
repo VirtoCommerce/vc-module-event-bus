@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Azure;
+using Azure.Messaging;
 using Azure.Messaging.EventGrid;
 using Microsoft.AspNetCore.Http;
 using VirtoCommerce.EventBusModule.Core.Models;
