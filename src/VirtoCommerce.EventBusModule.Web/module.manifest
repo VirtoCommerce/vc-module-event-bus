@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <module xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
   <id>VirtoCommerce.EventBus</id>
-  <version>1.3.0</version>
+  <version>3.200.0</version>
   <version-tag />
-  <platformVersion>3.30.0</platformVersion>
+  <platformVersion>3.200.0</platformVersion>
   <title>Event Bus module</title>
   <description>The module enables you to be notified of new messages or changes via a Message Queue of your choice</description>
   <authors>
@@ -16,7 +16,7 @@
   <iconUrl>Modules/$(VirtoCommerce.EventBus)/Content/logo.svg</iconUrl>
   <requireLicenseAcceptance>false</requireLicenseAcceptance>
   <releaseNotes />
-  <copyright>Copyright © 2021 Virto Commerce. All rights reserved</copyright>
+  <copyright>Copyright © 2022 Virto Commerce. All rights reserved</copyright>
   <tags>eventbus azureveventgrid</tags>
   <assemblyFile>VirtoCommerce.EventBusModule.Web.dll</assemblyFile>
   <moduleType>VirtoCommerce.EventBusModule.Web.Module, VirtoCommerce.EventBusModule.Web</moduleType>
