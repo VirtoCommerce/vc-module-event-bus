@@ -17,7 +17,7 @@ namespace VirtoCommerce.EventBusModule.Tests
     public class DefaultEventBusSubscriptionsManagerTests
     {
 
-        public ILogger<T> GetLogger<T>()
+        public static ILogger<T> GetLogger<T>()
         {
             return new Mock<ILogger<T>>().Object;
         }
@@ -90,7 +90,7 @@ namespace VirtoCommerce.EventBusModule.Tests
             Assert.Equal("The provider Unknown_Provider is not registered", ex.Message);
         }
 
-        private DefaultEventBusSubscriptionsManager GetEventBusSubscriptionsManager(IHandlerRegistrar handlerRegistrar, ISubscriptionService subscriptionService)
+        private static DefaultEventBusSubscriptionsManager GetEventBusSubscriptionsManager(IHandlerRegistrar handlerRegistrar, ISubscriptionService subscriptionService)
         {
             var registeredEventServiceMock = new Mock<RegisteredEventService>(Mock.Of<IPlatformMemoryCache>());
             var eventTypes = new List<PlatformEventInfo>
@@ -109,7 +109,7 @@ namespace VirtoCommerce.EventBusModule.Tests
                 eventBusProviderServiceMock.Object);
         }
 
-        private DefaultEventBusSubscriptionsManager GetEventBusSubscriptionsManager()
+        private static DefaultEventBusSubscriptionsManager GetEventBusSubscriptionsManager()
         {
             var eventBusProviderServiceMock = new Mock<IEventBusProviderService>();
             eventBusProviderServiceMock.Setup(x => x.IsProviderRegistered(It.Is<string>(x => x == "Known_Provider"))).Returns(true);
