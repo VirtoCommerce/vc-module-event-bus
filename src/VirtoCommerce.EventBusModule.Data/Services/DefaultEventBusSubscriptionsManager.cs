@@ -97,6 +97,8 @@ namespace VirtoCommerce.EventBusModule.Data.Services
                         var result = await provider.SendEventAsync(subscription, eventData);
 
                         subscription.Status = result.Status;
+                        subscription.ErrorMessage = string.Empty;
+
                         if (!string.IsNullOrEmpty(result.ErrorMessage))
                         {
                             subscription.ErrorMessage = new string(result.ErrorMessage.Take(1024).ToArray());
