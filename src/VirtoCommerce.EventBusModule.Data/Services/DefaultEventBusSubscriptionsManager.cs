@@ -4,11 +4,9 @@ using System.Linq;
 using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
-using VirtoCommerce.EventBusModule.Core.Extensions;
 using VirtoCommerce.EventBusModule.Core.Models;
 using VirtoCommerce.EventBusModule.Core.Services;
 using VirtoCommerce.Platform.Core.Bus;
-using VirtoCommerce.Platform.Core.Common;
 using VirtoCommerce.Platform.Core.Events;
 using VirtoCommerce.Platform.Core.Exceptions;
 
@@ -78,13 +76,16 @@ namespace VirtoCommerce.EventBusModule.Data.Services
 
             if (searchResult.TotalCount > 0)
             {
+                /*
                 var entities = domainEvent.GetObjectsWithDerived<IEntity>()
-                                             .Select(x => new EventData { ObjectId = x.Id, ObjectType = x.GetType().FullName, EventId = eventId })
+                                             .Select(x => new EventData { ObjectId = x.Id, ObjectType = x.GetType().FullName, EventId = eventId})
                                              .ToArray();
                 var valueObjects = domainEvent.GetObjectsWithDerived<ValueObject>()
-                                             .Select(x => new EventData { ObjectId = x.GetCacheKey(), ObjectType = x.GetType().FullName, EventId = eventId })
+                                             .Select(x => new EventData { ObjectId = x.GetCacheKey(), ObjectType = x.GetType().FullName, EventId = eventId})
                                              .ToArray();
                 var eventData = entities.Union(valueObjects).ToArray();
+                */
+                var eventData = new EventData[] { new EventData {DomainEvent = domainEvent } };
 
                 var activeSubscritions = new List<SubscriptionInfo>();
 
