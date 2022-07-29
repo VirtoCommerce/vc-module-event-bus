@@ -4,44 +4,45 @@ using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using VirtoCommerce.EventBusModule.Core.Models;
 using VirtoCommerce.Platform.Core.Common;
+using VirtoCommerce.Platform.Core.Domain;
 
 namespace VirtoCommerce.EventBusModule.Data.Model
 {
-    public class SubscriptionEntity : AuditableEntity
+    public class SubscriptionEntity : AuditableEntity, IDataEntity<SubscriptionEntity, Subscription>
     {
         [StringLength(128)]
-        public string Provider { get; set; }
+        public string Name { get; set; }
+        [StringLength(128)]
+        public string ConnectionName { get; set; }
         [StringLength(512)]
-        public string ConnectionString { get; set; }
-        [StringLength(512)]
-        public string AccessKey { get; set; }
-        public int Status { get; set; }
-        [StringLength(1024)]
-        public string ErrorMessage { get; set; }
+        public string JsonPathFilter { get; set; }
+        public string PayloadTransformationTemplate { get; set; }
+        public string EventSettingsSerialized { get; set; }
+
         public ObservableCollection<SubscriptionEventEntity> Events { get; set; }
 
-        public virtual SubscriptionInfo ToModel(SubscriptionInfo subscription)
+        public virtual Subscription ToModel(Subscription subscription)
         {
             if (subscription == null)
                 throw new ArgumentNullException(nameof(subscription));
 
-            subscription.Id = Id;
+            subscription.Id = Id; 
             subscription.CreatedBy = CreatedBy;
             subscription.CreatedDate = CreatedDate;
             subscription.ModifiedBy = ModifiedBy;
             subscription.ModifiedDate = ModifiedDate;
-            subscription.Provider = Provider;
-            subscription.ConnectionString = ConnectionString;
-            subscription.AccessKey = AccessKey;
-            subscription.Status = Status;
-            subscription.ErrorMessage = ErrorMessage;
+            subscription.Name = Name;
+            subscription.ConnectionName = ConnectionName;
+            subscription.JsonPathFilter = JsonPathFilter;
+            subscription.PayloadTransformationTemplate = PayloadTransformationTemplate;
+            subscription.EventSettingsSerialized = EventSettingsSerialized;
 
             subscription.Events = Events.Select(x => x.ToModel(AbstractTypeFactory<SubscriptionEvent>.TryCreateInstance())).ToArray();
 
             return subscription;
         }
 
-        public virtual SubscriptionEntity FromModel(SubscriptionInfo subscription, PrimaryKeyResolvingMap pkMap)
+        public virtual SubscriptionEntity FromModel(Subscription subscription, PrimaryKeyResolvingMap pkMap)
         {
             if (subscription == null)
                 throw new ArgumentNullException(nameof(subscription));
@@ -51,11 +52,11 @@ namespace VirtoCommerce.EventBusModule.Data.Model
             CreatedDate = subscription.CreatedDate;
             ModifiedBy = subscription.ModifiedBy;
             ModifiedDate = subscription.ModifiedDate;
-            Provider = subscription.Provider;
-            ConnectionString = subscription.ConnectionString;
-            AccessKey = subscription.AccessKey;
-            Status = subscription.Status;
-            ErrorMessage = subscription.ErrorMessage;
+            Name = subscription.Name;
+            ConnectionName = subscription.ConnectionName;
+            JsonPathFilter = subscription.JsonPathFilter;
+            PayloadTransformationTemplate = subscription.PayloadTransformationTemplate;
+            EventSettingsSerialized = subscription.EventSettingsSerialized;
 
             if (subscription.Events != null)
             {
@@ -68,11 +69,11 @@ namespace VirtoCommerce.EventBusModule.Data.Model
 
         public virtual void Patch(SubscriptionEntity target)
         {
-            target.Provider = Provider;
-            target.ConnectionString = ConnectionString;
-            target.AccessKey = AccessKey;
-            target.Status = Status;
-            target.ErrorMessage = ErrorMessage;
+            target.Name = Name;
+            target.ConnectionName = ConnectionName;
+            target.JsonPathFilter = JsonPathFilter;
+            target.PayloadTransformationTemplate = PayloadTransformationTemplate;
+            target.EventSettingsSerialized = EventSettingsSerialized;
 
             if (!Events.IsNullCollection())
             {

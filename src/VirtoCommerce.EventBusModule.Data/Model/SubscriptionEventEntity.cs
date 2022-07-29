@@ -2,12 +2,13 @@ using System;
 using System.ComponentModel.DataAnnotations;
 using VirtoCommerce.EventBusModule.Core.Models;
 using VirtoCommerce.Platform.Core.Common;
+using VirtoCommerce.Platform.Core.Domain;
 
 namespace VirtoCommerce.EventBusModule.Data.Model
 {
-    public class SubscriptionEventEntity : AuditableEntity
+    public class SubscriptionEventEntity :AuditableEntity, IDataEntity<SubscriptionEventEntity, SubscriptionEvent>
     {
-        [StringLength(128)]
+        [StringLength(256)]
         public string EventId { get; set; }
 
         [StringLength(128)]

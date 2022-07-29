@@ -8,7 +8,7 @@ using VirtoCommerce.EventBusModule.Data.Repositories;
 
 namespace VirtoCommerce.EventBusModule.Data.Migrations
 {
-    [DbContext(typeof(SubscriptionDbContext))]
+    [DbContext(typeof(EventBusDbContext))]
     partial class SubscriptionDbContextModelSnapshot : ModelSnapshot
     {
         protected override void BuildModel(ModelBuilder modelBuilder)

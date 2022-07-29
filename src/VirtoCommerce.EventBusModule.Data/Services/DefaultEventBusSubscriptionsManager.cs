@@ -4,26 +4,31 @@ using System.Linq;
 using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
+using Scriban;
 using VirtoCommerce.EventBusModule.Core.Models;
 using VirtoCommerce.EventBusModule.Core.Services;
 using VirtoCommerce.Platform.Core.Bus;
+using VirtoCommerce.Platform.Core.Common;
 using VirtoCommerce.Platform.Core.Events;
 using VirtoCommerce.Platform.Core.Exceptions;
+using VirtoCommerce.Platform.Core.GenericCrud;
 
 namespace VirtoCommerce.EventBusModule.Data.Services
 {
     public class DefaultEventBusSubscriptionsManager : IEventBusSubscriptionsManager
     {
-        private readonly ISubscriptionService _subscriptionService;
+        private readonly ICrudService<Subscription> _subscriptionService;
         private readonly IHandlerRegistrar _eventHandlerRegistrar;
         private readonly RegisteredEventService _registeredEventService;
-        private readonly ISubscriptionSearchService _subscriptionSearchService;
+        private readonly ISearchService<SubscriptionSearchCriteria, SubscriptionSearchResult, Subscription> _subscriptionSearchService;
         private readonly IEventBusProviderService _eventBusFactory;
 
         public DefaultEventBusSubscriptionsManager(IHandlerRegistrar eventHandlerRegistrar,
             RegisteredEventService registeredEventService,
-            ISubscriptionService subscriptionService,
-            ISubscriptionSearchService subscriptionSearchService,
+            ICrudService<Subscription> subscriptionService,
+            ISearchService<SubscriptionSearchCriteria, SubscriptionSearchResult, Subscription> subscriptionSearchService,
             IEventBusProviderService eventBusFactory)
         {
             _eventHandlerRegistrar = eventHandlerRegistrar;
@@ -35,11 +40,11 @@ namespace VirtoCommerce.EventBusModule.Data.Services
 
         #region Subcription
 
-        public virtual async Task<SubscriptionInfo> SaveSubscriptionAsync(SubscriptionRequest request)
+        public virtual async Task<Subscription> SaveSubscriptionAsync(SubscriptionRequest request)
         {
-            SubscriptionInfo result = null;
+            Subscription result = null;
             if (CheckEvents(request.EventIds) &&
-                CheckProvider(request.Provider))
+                CheckProviderConnection(request.ConnectionName))
             {
                 result = request.ToModel();
                 await _subscriptionService.SaveChangesAsync(new[] { result });
@@ -85,31 +90,59 @@ namespace VirtoCommerce.EventBusModule.Data.Services
                                              .ToArray();
                 var eventData = entities.Union(valueObjects).ToArray();
                 */
-                var eventData = new EventData[] { new EventData {DomainEvent = domainEvent } };
 
-                var activeSubscritions = new List<SubscriptionInfo>();
+
+                //var activeSubscritions = new List<SubscriptionInfo>();
+
+                var domainEventJson = JsonConvert.SerializeObject(domainEvent);
+                var domainEventJObject = JObject.Parse(domainEventJson);
 
                 foreach (var subscription in searchResult.Results)
                 {
-                    var provider = _eventBusFactory.CreateProvider(subscription.Provider);
+                    var provider = _eventBusFactory.CreateProvider(subscription.ConnectionName);
 
                     if (provider != null)
                     {
-                        var result = await provider.SendEventAsync(subscription, eventData);
 
-                        subscription.Status = result.Status;
-                        subscription.ErrorMessage = string.Empty;
-
-                        if (!string.IsNullOrEmpty(result.ErrorMessage))
+                        var tokens = domainEventJObject.SelectTokens(subscription.JsonPathFilter);
+                        if (tokens.Any())
                         {
-                            subscription.ErrorMessage = new string(result.ErrorMessage.Take(1024).ToArray());
-                        }
 
-                        activeSubscritions.Add(subscription);
+                            Event eventData = null;
+
+                            object payload = null;
+
+                            if (!subscription.PayloadTransformationTemplate.IsNullOrEmpty())
+                            {
+                                var template = Template.Parse(subscription.PayloadTransformationTemplate);
+                                payload = JsonConvert.DeserializeObject(template.Render(domainEvent));
+                            }
+                            else
+                            {
+                                payload = domainEvent;
+                            }
+
+                            eventData = new Event() { Subscription = subscription, Payload = new EventPayload() { EventId = eventId, Arg = payload } };
+
+                            var result = await provider.SendEventAsync(eventData);
+
+                            /*
+                            subscription.Status = result.Status;
+                            subscription.ErrorMessage = string.Empty;
+
+                            if (!string.IsNullOrEmpty(result.ErrorMessage))
+                            {
+                                subscription.ErrorMessage = new string(result.ErrorMessage.Take(1024).ToArray());
+                            }
+
+
+                            activeSubscritions.Add(subscription);
+                            */
+                        }
                     }
                 }
 
-                await _subscriptionService.SaveChangesAsync(activeSubscritions.ToArray());
+                //await _subscriptionService.SaveChangesAsync(activeSubscritions.ToArray());
             }
         }
 
@@ -159,6 +192,12 @@ namespace VirtoCommerce.EventBusModule.Data.Services
             {
                 throw new PlatformException($"The provider {providerName} is not registered");
             }
+        }
+
+        private bool CheckProviderConnection(string connectionName)
+        {
+            // TODO: add call for service
+            return true;
         }
     }
 }

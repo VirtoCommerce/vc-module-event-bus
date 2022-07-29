@@ -4,14 +4,14 @@ using VirtoCommerce.EventBusModule.Data.Model;
 
 namespace VirtoCommerce.EventBusModule.Data.Repositories
 {
-    public class SubscriptionDbContext : DbContextWithTriggers
+    public class EventBusDbContext : DbContextWithTriggers
     {
-        public SubscriptionDbContext(DbContextOptions<SubscriptionDbContext> options)
+        public EventBusDbContext(DbContextOptions<EventBusDbContext> options)
             : base(options)
         {
         }
 
-        protected SubscriptionDbContext(DbContextOptions options)
+        protected EventBusDbContext(DbContextOptions options)
             : base(options)
         {
         }

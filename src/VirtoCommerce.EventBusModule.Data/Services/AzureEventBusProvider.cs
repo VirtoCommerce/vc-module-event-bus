@@ -13,40 +13,49 @@ namespace VirtoCommerce.EventBusModule.Data.Services
 {
     public class AzureEventBusProvider : EventBusProvider
     {
-        public override async Task<SendEventResult> SendEventAsync(SubscriptionInfo subscription, IList<EventData> events)
+        public override async Task<SendEventResult> SendEventAsync(Event @event)
+        {
+            var dsd = new CloudEvent(@event.Subscription.Id ?? nameof(AzureEventBusProvider), @event.Payload.EventId, @event);
+
+            return new SendEventResult();
+        }
+
+
+
+        public override async Task<SendEventResult> SendEventAsync(Subscription subscription, IList<EventData> events)
         {
             var result = new SendEventResult();
 
-            try
-            {
-                var client = new EventGridPublisherClient(new Uri(subscription.ConnectionString), new AzureKeyCredential(subscription.AccessKey));
+            //try
+            //{
+            //    var client = new EventGridPublisherClient(new Uri(subscription.ConnectionString), new AzureKeyCredential(subscription.AccessKey));
 
-                var cloudEvents = events.Select(x => new CloudEvent(subscription.Id ?? nameof(AzureEventBusProvider), x.EventId, x)).ToList();
+            //    var cloudEvents = events.Select(x => new CloudEvent(subscription.Id ?? nameof(AzureEventBusProvider), x.EventId, x)).ToList();
 
-                var eventGridResponse = await client.SendEventsAsync(cloudEvents);
+            //    var eventGridResponse = await client.SendEventsAsync(cloudEvents);
 
-                result.Status = eventGridResponse.Status;
-            }
-            catch (ArgumentException)
-            {
-                result.Status = StatusCodes.Status400BadRequest;
-                result.ErrorMessage = "Either key or endpoint are empty";
-            }
-            catch (UriFormatException)
-            {
-                result.Status = StatusCodes.Status400BadRequest;
-                result.ErrorMessage = "Invalid endpoint URI format";
-            }
-            catch (RequestFailedException requestFailedEx)
-            {
-                result.Status = requestFailedEx.Status;
-                result.ErrorMessage = requestFailedEx.Message;
-            }
-            catch (Exception ex)
-            {
-                result.Status = StatusCodes.Status500InternalServerError;
-                result.ErrorMessage = ex.Message;
-            }
+            //    result.Status = eventGridResponse.Status;
+            //}
+            //catch (ArgumentException)
+            //{
+            //    result.Status = StatusCodes.Status400BadRequest;
+            //    result.ErrorMessage = "Either key or endpoint are empty";
+            //}
+            //catch (UriFormatException)
+            //{
+            //    result.Status = StatusCodes.Status400BadRequest;
+            //    result.ErrorMessage = "Invalid endpoint URI format";
+            //}
+            //catch (RequestFailedException requestFailedEx)
+            //{
+            //    result.Status = requestFailedEx.Status;
+            //    result.ErrorMessage = requestFailedEx.Message;
+            //}
+            //catch (Exception ex)
+            //{
+            //    result.Status = StatusCodes.Status500InternalServerError;
+            //    result.ErrorMessage = ex.Message;
+            //}
 
             return result;
         }

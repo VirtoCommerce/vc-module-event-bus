@@ -3,15 +3,15 @@ using Microsoft.EntityFrameworkCore.Design;
 
 namespace VirtoCommerce.EventBusModule.Data.Repositories
 {
-    public class DesignTimeDbContextFactory : IDesignTimeDbContextFactory<SubscriptionDbContext>
+    public class DesignTimeDbContextFactory : IDesignTimeDbContextFactory<EventBusDbContext>
     {
-        public SubscriptionDbContext CreateDbContext(string[] args)
+        public EventBusDbContext CreateDbContext(string[] args)
         {
-            var builder = new DbContextOptionsBuilder<SubscriptionDbContext>();
+            var builder = new DbContextOptionsBuilder<EventBusDbContext>();
 
             builder.UseSqlServer("Data Source=(local);Initial Catalog=VirtoCommerce3;Persist Security Info=True;User ID=virto;Password=virto;MultipleActiveResultSets=True;Connect Timeout=30");
 
-            return new SubscriptionDbContext(builder.Options);
+            return new EventBusDbContext(builder.Options);
         }
     }
 }

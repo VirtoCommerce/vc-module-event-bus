@@ -9,7 +9,7 @@ using VirtoCommerce.EventBusModule.Data.Repositories;
 
 namespace VirtoCommerce.EventBusModule.Data.Migrations
 {
-    [DbContext(typeof(SubscriptionDbContext))]
+    [DbContext(typeof(EventBusDbContext))]
     [Migration("20210127144746_AddAccessKey")]
     partial class AddAccessKey
     {

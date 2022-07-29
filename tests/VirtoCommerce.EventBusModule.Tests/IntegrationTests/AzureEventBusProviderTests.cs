@@ -35,8 +35,8 @@ namespace VirtoCommerce.EventBusModule.Tests.IntegrationTests
             {
                 Id = "testSubscription",
                 Provider = "AzureEventGrid",
-                ConnectionString = _topicEndpoint,
-                AccessKey = _topicAccessKey,
+                //ConnectionString = _topicEndpoint,
+                //AccessKey = _topicAccessKey,
             };
 
             var eventData = new EventData()
@@ -61,8 +61,8 @@ namespace VirtoCommerce.EventBusModule.Tests.IntegrationTests
             {
                 Id = "testSubscription",
                 Provider = "AzureEventGrid",
-                ConnectionString = _topicEndpoint,
-                AccessKey = "gibberish",
+                //ConnectionString = _topicEndpoint,
+                //AccessKey = "gibberish",
             };
 
             var eventData = new EventData()
