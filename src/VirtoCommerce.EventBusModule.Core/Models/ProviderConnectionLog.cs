@@ -9,7 +9,7 @@ namespace VirtoCommerce.EventBusModule.Core.Models
 {
     public class ProviderConnectionLog : AuditableEntity, ICloneable
     {
-        public ProviderConnection ProviderConnection { get; set; }
+        public string ProviderName { get; set; }
         public int Status { get; set; }
         public string ErrorMessage { get; set; }
 

@@ -7,6 +7,8 @@ using VirtoCommerce.EventBusModule.Core.Models;
 using VirtoCommerce.EventBusModule.Core.Services;
 using VirtoCommerce.EventBusModule.Data.Services;
 using VirtoCommerce.Platform.Core.Exceptions;
+using VirtoCommerce.Platform.Core.GenericCrud;
+using System.Collections.Generic;
 
 namespace VirtoCommerce.EventBusModule.Web.Controllers.Api
 {
@@ -17,13 +19,13 @@ namespace VirtoCommerce.EventBusModule.Web.Controllers.Api
     {
         private readonly RegisteredEventService _registeredEventService;
         private readonly IEventBusSubscriptionsManager _eventBusSubscriptionsManager;
-        private readonly ISubscriptionService _subscriptionService;
-        private readonly ISubscriptionSearchService _subscriptionSearchService;
+        private readonly ICrudService<Subscription> _subscriptionService;
+        private readonly ISearchService<SubscriptionSearchCriteria, SubscriptionSearchResult, Subscription> _subscriptionSearchService;
 
         public EventBusController(RegisteredEventService registeredEventService,
             IEventBusSubscriptionsManager eventBusSubscriptionsManager,
-            ISubscriptionService subscriptionService,
-            ISubscriptionSearchService subscriptionSearchService)
+            ICrudService<Subscription> subscriptionService,
+            ISearchService<SubscriptionSearchCriteria, SubscriptionSearchResult, Subscription> subscriptionSearchService)
         {
             _registeredEventService = registeredEventService;
             _eventBusSubscriptionsManager = eventBusSubscriptionsManager;
@@ -49,9 +51,9 @@ namespace VirtoCommerce.EventBusModule.Web.Controllers.Api
 
         [HttpGet("subscriptions/{id}")]
         [Authorize(ModuleConstants.Security.Permissions.Read)]
-        public async Task<ActionResult<SubscriptionInfo>> GetById(string id)
+        public async Task<ActionResult<Subscription>> GetById(string id)
         {
-            var subscriptions = await _subscriptionService.GetByIdsAsync(new[] { id });
+            var subscriptions = await _subscriptionService.GetAsync(new List<string> { id });
             return Ok(subscriptions.FirstOrDefault());
         }
 
@@ -83,7 +85,7 @@ namespace VirtoCommerce.EventBusModule.Web.Controllers.Api
         [Authorize(ModuleConstants.Security.Permissions.Delete)]
         public Task Delete(string id)
         {
-            return _subscriptionService.DeleteByIdsAsync(new[] { id });
+            return _subscriptionService.DeleteAsync(new[] { id });
         }
     }
 }

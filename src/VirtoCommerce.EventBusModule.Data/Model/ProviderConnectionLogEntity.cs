@@ -15,6 +15,9 @@ namespace VirtoCommerce.EventBusModule.Data.Model
         public int Status { get; set; }
         public string ErrorMessage { get; set; }
 
+        [StringLength(128)]
+        public string ProviderName { get; set; }
+
         public virtual ProviderConnectionLog ToModel(ProviderConnectionLog providerConnectionLog)
         {
             if (providerConnectionLog == null)
@@ -27,6 +30,7 @@ namespace VirtoCommerce.EventBusModule.Data.Model
             providerConnectionLog.ModifiedDate = ModifiedDate;
             providerConnectionLog.Status = Status;
             providerConnectionLog.ErrorMessage = ErrorMessage;
+            providerConnectionLog.ProviderName = ProviderName;
             return providerConnectionLog;
         }
 
@@ -42,6 +46,7 @@ namespace VirtoCommerce.EventBusModule.Data.Model
             ModifiedDate = providerConnectionLog.ModifiedDate;
             Status = providerConnectionLog.Status;
             ErrorMessage = providerConnectionLog.ErrorMessage;
+            ProviderName = providerConnectionLog.ProviderName;
 
             pkMap.AddPair(providerConnectionLog, this);
 
@@ -52,6 +57,7 @@ namespace VirtoCommerce.EventBusModule.Data.Model
         {
             target.Status = Status;
             target.ErrorMessage = ErrorMessage;
+            target.ProviderName = ProviderName;
         }
     }
 }

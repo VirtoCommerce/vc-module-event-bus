@@ -1,14 +1,16 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using Newtonsoft.Json.Linq;
 using VirtoCommerce.EventBusModule.Core.Models;
+using VirtoCommerce.EventBusModule.Core.Options;
 
 namespace VirtoCommerce.EventBusModule.Core.Services
 {
     public abstract class EventBusProvider
     {
-        public abstract Task<SendEventResult> SendEventAsync(Subscription subscription, IList<EventData> events);
-
-        public abstract Task<SendEventResult> SendEventAsync(Event @event);
-
+        public abstract Task<SendEventResult> SendEventsAsync(IEnumerable<Event> events);
+        public abstract bool IsConnected();
+        public abstract void SetConnectionOptions(JObject options);
+        public abstract bool Connect();
     }
 }

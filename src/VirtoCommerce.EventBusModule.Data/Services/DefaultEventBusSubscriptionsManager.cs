@@ -22,20 +22,20 @@ namespace VirtoCommerce.EventBusModule.Data.Services
         private readonly ICrudService<Subscription> _subscriptionService;
         private readonly IHandlerRegistrar _eventHandlerRegistrar;
         private readonly RegisteredEventService _registeredEventService;
-        private readonly ISearchService<SubscriptionSearchCriteria, SubscriptionSearchResult, Subscription> _subscriptionSearchService;
-        private readonly IEventBusProviderService _eventBusFactory;
+        private readonly IEventBusSubscriptionsService _subscriptionsService;
+        private readonly IEventBusProviderConnectionsService _providerConnections;
 
         public DefaultEventBusSubscriptionsManager(IHandlerRegistrar eventHandlerRegistrar,
             RegisteredEventService registeredEventService,
             ICrudService<Subscription> subscriptionService,
-            ISearchService<SubscriptionSearchCriteria, SubscriptionSearchResult, Subscription> subscriptionSearchService,
-            IEventBusProviderService eventBusFactory)
+            IEventBusSubscriptionsService subscriptionsService,
+            IEventBusProviderConnectionsService providerConnections)
         {
             _eventHandlerRegistrar = eventHandlerRegistrar;
             _registeredEventService = registeredEventService;
             _subscriptionService = subscriptionService;
-            _subscriptionSearchService = subscriptionSearchService;
-            _eventBusFactory = eventBusFactory;
+            _subscriptionsService = subscriptionsService;
+            _providerConnections = providerConnections;
         }
 
         #region Subcription
@@ -71,15 +71,10 @@ namespace VirtoCommerce.EventBusModule.Data.Services
         protected virtual async Task HandleEvent(DomainEvent domainEvent, CancellationToken cancellationToken)
         {
             var eventId = domainEvent.GetType().FullName;
-            var criteria = new SubscriptionSearchCriteria()
-            {
-                EventIds = new[] { eventId },
-                Skip = 0,
-                Take = int.MaxValue,
-            };
-            var searchResult = await _subscriptionSearchService.SearchAsync(criteria);
 
-            if (searchResult.TotalCount > 0)
+            var searchResult = _subscriptionsService.GetSubscriptionByEventId(eventId);
+
+            if (searchResult.Count > 0)
             {
                 /*
                 var entities = domainEvent.GetObjectsWithDerived<IEntity>()
@@ -94,12 +89,11 @@ namespace VirtoCommerce.EventBusModule.Data.Services
 
                 //var activeSubscritions = new List<SubscriptionInfo>();
 
-                var domainEventJson = JsonConvert.SerializeObject(domainEvent);
-                var domainEventJObject = JObject.Parse(domainEventJson);
+                var domainEventJObject = JObject.FromObject(domainEvent);
 
-                foreach (var subscription in searchResult.Results)
+                foreach (var subscription in searchResult)
                 {
-                    var provider = _eventBusFactory.CreateProvider(subscription.ConnectionName);
+                    var provider = _providerConnections.GetConnectedProvider(subscription.ConnectionName);
 
                     if (provider != null)
                     {
@@ -124,7 +118,7 @@ namespace VirtoCommerce.EventBusModule.Data.Services
 
                             eventData = new Event() { Subscription = subscription, Payload = new EventPayload() { EventId = eventId, Arg = payload } };
 
-                            var result = await provider.SendEventAsync(eventData);
+                            var result = await provider.SendEventsAsync(new List<Event>() { eventData });
 
                             /*
                             subscription.Status = result.Status;
@@ -179,18 +173,6 @@ namespace VirtoCommerce.EventBusModule.Data.Services
             {
                 var notRegisteredEvents = eventIds.Where(e => !allEvents.Any(all => all.Id == e));
                 throw new PlatformException($"The events are not registered: {string.Join(",", notRegisteredEvents)}");
-            }
-        }
-
-        private bool CheckProvider(string providerName)
-        {
-            if (_eventBusFactory.IsProviderRegistered(providerName))
-            {
-                return true;
-            }
-            else
-            {
-                throw new PlatformException($"The provider {providerName} is not registered");
             }
         }
 

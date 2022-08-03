@@ -19,7 +19,7 @@ namespace VirtoCommerce.EventBusModule.Data.Services
 {
     public class SubscriptionSearchService : SearchService<SubscriptionSearchCriteria, SubscriptionSearchResult, Subscription, SubscriptionEntity>
     {
-        public SubscriptionSearchService(Func<IRepository> repositoryFactory, IPlatformMemoryCache platformMemoryCache, ICrudService<Subscription> crudService) : base(repositoryFactory, platformMemoryCache, crudService)
+        public SubscriptionSearchService(Func<IEventBusRepository> repositoryFactory, IPlatformMemoryCache platformMemoryCache, ICrudService<Subscription> crudService) : base(repositoryFactory, platformMemoryCache, crudService)
         {
         }
 

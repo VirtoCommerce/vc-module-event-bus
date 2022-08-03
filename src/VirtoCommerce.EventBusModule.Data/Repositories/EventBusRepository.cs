@@ -36,5 +36,9 @@ namespace VirtoCommerce.EventBusModule.Data.Repositories
         public Task<ProviderConnectionEntity[]> GetProviderConnectionsByIdsAsync(IEnumerable<string> ids) => ProviderConnections
                 .Where(x => ids.Contains(x.Id))
                 .ToArrayAsync();
+
+        public Task<ProviderConnectionLogEntity[]> GetProviderConnectionLogsByIdsAsync(IEnumerable<string> ids) => ProviderConnectionLogs
+                .Where(x => ids.Contains(x.Id))
+                .ToArrayAsync();
     }
 }

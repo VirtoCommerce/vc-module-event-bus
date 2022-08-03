@@ -19,7 +19,7 @@ namespace VirtoCommerce.EventBusModule.Data.Services
     public class SubscriptionService : CrudService<Subscription, SubscriptionEntity, SubscriptionChangeEvent, SubscriptionChangedEvent>
     {
         
-        public SubscriptionService(Func<IRepository> repositoryFactory, IPlatformMemoryCache platformMemoryCache, IEventPublisher eventPublisher) : base(repositoryFactory, platformMemoryCache, eventPublisher)
+        public SubscriptionService(Func<IEventBusRepository> repositoryFactory, IPlatformMemoryCache platformMemoryCache, IEventPublisher eventPublisher) : base(repositoryFactory, platformMemoryCache, eventPublisher)
         {
         }
 

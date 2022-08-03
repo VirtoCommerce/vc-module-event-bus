@@ -1,4 +1,5 @@
 using System.Linq;
+using Newtonsoft.Json.Linq;
 
 namespace VirtoCommerce.EventBusModule.Core.Models
 {
@@ -8,7 +9,7 @@ namespace VirtoCommerce.EventBusModule.Core.Models
         public string ConnectionName { get; set; }
         public string JsonPathFilter { get; set; }
         public string PayloadTransformationTemplate { get; set; }
-        public string EventSettingsSerialized { get; set; }
+        public JObject EventSettings { get; set; }
 
         public string[] EventIds { get; set; }
 
@@ -21,7 +22,7 @@ namespace VirtoCommerce.EventBusModule.Core.Models
                 ConnectionName = ConnectionName,
                 JsonPathFilter = JsonPathFilter,
                 PayloadTransformationTemplate = PayloadTransformationTemplate,
-                EventSettingsSerialized = EventSettingsSerialized,
+                EventSettingsSerialized = EventSettings.ToString(),
                 //ConnectionString = ConnectionString,
                 //AccessKey = AccessKey,
                 Events = EventIds.Select(x => new SubscriptionEvent { EventId = x }).ToArray()

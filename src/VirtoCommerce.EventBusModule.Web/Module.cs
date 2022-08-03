@@ -10,25 +10,49 @@ using VirtoCommerce.EventBusModule.Data.Repositories;
 using VirtoCommerce.EventBusModule.Data.Services;
 using VirtoCommerce.Platform.Core.Modularity;
 using VirtoCommerce.Platform.Core.Security;
+using VirtoCommerce.Platform.Core.GenericCrud;
+using VirtoCommerce.Platform.Data.GenericCrud;
+using VirtoCommerce.EventBusModule.Core.Models;
+using VirtoCommerce.EventBusModule.Core.Options;
 
 namespace VirtoCommerce.EventBusModule.Web
 {
-    public class Module : IModule
+    public class Module : IModule, IHasConfiguration
     {
+        public IConfiguration Configuration { get; set; }
+
         public ManifestModuleInfo ModuleInfo { get; set; }
 
         public void Initialize(IServiceCollection serviceCollection)
         {
-            serviceCollection.AddTransient<ISubscriptionRepository, SubscriptionRepository>();
-            serviceCollection.AddDbContext<SubscriptionDbContext>((provider, options) =>
+            serviceCollection.AddTransient<IEventBusRepository, EventBusRepository>();
+            serviceCollection.AddDbContext<EventBusDbContext>((provider, options) =>
                 options.UseSqlServer(provider.GetRequiredService<IConfiguration>().GetConnectionString("VirtoCommerce")));
-            serviceCollection.AddTransient<Func<ISubscriptionRepository>>(provider => () => provider.CreateScope().ServiceProvider.GetRequiredService<ISubscriptionRepository>());
 
-            serviceCollection.AddTransient<IEventBusSubscriptionsManager, DefaultEventBusSubscriptionsManager>();
-            serviceCollection.AddTransient<ISubscriptionSearchService, SubscriptionSearchService>();
-            serviceCollection.AddTransient<ISubscriptionService, SubscriptionService>();
-            serviceCollection.AddTransient<IEventBusProviderService, EventBusProviderService>();
+            serviceCollection.AddTransient<Func<IEventBusRepository>>(provider => () => provider.CreateScope().ServiceProvider.GetRequiredService<IEventBusRepository>());
+            
+            serviceCollection.AddTransient<ISearchService<SubscriptionSearchCriteria, SubscriptionSearchResult, Subscription>, SubscriptionSearchService>();
+            serviceCollection.AddTransient<ICrudService<Subscription>, SubscriptionService>();
+
+            serviceCollection.AddTransient<ISearchService<ProviderConnectionSearchCriteria, ProviderConnectionSearchResult, ProviderConnection>, ProviderConnectionSearchService>();
+            serviceCollection.AddTransient<ICrudService<ProviderConnection>, ProviderConnectionService>();
+
+            serviceCollection.AddTransient<ICrudService<ProviderConnectionLog>, ProviderConnectionLogService>();
+
+            serviceCollection.AddSingleton<IEventBusSubscriptionsManager, DefaultEventBusSubscriptionsManager>();
+
+            serviceCollection.AddSingleton<IEventBusProviderConnectionsService, EventBusProviderConnectionsService>();
+
+            serviceCollection.AddSingleton<IEventBusReadConfigurationService, EventBusReadConfigurationService>();
+            
+            serviceCollection.AddSingleton<IEventBusProviderService, EventBusProviderService>();
+
             serviceCollection.AddSingleton<RegisteredEventService>();
+
+            serviceCollection.AddSingleton<IEventBusSubscriptionsService, EventBusSubscriptionsService>();
+
+            var cfg = Configuration.GetSection("EventBus");
+            serviceCollection.AddOptions<EventBusOptions>().Bind(cfg).ValidateDataAnnotations();
         }
 
         public void PostInitialize(IApplicationBuilder appBuilder)
@@ -44,7 +68,7 @@ namespace VirtoCommerce.EventBusModule.Web
             //Force migrations
             using (var serviceScope = appBuilder.ApplicationServices.CreateScope())
             {
-                var dbContext = serviceScope.ServiceProvider.GetRequiredService<SubscriptionDbContext>();
+                var dbContext = serviceScope.ServiceProvider.GetRequiredService<EventBusDbContext>();
                 dbContext.Database.EnsureCreated();
                 dbContext.Database.Migrate();
             }

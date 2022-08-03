@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Newtonsoft.Json.Linq;
 using VirtoCommerce.Platform.Core.Common;
 
 namespace VirtoCommerce.EventBusModule.Core.Models
@@ -9,9 +10,20 @@ namespace VirtoCommerce.EventBusModule.Core.Models
     {
         public string Name { get; set; }
         public string ConnectionName { get; set; }
-        public string JsonPathFilter { get; set; }
-        public string PayloadTransformationTemplate { get; set; }
-        public string EventSettingsSerialized { get; set; }
+        public string JsonPathFilter { get; set; } = "$"; // All events are good by default
+        public string PayloadTransformationTemplate { get; set; } = String.Empty; // No transformation by default
+        public JObject EventSettings { get; private set; }
+        public string EventSettingsSerialized
+        {
+            get
+            {
+                return EventSettings?.ToString();
+            }
+            set
+            {
+                EventSettings = JObject.Parse(value);
+            }
+        }
         public ICollection<SubscriptionEvent> Events { get; set; }
 
         public object Clone()

@@ -15,7 +15,7 @@ namespace VirtoCommerce.EventBusModule.Data.Services
 {
     public class ProviderConnectionSearchService : SearchService<ProviderConnectionSearchCriteria, ProviderConnectionSearchResult, ProviderConnection, ProviderConnectionEntity>
     {
-        public ProviderConnectionSearchService(Func<IRepository> repositoryFactory, IPlatformMemoryCache platformMemoryCache, ICrudService<ProviderConnection> crudService) : base(repositoryFactory, platformMemoryCache, crudService)
+        public ProviderConnectionSearchService(Func<IEventBusRepository> repositoryFactory, IPlatformMemoryCache platformMemoryCache, ICrudService<ProviderConnection> crudService) : base(repositoryFactory, platformMemoryCache, crudService)
         {
         }
 
@@ -34,6 +34,22 @@ namespace VirtoCommerce.EventBusModule.Data.Services
             }
 
             return query;
+        }
+
+        protected override IList<SortInfo> BuildSortExpression(ProviderConnectionSearchCriteria criteria)
+        {
+            var sortInfos = criteria.SortInfos;
+            if (sortInfos.IsNullOrEmpty())
+            {
+                sortInfos = new[]
+                {
+                    new SortInfo
+                    {
+                        SortColumn = nameof(ProviderConnectionEntity.Name)
+                    }
+                };
+            }
+            return sortInfos;
         }
     }
 }

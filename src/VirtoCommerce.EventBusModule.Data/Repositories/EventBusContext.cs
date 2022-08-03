@@ -19,11 +19,19 @@ namespace VirtoCommerce.EventBusModule.Data.Repositories
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.Entity<SubscriptionEntity>().HasKey(x => x.Id);
-            modelBuilder.Entity<SubscriptionEntity>().ToTable("EventBusSubscription");
+            modelBuilder.Entity<SubscriptionEntity>().ToTable("EventBus2Subscription");
             modelBuilder.Entity<SubscriptionEntity>().Property(x => x.Id).HasMaxLength(128).ValueGeneratedOnAdd();
 
+            modelBuilder.Entity<ProviderConnectionEntity>().HasKey(x => x.Id);
+            modelBuilder.Entity<ProviderConnectionEntity>().ToTable("EventBus2ProviderConnection");
+            modelBuilder.Entity<ProviderConnectionEntity>().Property(x => x.Id).HasMaxLength(128).ValueGeneratedOnAdd();
+
+            modelBuilder.Entity<ProviderConnectionLogEntity>().HasKey(x => x.Id);
+            modelBuilder.Entity<ProviderConnectionLogEntity>().ToTable("EventBus2ProviderConnectionLog");
+            modelBuilder.Entity<ProviderConnectionLogEntity>().Property(x => x.Id).HasMaxLength(128).ValueGeneratedOnAdd();
+
             modelBuilder.Entity<SubscriptionEventEntity>().HasKey(x => x.Id);
-            modelBuilder.Entity<SubscriptionEventEntity>().ToTable("EventBusSubscriptionEvent");
+            modelBuilder.Entity<SubscriptionEventEntity>().ToTable("EventBus2SubscriptionEvent");
             modelBuilder.Entity<SubscriptionEventEntity>().Property(x => x.Id).HasMaxLength(128).ValueGeneratedOnAdd();
             modelBuilder.Entity<SubscriptionEventEntity>().HasOne(m => m.Subscription).WithMany(m => m.Events)
                 .HasForeignKey(m => m.SubscriptionId).OnDelete(DeleteBehavior.Cascade).IsRequired();

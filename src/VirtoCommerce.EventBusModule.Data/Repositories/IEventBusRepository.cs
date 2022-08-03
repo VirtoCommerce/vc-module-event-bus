@@ -14,6 +14,7 @@ namespace VirtoCommerce.EventBusModule.Data.Repositories
         IQueryable<ProviderConnectionLogEntity> ProviderConnectionLogs { get; }
         Task<SubscriptionEntity[]> GetSubscriptionsByIdsAsync(IEnumerable<string> ids);
         Task<ProviderConnectionEntity[]> GetProviderConnectionsByIdsAsync(IEnumerable<string> ids);
+        Task<ProviderConnectionLogEntity[]> GetProviderConnectionLogsByIdsAsync(IEnumerable<string> ids);
         Task DeleteSubscriptionsByIdsAsync(IEnumerable<string> ids);
     }
 }
