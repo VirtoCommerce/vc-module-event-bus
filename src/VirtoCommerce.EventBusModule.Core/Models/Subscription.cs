@@ -12,6 +12,9 @@ namespace VirtoCommerce.EventBusModule.Core.Models
         public string ConnectionName { get; set; }
         public string JsonPathFilter { get; set; } = "$"; // All events are good by default
         public string PayloadTransformationTemplate { get; set; } = String.Empty; // No transformation by default
+
+        [System.Text.Json.Serialization.JsonIgnore]
+        [Newtonsoft.Json.JsonIgnore]
         public JObject EventSettings { get; private set; }
         public string EventSettingsSerialized
         {

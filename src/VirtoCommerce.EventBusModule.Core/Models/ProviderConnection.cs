@@ -19,6 +19,8 @@ namespace VirtoCommerce.EventBusModule.Core.Models
     {
         public string Name { get; set; }
         public string ProviderName { get; set; }
+        [System.Text.Json.Serialization.JsonIgnore]
+        [Newtonsoft.Json.JsonIgnore]
         public JObject ConnectionOptions { get; private set; }
         public string ConnectionOptionsSerialized
         {

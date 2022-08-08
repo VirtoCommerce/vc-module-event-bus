@@ -21,16 +21,22 @@ namespace VirtoCommerce.EventBusModule.Web.Controllers.Api
         private readonly IEventBusSubscriptionsManager _eventBusSubscriptionsManager;
         private readonly ICrudService<Subscription> _subscriptionService;
         private readonly ISearchService<SubscriptionSearchCriteria, SubscriptionSearchResult, Subscription> _subscriptionSearchService;
+        private readonly ICrudService<ProviderConnection> _providerConnectionService;
+        private readonly ISearchService<ProviderConnectionSearchCriteria, ProviderConnectionSearchResult, ProviderConnection> _providerConnectionSearchService;
 
         public EventBusController(RegisteredEventService registeredEventService,
             IEventBusSubscriptionsManager eventBusSubscriptionsManager,
             ICrudService<Subscription> subscriptionService,
-            ISearchService<SubscriptionSearchCriteria, SubscriptionSearchResult, Subscription> subscriptionSearchService)
+            ISearchService<SubscriptionSearchCriteria, SubscriptionSearchResult, Subscription> subscriptionSearchService,
+            ICrudService<ProviderConnection> providerConnectionService,
+            ISearchService<ProviderConnectionSearchCriteria, ProviderConnectionSearchResult, ProviderConnection> providerConnectionSearchService)
         {
             _registeredEventService = registeredEventService;
             _eventBusSubscriptionsManager = eventBusSubscriptionsManager;
             _subscriptionService = subscriptionService;
             _subscriptionSearchService = subscriptionSearchService;
+            _providerConnectionService = providerConnectionService;
+            _providerConnectionSearchService = providerConnectionSearchService;
         }
 
         [HttpGet("events")]
@@ -43,7 +49,7 @@ namespace VirtoCommerce.EventBusModule.Web.Controllers.Api
 
         [HttpPost("subscriptions/search")]
         [Authorize(ModuleConstants.Security.Permissions.Read)]
-        public async Task<ActionResult<SubscriptionSearchResult>> Search([FromBody] SubscriptionSearchCriteria searchCriteria)
+        public async Task<ActionResult<SubscriptionSearchResult>> SearchSubscriptions([FromBody] SubscriptionSearchCriteria searchCriteria)
         {
             var searchResult = await _subscriptionSearchService.SearchAsync(searchCriteria);
             return Ok(searchResult);
@@ -51,7 +57,7 @@ namespace VirtoCommerce.EventBusModule.Web.Controllers.Api
 
         [HttpGet("subscriptions/{id}")]
         [Authorize(ModuleConstants.Security.Permissions.Read)]
-        public async Task<ActionResult<Subscription>> GetById(string id)
+        public async Task<ActionResult<Subscription>> GetSubscriptionById(string id)
         {
             var subscriptions = await _subscriptionService.GetAsync(new List<string> { id });
             return Ok(subscriptions.FirstOrDefault());
@@ -59,7 +65,7 @@ namespace VirtoCommerce.EventBusModule.Web.Controllers.Api
 
         [HttpPost("subscriptions")]
         [Authorize(ModuleConstants.Security.Permissions.Create)]
-        public async Task<ActionResult<string>> Create([FromBody] SubscriptionRequest request)
+        public async Task<ActionResult<string>> CreateSubscription([FromBody] SubscriptionRequest request)
         {
             var limit = 20;
             var searchResult = await _subscriptionSearchService.SearchAsync(new SubscriptionSearchCriteria { Skip = 0, Take = 0 });
@@ -76,16 +82,56 @@ namespace VirtoCommerce.EventBusModule.Web.Controllers.Api
 
         [HttpPut("subscriptions")]
         [Authorize(ModuleConstants.Security.Permissions.Update)]
-        public Task Update([FromBody] SubscriptionRequest request)
+        public Task UpdateSubscription([FromBody] SubscriptionRequest request)
         {
             return _eventBusSubscriptionsManager.SaveSubscriptionAsync(request);
         }
 
         [HttpDelete("subscriptions/{id}")]
         [Authorize(ModuleConstants.Security.Permissions.Delete)]
-        public Task Delete(string id)
+        public Task DeleteSUbscription(string id)
         {
             return _subscriptionService.DeleteAsync(new[] { id });
         }
+
+        [HttpPut("connections")]
+        [Authorize(ModuleConstants.Security.Permissions.Update)]
+        public Task UpdateConnection([FromBody] ProviderConnectionRequest request)
+        {
+            return _providerConnectionService.SaveChangesAsync(new List<ProviderConnection>() { request.ToModel() });
+        }
+
+        [HttpDelete("connections/{id}")]
+        [Authorize(ModuleConstants.Security.Permissions.Delete)]
+        public Task DeleteConnection(string id)
+        {
+            return _providerConnectionService.DeleteAsync(new[] { id });
+        }
+
+        [HttpPost("connections/search")]
+        [Authorize(ModuleConstants.Security.Permissions.Read)]
+        public async Task<ActionResult<ProviderConnectionSearchResult>> SearchConnections([FromBody] ProviderConnectionSearchCriteria searchCriteria)
+        {
+            var searchResult = await _providerConnectionSearchService.SearchAsync(searchCriteria);
+            return Ok(searchResult);
+        }
+
+        [HttpGet("connections/{id}")]
+        [Authorize(ModuleConstants.Security.Permissions.Read)]
+        public async Task<ActionResult<ProviderConnection>> GetConnectionById(string id)
+        {
+            var connections = await _providerConnectionService.GetAsync(new List<string> { id });
+            return Ok(connections.FirstOrDefault());
+        }
+
+        [HttpPost("connections")]
+        [Authorize(ModuleConstants.Security.Permissions.Create)]
+        public async Task<ActionResult<string>> CreateConnection([FromBody] ProviderConnectionRequest request)
+        {
+            await _providerConnectionService.SaveChangesAsync(new List<ProviderConnection>() { request.ToModel() });
+            return Ok();
+        }
+
+      
     }
 }

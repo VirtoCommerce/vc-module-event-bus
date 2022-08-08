@@ -6,7 +6,8 @@ using System.Threading.Tasks;
 
 namespace VirtoCommerce.EventBusModule.Core.Models
 {
-    public abstract class ProviderSpecificEventSettings
+    public class SubscriptionEventRequest
     {
+        public string EventId { get; set; }
     }
 }

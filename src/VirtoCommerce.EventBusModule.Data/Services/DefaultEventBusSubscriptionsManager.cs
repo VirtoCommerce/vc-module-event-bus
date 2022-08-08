@@ -20,6 +20,7 @@ namespace VirtoCommerce.EventBusModule.Data.Services
     public class DefaultEventBusSubscriptionsManager : IEventBusSubscriptionsManager
     {
         private readonly ICrudService<Subscription> _subscriptionService;
+        private readonly ICrudService<ProviderConnectionLog> _providerConnectionLogService;
         private readonly IHandlerRegistrar _eventHandlerRegistrar;
         private readonly RegisteredEventService _registeredEventService;
         private readonly IEventBusSubscriptionsService _subscriptionsService;
@@ -28,6 +29,7 @@ namespace VirtoCommerce.EventBusModule.Data.Services
         public DefaultEventBusSubscriptionsManager(IHandlerRegistrar eventHandlerRegistrar,
             RegisteredEventService registeredEventService,
             ICrudService<Subscription> subscriptionService,
+            ICrudService<ProviderConnectionLog> providerConnectionLogService,
             IEventBusSubscriptionsService subscriptionsService,
             IEventBusProviderConnectionsService providerConnections)
         {
@@ -35,6 +37,7 @@ namespace VirtoCommerce.EventBusModule.Data.Services
             _registeredEventService = registeredEventService;
             _subscriptionService = subscriptionService;
             _subscriptionsService = subscriptionsService;
+            _providerConnectionLogService = providerConnectionLogService;
             _providerConnections = providerConnections;
         }
 
@@ -43,7 +46,7 @@ namespace VirtoCommerce.EventBusModule.Data.Services
         public virtual async Task<Subscription> SaveSubscriptionAsync(SubscriptionRequest request)
         {
             Subscription result = null;
-            if (CheckEvents(request.EventIds) &&
+            if (CheckEvents(request.Events) &&
                 CheckProviderConnection(request.ConnectionName))
             {
                 result = request.ToModel();
@@ -76,19 +79,7 @@ namespace VirtoCommerce.EventBusModule.Data.Services
 
             if (searchResult.Count > 0)
             {
-                /*
-                var entities = domainEvent.GetObjectsWithDerived<IEntity>()
-                                             .Select(x => new EventData { ObjectId = x.Id, ObjectType = x.GetType().FullName, EventId = eventId})
-                                             .ToArray();
-                var valueObjects = domainEvent.GetObjectsWithDerived<ValueObject>()
-                                             .Select(x => new EventData { ObjectId = x.GetCacheKey(), ObjectType = x.GetType().FullName, EventId = eventId})
-                                             .ToArray();
-                var eventData = entities.Union(valueObjects).ToArray();
-                */
-
-
-                //var activeSubscritions = new List<SubscriptionInfo>();
-
+                var logs = new List<ProviderConnectionLog>();
                 var domainEventJObject = JObject.FromObject(domainEvent);
 
                 foreach (var subscription in searchResult)
@@ -120,23 +111,15 @@ namespace VirtoCommerce.EventBusModule.Data.Services
 
                             var result = await provider.SendEventsAsync(new List<Event>() { eventData });
 
-                            /*
-                            subscription.Status = result.Status;
-                            subscription.ErrorMessage = string.Empty;
-
                             if (!string.IsNullOrEmpty(result.ErrorMessage))
                             {
-                                subscription.ErrorMessage = new string(result.ErrorMessage.Take(1024).ToArray());
+                                logs.Add(new ProviderConnectionLog() { ErrorMessage = result.ErrorMessage, Status = result.Status });
                             }
-
-
-                            activeSubscritions.Add(subscription);
-                            */
                         }
                     }
                 }
 
-                //await _subscriptionService.SaveChangesAsync(activeSubscritions.ToArray());
+                await _providerConnectionLogService.SaveChangesAsync(logs);
             }
         }
 
@@ -162,16 +145,16 @@ namespace VirtoCommerce.EventBusModule.Data.Services
         #endregion HandleEvent
 
 
-        private bool CheckEvents(string[] eventIds)
+        private bool CheckEvents(IList<SubscriptionEventRequest> eventIds)
         {
             var allEvents = _registeredEventService.GetAllEvents();
-            if (eventIds.All(x => allEvents.Any(e => e.Id == x)))
+            if (eventIds.All(x => allEvents.Any(e => e.Id == x.EventId)))
             {
                 return true;
             }
             else
             {
-                var notRegisteredEvents = eventIds.Where(e => !allEvents.Any(all => all.Id == e));
+                var notRegisteredEvents = eventIds.Where(e => !allEvents.Any(all => all.Id == e.EventId));
                 throw new PlatformException($"The events are not registered: {string.Join(",", notRegisteredEvents)}");
             }
         }
