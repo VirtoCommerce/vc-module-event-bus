@@ -7,6 +7,5 @@ namespace VirtoCommerce.EventBusModule.Core.Models
         public string ObjectId { get; set; }
         public string ObjectType { get; set; }
         public string EventId { get; set; }
-        //public DomainEvent DomainEvent { get; set; }
     }
 }

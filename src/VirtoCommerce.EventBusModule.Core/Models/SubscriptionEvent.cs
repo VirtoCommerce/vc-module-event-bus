@@ -7,7 +7,6 @@ namespace VirtoCommerce.EventBusModule.Core.Models
     {
         public string SubscriptionId { get; set; }
         public string EventId { get; set; }
-
         public object Clone()
         {
             var result = MemberwiseClone() as SubscriptionEvent;

@@ -12,7 +12,6 @@ namespace VirtoCommerce.EventBusModule.Core.Models
         public string ProviderName { get; set; }
         public int Status { get; set; }
         public string ErrorMessage { get; set; }
-
         public object Clone()
         {
             var result = MemberwiseClone() as ProviderConnectionLog;

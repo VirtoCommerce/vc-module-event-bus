@@ -12,7 +12,6 @@ namespace VirtoCommerce.EventBusModule.Core.Models
         public string PayloadTransformationTemplate { get; set; }
         public string EventSettingsSerialized { get; set; }
         public List<SubscriptionEventRequest> Events { get; set; }
-
         public Subscription ToModel()
         {
             return new Subscription

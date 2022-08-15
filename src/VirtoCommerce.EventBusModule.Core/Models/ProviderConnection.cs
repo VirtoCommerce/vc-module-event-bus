@@ -1,17 +1,6 @@
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Text.Json;
-using System.Text.Json.Nodes;
-using System.Threading.Tasks;
-using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
-using System.Text.Json.Serialization;
-using VirtoCommerce.EventBusModule.Core.JsonConverters;
-using VirtoCommerce.EventBusModule.Core.Options;
 using VirtoCommerce.Platform.Core.Common;
-using System.ComponentModel;
 
 namespace VirtoCommerce.EventBusModule.Core.Models
 {
@@ -24,14 +13,15 @@ namespace VirtoCommerce.EventBusModule.Core.Models
         public JObject ConnectionOptions { get; private set; }
         public string ConnectionOptionsSerialized
         {
-            get {
+            get
+            {
                 return ConnectionOptions?.ToString();
             }
-            set {
+            set
+            {
                 ConnectionOptions = JObject.Parse(value);
             }
         }
-
         public object Clone()
         {
             var result = MemberwiseClone() as ProviderConnection;
