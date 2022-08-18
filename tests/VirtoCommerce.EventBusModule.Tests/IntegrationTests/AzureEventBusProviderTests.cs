@@ -2,7 +2,10 @@ using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Options;
+using Newtonsoft.Json.Linq;
 using VirtoCommerce.EventBusModule.Core.Models;
+using VirtoCommerce.EventBusModule.Core.Options;
 using VirtoCommerce.EventBusModule.Data.Services;
 using Xunit;
 
@@ -13,8 +16,7 @@ namespace VirtoCommerce.EventBusModule.Tests.IntegrationTests
     {
         public IConfiguration Configuration { get; set; }
 
-        private string _topicEndpoint;
-        private string _topicAccessKey;
+        private AzureEventGridOptions options;
 
         public AzureEventBusProviderTests()
         {
@@ -23,31 +25,33 @@ namespace VirtoCommerce.EventBusModule.Tests.IntegrationTests
 
             Configuration = builder.Build();
 
-            _topicEndpoint = Configuration["topicEndpoint"];
-            _topicAccessKey = Configuration["topicAccessKey"];
+            options = new AzureEventGridOptions()
+            {
+                ConnectionString = Configuration["topicEndpoint"],
+                AccessKey = Configuration["topicAccessKey"]
+            };
         }
 
         [Fact]
         public async Task AzureEventBusProviderSendTest()
         {
             // Arrange
-            var subscription = new SubscriptionInfo()
+            var subscription = new Subscription()
             {
-                Id = "testSubscription",
-                Provider = "AzureEventGrid",
-                //ConnectionString = _topicEndpoint,
-                //AccessKey = _topicAccessKey,
+                Id = "testSubscription",                
+                ConnectionName = "AzureEventGrid",
             };
 
-            var eventData = new EventData()
+            var eventData = new Event()
             {
-                ObjectId = Guid.NewGuid().ToString(),
-                ObjectType = "testObjectType",
-                EventId = "testEventId",
+                Subscription = subscription,
+                Payload = new EventPayload() { EventId = "testEventId", Arg = new {Id = Guid.NewGuid().ToString() } }
             };
 
+            var azureProvider = new AzureEventBusProvider();
+            azureProvider.SetConnectionOptions(JObject.FromObject(options));
             //Act
-            var result = await new AzureEventBusProvider().SendEventAsync(subscription, new List<EventData>() { eventData });
+            var result = await azureProvider.SendEventsAsync(new List<Event>() { eventData });
 
             // Assert
             Assert.Equal(200, result.Status);
@@ -57,23 +61,22 @@ namespace VirtoCommerce.EventBusModule.Tests.IntegrationTests
         public async Task AzureEventBusProviderSendErrorTest()
         {
             // Arrange
-            var subscription = new SubscriptionInfo()
+            var subscription = new Subscription()
             {
                 Id = "testSubscription",
-                Provider = "AzureEventGrid",
-                //ConnectionString = _topicEndpoint,
-                //AccessKey = "gibberish",
+                ConnectionName = "AzureEventGrid",
             };
 
-            var eventData = new EventData()
+            var eventData = new Event()
             {
-                ObjectId = Guid.NewGuid().ToString(),
-                ObjectType = "testObjectType",
-                EventId = "testEventId",
+                Subscription = subscription,
+                Payload = new EventPayload() { EventId = "testEventId", Arg = new { Id = Guid.NewGuid().ToString() } }
             };
 
-            // Act
-            var result = await new AzureEventBusProvider().SendEventAsync(subscription, new List<EventData>() { eventData });
+            var azureProvider = new AzureEventBusProvider();
+            azureProvider.SetConnectionOptions(JObject.FromObject(options));
+            //Act
+            var result = await azureProvider.SendEventsAsync(new List<Event>() { eventData });
 
             // Assert
             Assert.Equal(401, result.Status);
@@ -84,14 +87,22 @@ namespace VirtoCommerce.EventBusModule.Tests.IntegrationTests
         public async Task AzureEventBusProviderEmptyCredentials()
         {
             // Arrange
-            var subscription = new SubscriptionInfo()
+            var subscription = new Subscription()
             {
                 Id = "testSubscription",
-                Provider = "AzureEventGrid",
+                ConnectionName = "AzureEventGrid",
             };
 
-            // Act
-            var result = await new AzureEventBusProvider().SendEventAsync(subscription, new List<EventData>());
+            var eventData = new Event()
+            {
+                Subscription = subscription,
+                Payload = new EventPayload() { EventId = "testEventId" }
+            };
+
+            var azureProvider = new AzureEventBusProvider();
+            azureProvider.SetConnectionOptions(JObject.FromObject(options));
+            //Act
+            var result = await azureProvider.SendEventsAsync(new List<Event>() { eventData });
 
             // Assert
             Assert.NotNull(result.ErrorMessage);

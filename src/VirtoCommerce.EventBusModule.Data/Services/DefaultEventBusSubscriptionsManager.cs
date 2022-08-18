@@ -41,13 +41,14 @@ namespace VirtoCommerce.EventBusModule.Data.Services
             _providerConnections = providerConnections;
         }
 
-        #region Subcription
+        #region Subscription
 
         public virtual async Task<Subscription> SaveSubscriptionAsync(SubscriptionRequest request)
         {
             Subscription result = null;
             if (CheckEvents(request.Events) &&
-                CheckProviderConnection(request.ConnectionName))
+                _providerConnections.GetProviderConnection(request.ConnectionName)!=null
+                )
             {
                 result = request.ToModel();
                 await _subscriptionService.SaveChangesAsync(new[] { result });
@@ -56,7 +57,7 @@ namespace VirtoCommerce.EventBusModule.Data.Services
             return result;
         }
 
-        #endregion Subcription
+        #endregion Subscription
 
         #region HandleEvent
 
@@ -154,15 +155,9 @@ namespace VirtoCommerce.EventBusModule.Data.Services
             }
             else
             {
-                var notRegisteredEvents = eventIds.Where(e => !allEvents.Any(all => all.Id == e.EventId));
+                var notRegisteredEvents = eventIds.Where(e => !allEvents.Any(all => all.Id == e.EventId)).Select(x=>x.EventId);
                 throw new PlatformException($"The events are not registered: {string.Join(",", notRegisteredEvents)}");
             }
-        }
-
-        private bool CheckProviderConnection(string connectionName)
-        {
-            // TODO: add call for service
-            return true;
         }
     }
 }

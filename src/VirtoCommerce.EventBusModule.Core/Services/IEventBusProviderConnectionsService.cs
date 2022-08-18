@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using VirtoCommerce.EventBusModule.Core.Models;
 
 namespace VirtoCommerce.EventBusModule.Core.Services
 {
@@ -17,5 +18,7 @@ namespace VirtoCommerce.EventBusModule.Core.Services
         /// <param name="providerConnectionName"></param>
         /// <returns></returns>
         public EventBusProvider GetConnectedProvider(string providerConnectionName);
+
+        public ProviderConnection GetProviderConnection(string providerConnectionName);
     }
 }

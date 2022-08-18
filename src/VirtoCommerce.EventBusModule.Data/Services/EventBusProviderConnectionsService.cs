@@ -6,6 +6,7 @@ using System.Text;
 using System.Threading.Tasks;
 using VirtoCommerce.EventBusModule.Core.Models;
 using VirtoCommerce.EventBusModule.Core.Services;
+using VirtoCommerce.Platform.Core.Exceptions;
 using VirtoCommerce.Platform.Core.GenericCrud;
 
 namespace VirtoCommerce.EventBusModule.Data.Services
@@ -32,9 +33,7 @@ namespace VirtoCommerce.EventBusModule.Data.Services
         {
             if (!Connections.ContainsKey(providerConnectionName))
             {
-                // Connection from appsettings have priority
-                var connection = _eventBusReadConfigurationService.GetProviderConnection(providerConnectionName);
-                connection ??= _providerConnectionSearchService.SearchAsync(new ProviderConnectionSearchCriteria() { Name = providerConnectionName }).Result.Results.FirstOrDefault();
+                var connection = GetProviderConnection(providerConnectionName);
 
                 var eventBusProvider = _eventBusProviderService.CreateProvider(connection.ProviderName);
                 eventBusProvider.SetConnectionOptions(connection.ConnectionOptions);
@@ -45,6 +44,18 @@ namespace VirtoCommerce.EventBusModule.Data.Services
             if (!result.IsConnected()) result.Connect();
 
             return result;
+        }
+
+        public ProviderConnection GetProviderConnection(string providerConnectionName)
+        {
+            // Connection from appsettings have priority
+            var connection = _eventBusReadConfigurationService.GetProviderConnection(providerConnectionName);
+            connection ??= _providerConnectionSearchService.SearchAsync(new ProviderConnectionSearchCriteria() { Name = providerConnectionName }).Result.Results.FirstOrDefault();
+            if (connection == null)
+            {
+                throw new PlatformException($@"The provider connection {providerConnectionName} is not registered");
+            }
+            return connection;
         }
     }
 }
