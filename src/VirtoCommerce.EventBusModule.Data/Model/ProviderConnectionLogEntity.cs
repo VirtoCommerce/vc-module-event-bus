@@ -21,7 +21,9 @@ namespace VirtoCommerce.EventBusModule.Data.Model
         public virtual ProviderConnectionLog ToModel(ProviderConnectionLog providerConnectionLog)
         {
             if (providerConnectionLog == null)
+            {
                 throw new ArgumentNullException(nameof(providerConnectionLog));
+            }
 
             providerConnectionLog.Id = Id;
             providerConnectionLog.CreatedBy = CreatedBy;
@@ -37,7 +39,9 @@ namespace VirtoCommerce.EventBusModule.Data.Model
         public virtual ProviderConnectionLogEntity FromModel(ProviderConnectionLog providerConnectionLog, PrimaryKeyResolvingMap pkMap)
         {
             if (providerConnectionLog == null)
+            {
                 throw new ArgumentNullException(nameof(providerConnectionLog));
+            }
 
             Id = providerConnectionLog.Id;
             CreatedBy = providerConnectionLog.CreatedBy;
