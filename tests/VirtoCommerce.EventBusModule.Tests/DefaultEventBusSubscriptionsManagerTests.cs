@@ -1,4 +1,3 @@
-using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
@@ -67,7 +66,7 @@ namespace VirtoCommerce.EventBusModule.Tests
             //Arrange
             var eventBusManager = GetEventBusSubscriptionsManager();
 
-            var request = new SubscriptionRequest() { ConnectionName = "Known_Provider", Events = new List<SubscriptionEventRequest>()};
+            var request = new SubscriptionRequest() { ConnectionName = "Known_Provider", Events = new List<SubscriptionEventRequest>() };
 
             //Act
             var result = await eventBusManager.SaveSubscriptionAsync(request);
@@ -106,7 +105,7 @@ namespace VirtoCommerce.EventBusModule.Tests
             eventBusProviderServiceMock.Setup(x => x.GetConnectedProvider(It.IsAny<string>())).Returns(new FakeProvider());
 
             return new DefaultEventBusSubscriptionsManager(handlerRegistrar,
-                registeredEventServiceMock.Object,                
+                registeredEventServiceMock.Object,
                 subscriptionService,
                 Mock.Of<ICrudService<ProviderConnectionLog>>(),
                 Mock.Of<IEventBusSubscriptionsService>(),
@@ -115,15 +114,23 @@ namespace VirtoCommerce.EventBusModule.Tests
 
         private static DefaultEventBusSubscriptionsManager GetEventBusSubscriptionsManager()
         {
-            var eventBusProviderServiceMock = new Mock<IEventBusProviderConnectionsService>();
-            eventBusProviderServiceMock.Setup(x => x.GetProviderConnection(It.Is<string>(x => x == "Known_Provider"))).Returns(new ProviderConnection());
+
+            var providerConnectionSearchServiceMock = new Mock<ISearchService<ProviderConnectionSearchCriteria, ProviderConnectionSearchResult, ProviderConnection>>();
+            providerConnectionSearchServiceMock.Setup(x => x.SearchAsync(It.Is<ProviderConnectionSearchCriteria>(x => x.Name == "Known_Provider"))).ReturnsAsync(
+                new ProviderConnectionSearchResult()
+                {
+                    TotalCount = 1,
+                    Results = new List<ProviderConnection>() { new ProviderConnection() { ProviderName = "Known_Provider" } }
+                });
+
+            var eventBusProviderConnectionsService = new EventBusProviderConnectionsService(Mock.Of<IEventBusProviderService>(), providerConnectionSearchServiceMock.Object, Mock.Of<IEventBusReadConfigurationService>());
 
             return new DefaultEventBusSubscriptionsManager(new InProcessBus(GetLogger<InProcessBus>()),
                 new Mock<RegisteredEventService>(Mock.Of<IPlatformMemoryCache>()).Object,
                 Mock.Of<ICrudService<Subscription>>(),
                 Mock.Of<ICrudService<ProviderConnectionLog>>(),
                 Mock.Of<IEventBusSubscriptionsService>(),
-                eventBusProviderServiceMock.Object);
+                eventBusProviderConnectionsService);
         }
     }
 
