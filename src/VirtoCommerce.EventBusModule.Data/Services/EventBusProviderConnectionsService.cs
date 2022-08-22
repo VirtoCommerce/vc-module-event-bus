@@ -29,11 +29,11 @@ namespace VirtoCommerce.EventBusModule.Data.Services
             _eventBusReadConfigurationService = eventBusReadConfigurationService;
         }
 
-        public EventBusProvider GetConnectedProvider(string providerConnectionName)
+        public async Task<EventBusProvider> GetConnectedProviderAsync(string providerConnectionName)
         {
             if (!Connections.ContainsKey(providerConnectionName))
             {
-                var connection = GetProviderConnection(providerConnectionName);
+                var connection = await GetProviderConnectionAsync(providerConnectionName);
 
                 var eventBusProvider = _eventBusProviderService.CreateProvider(connection.ProviderName);
                 eventBusProvider.SetConnectionOptions(connection.ConnectionOptions);
@@ -41,16 +41,19 @@ namespace VirtoCommerce.EventBusModule.Data.Services
             }
 
             var result = Connections[providerConnectionName];
-            if (!result.IsConnected()) result.Connect();
+            if (!result.IsConnected())
+            {
+                result.Connect();
+            }
 
             return result;
         }
 
-        public ProviderConnection GetProviderConnection(string providerConnectionName)
+        public async Task<ProviderConnection> GetProviderConnectionAsync(string providerConnectionName)
         {
             // Connection from appsettings have priority
             var connection = _eventBusReadConfigurationService.GetProviderConnection(providerConnectionName);
-            connection ??= _providerConnectionSearchService.SearchAsync(new ProviderConnectionSearchCriteria() { Name = providerConnectionName }).GetAwaiter().GetResult()?.Results?.FirstOrDefault();
+            connection ??= (await _providerConnectionSearchService.SearchAsync(new ProviderConnectionSearchCriteria() { Name = providerConnectionName }))?.Results?.FirstOrDefault();
             if (connection == null)
             {
                 throw new PlatformException($@"The provider connection {providerConnectionName} is not registered");

@@ -34,8 +34,10 @@ namespace VirtoCommerce.EventBusModule.Data.Services
             {
                 var cloudEvents = events.Select(@event =>
                 {
-                    // Here we can add in future azure-specific event translation settings
-                    // var azureEventGridEventSettings = @event.Subscription.EventSettings.ToObject<AzureEventGridEventSettings>();
+                    // Currently, AzureEventBusProvider does not have azure-specific event translation settings.
+                    // Here we can add those in the future if need
+                    // To allow this you should make a descendant from ProviderSpecificEventSettings,
+                    // add deserialization from @event.Subscription.EventSettings
                     return new CloudEvent(@event.Subscription.Id ?? nameof(AzureEventBusProvider), @event.Payload.EventId, @event.Payload.Arg);
                 }).ToList();
 

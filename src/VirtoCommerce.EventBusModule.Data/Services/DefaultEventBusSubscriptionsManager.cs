@@ -47,7 +47,7 @@ namespace VirtoCommerce.EventBusModule.Data.Services
         {
             Subscription result = null;
             if (CheckEvents(request.Events) &&
-                _providerConnections.GetProviderConnection(request.ConnectionName)!=null
+                await _providerConnections.GetProviderConnectionAsync(request.ConnectionName)!=null
                 )
             {
                 result = request.ToModel();
@@ -76,7 +76,7 @@ namespace VirtoCommerce.EventBusModule.Data.Services
         {
             var eventId = domainEvent.GetType().FullName;
 
-            var searchResult = _subscriptionsService.GetSubscriptionByEventId(eventId);
+            var searchResult = await _subscriptionsService.GetSubscriptionsByEventIdAsync(eventId);
 
             if (searchResult.Count > 0)
             {
@@ -85,42 +85,44 @@ namespace VirtoCommerce.EventBusModule.Data.Services
 
                 foreach (var subscription in searchResult)
                 {
-                    var provider = _providerConnections.GetConnectedProvider(subscription.ConnectionName);
+                    var provider = await _providerConnections.GetConnectedProviderAsync(subscription.ConnectionName);
 
-                    if (provider != null)
-                    {
-
-                        var tokens = domainEventJObject.SelectTokens(subscription.JsonPathFilter);
-                        if (tokens.Any())
-                        {
-
-                            Event eventData = null;
-
-                            object payload = null;
-
-                            if (!subscription.PayloadTransformationTemplate.IsNullOrEmpty())
-                            {
-                                var template = Template.Parse(subscription.PayloadTransformationTemplate);
-                                payload = JsonConvert.DeserializeObject(template.Render(domainEvent));
-                            }
-                            else
-                            {
-                                payload = domainEvent;
-                            }
-
-                            eventData = new Event() { Subscription = subscription, Payload = new EventPayload() { EventId = eventId, Arg = payload } };
-
-                            var result = await provider.SendEventsAsync(new List<Event>() { eventData });
-
-                            if (!string.IsNullOrEmpty(result.ErrorMessage))
-                            {
-                                logs.Add(new ProviderConnectionLog() { ErrorMessage = result.ErrorMessage, Status = result.Status });
-                            }
-                        }
-                    }
+                    await SendEvent(domainEvent, eventId, logs, domainEventJObject, subscription, provider);
                 }
 
                 await _providerConnectionLogService.SaveChangesAsync(logs);
+            }
+        }
+
+        private async Task SendEvent(DomainEvent domainEvent, string eventId, List<ProviderConnectionLog> logs, JObject domainEventJObject, Subscription subscription, EventBusProvider provider)
+        {
+            if (provider != null)
+            {
+
+                var tokens = domainEventJObject.SelectTokens(subscription.JsonPathFilter);
+                if (tokens.Any())
+                {
+                    object payload = null;
+
+                    if (!subscription.PayloadTransformationTemplate.IsNullOrEmpty())
+                    {
+                        var template = Template.Parse(subscription.PayloadTransformationTemplate);
+                        payload = JsonConvert.DeserializeObject(template.Render(domainEvent));
+                    }
+                    else
+                    {
+                        payload = domainEvent;
+                    }
+
+                    var eventData = new Event() { Subscription = subscription, Payload = new EventPayload() { EventId = eventId, Arg = payload } };
+
+                    var result = await provider.SendEventsAsync(new List<Event>() { eventData });
+
+                    if (!string.IsNullOrEmpty(result.ErrorMessage))
+                    {
+                        logs.Add(new ProviderConnectionLog() { ErrorMessage = result.ErrorMessage, Status = result.Status });
+                    }
+                }
             }
         }
 

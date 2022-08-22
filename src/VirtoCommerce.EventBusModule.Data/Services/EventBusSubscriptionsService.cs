@@ -22,15 +22,15 @@ namespace VirtoCommerce.EventBusModule.Data.Services
             _eventBusReadConfigurationService = eventBusReadConfigurationService;
         }
 
-        public Subscription GetSubscription(string subscriptionName)
+        public async Task<Subscription> GetSubscriptionAsync(string subscriptionName)
         {
             var subscription = _eventBusReadConfigurationService.GetSubscription(subscriptionName);
-            subscription ??= _subscriptionSearchService.SearchAsync(new SubscriptionSearchCriteria() { Name = subscriptionName }).Result.Results.FirstOrDefault();
+            subscription ??= (await _subscriptionSearchService.SearchAsync(new SubscriptionSearchCriteria() { Name = subscriptionName })).Results.FirstOrDefault();
 
             return subscription;
         }
 
-        public IList<Subscription> GetSubscriptionByEventId(string eventId)
+        public async Task<IList<Subscription>> GetSubscriptionsByEventIdAsync(string eventId)
         {
             var resultFromAppSettings = _eventBusReadConfigurationService.GetSubscriptionsByEventId(eventId);
 
@@ -41,7 +41,7 @@ namespace VirtoCommerce.EventBusModule.Data.Services
                 Take = int.MaxValue,
             };
 
-            var resultFromDatabase = _subscriptionSearchService.SearchAsync(criteria).GetAwaiter().GetResult().Results;
+            var resultFromDatabase = (await _subscriptionSearchService.SearchAsync(criteria)).Results;
             
             return resultFromAppSettings.Union(resultFromDatabase.Where(x => !resultFromAppSettings.Any(y => y.Name == x.Name))).ToList();
         }

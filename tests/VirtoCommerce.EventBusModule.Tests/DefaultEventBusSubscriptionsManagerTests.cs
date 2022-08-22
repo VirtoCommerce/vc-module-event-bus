@@ -84,7 +84,7 @@ namespace VirtoCommerce.EventBusModule.Tests
             var request = new SubscriptionRequest() { ConnectionName = "Unknown_Provider", Events = new List<SubscriptionEventRequest>() };
 
             //Act
-            var ex = await Assert.ThrowsAsync<PlatformException>(() => eventBusManager.SaveSubscriptionAsync(request));
+            var ex = await Assert.ThrowsAsync<PlatformException>(async () => await eventBusManager.SaveSubscriptionAsync(request));
 
             //Assert
             Assert.Equal(typeof(PlatformException), ex.GetType());
@@ -101,8 +101,8 @@ namespace VirtoCommerce.EventBusModule.Tests
             registeredEventServiceMock.Setup(x => x.GetAllEvents()).Returns(eventTypes);
 
             var eventBusProviderServiceMock = new Mock<IEventBusProviderConnectionsService>();
-            eventBusProviderServiceMock.Setup(x => x.GetProviderConnection(It.Is<string>(x => x == "FakeProvider"))).Returns(new ProviderConnection());
-            eventBusProviderServiceMock.Setup(x => x.GetConnectedProvider(It.IsAny<string>())).Returns(new FakeProvider());
+            eventBusProviderServiceMock.Setup(x => x.GetProviderConnectionAsync(It.Is<string>(x => x == "FakeProvider"))).ReturnsAsync(new ProviderConnection());
+            eventBusProviderServiceMock.Setup(x => x.GetConnectedProviderAsync(It.IsAny<string>())).ReturnsAsync(new FakeProvider());
 
             return new DefaultEventBusSubscriptionsManager(handlerRegistrar,
                 registeredEventServiceMock.Object,

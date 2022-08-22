@@ -17,8 +17,8 @@ namespace VirtoCommerce.EventBusModule.Core.Services
         /// </summary>
         /// <param name="providerConnectionName"></param>
         /// <returns></returns>
-        public EventBusProvider GetConnectedProvider(string providerConnectionName);
+        public Task<EventBusProvider> GetConnectedProviderAsync(string providerConnectionName);
 
-        public ProviderConnection GetProviderConnection(string providerConnectionName);
+        public Task<ProviderConnection> GetProviderConnectionAsync(string providerConnectionName);
     }
 }

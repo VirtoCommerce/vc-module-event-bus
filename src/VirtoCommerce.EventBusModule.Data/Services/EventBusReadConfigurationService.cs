@@ -9,8 +9,7 @@ namespace VirtoCommerce.EventBusModule.Data.Services
 {
     public class EventBusReadConfigurationService : IEventBusReadConfigurationService
     {
-
-        public EventBusOptions _eventBusOptions { get; set; }
+        protected readonly EventBusOptions _eventBusOptions;
 
         public EventBusReadConfigurationService(IOptions<EventBusOptions> eventBusOptions)
         {

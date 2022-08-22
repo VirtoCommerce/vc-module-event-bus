@@ -15,8 +15,8 @@ namespace VirtoCommerce.EventBusModule.Core.Services
         /// <summary>
         /// Get the subscription from CRUD or application settings
         /// </summary>
-        public Subscription GetSubscription(string subscriptionName);
+        public Task<Subscription> GetSubscriptionAsync(string subscriptionName);
 
-        public IList<Subscription> GetSubscriptionByEventId(string eventId);
+        public Task<IList<Subscription>> GetSubscriptionsByEventIdAsync(string eventId);
     }
 }
