@@ -45,7 +45,12 @@ namespace VirtoCommerce.EventBusModule.Tests.IntegrationTests
             var eventData = new Event()
             {
                 Subscription = subscription,
-                Payload = new EventPayload() { EventId = "testEventId", Arg = new {Id = Guid.NewGuid().ToString() } }
+                Payload = new EventPayload() { EventId = "testEventId", Arg = new
+                {
+                    ObjectId = Guid.NewGuid().ToString(),
+                    ObjectType = "testObjectType",
+                    EventId = "testEventId",
+                } }
             };
 
             var azureProvider = new AzureEventBusProvider();
@@ -70,7 +75,12 @@ namespace VirtoCommerce.EventBusModule.Tests.IntegrationTests
             var eventData = new Event()
             {
                 Subscription = subscription,
-                Payload = new EventPayload() { EventId = "testEventId", Arg = new { Id = Guid.NewGuid().ToString() } }
+                Payload = new EventPayload() { EventId = "testEventId", Arg = new
+                {
+                    ObjectId = Guid.NewGuid().ToString(),
+                    ObjectType = "testObjectType",
+                    EventId = "testEventId",
+                } }
             };
 
             var azureProvider = new AzureEventBusProvider();
