@@ -42,7 +42,7 @@ namespace VirtoCommerce.EventBusModule.Data.Services
                     // Currently, AzureEventBusProvider does not have azure-specific event translation settings.
                     // Here we can add those in the future if need
                     // To allow this you should make a descendant from ProviderSpecificEventSettings,
-                    // add deserialization from @event.Subscription.EventSettings
+                    // then add deserialization from @event.Subscription.EventSettings
 
                     if (string.IsNullOrEmpty(@event.Subscription.PayloadTransformationTemplate) && @event.Payload.Arg is IEvent nativeEvent)
                     {
@@ -63,7 +63,7 @@ namespace VirtoCommerce.EventBusModule.Data.Services
                     {
                         cloudEvents.Add(new CloudEvent(@event.Subscription.Id ?? nameof(AzureEventBusProvider), @event.Payload.EventId, @event.Payload.Arg));
                     }
-                };
+                }
 
                 var eventGridResponse = await client.SendEventsAsync(cloudEvents);
 
