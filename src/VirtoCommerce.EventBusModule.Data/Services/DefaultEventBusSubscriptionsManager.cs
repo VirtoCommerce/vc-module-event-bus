@@ -120,7 +120,7 @@ namespace VirtoCommerce.EventBusModule.Data.Services
 
                     if (!string.IsNullOrEmpty(result.ErrorMessage))
                     {
-                        logs.Add(new ProviderConnectionLog() { ErrorMessage = result.ErrorMessage, Status = result.Status });
+                        logs.Add(new ProviderConnectionLog() {ProviderName = subscription.ConnectionName, ErrorMessage = result.ErrorMessage, Status = result.Status });
                     }
                 }
             }

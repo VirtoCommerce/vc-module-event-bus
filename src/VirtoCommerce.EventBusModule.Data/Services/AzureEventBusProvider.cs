@@ -57,11 +57,11 @@ namespace VirtoCommerce.EventBusModule.Data.Services
                                                      .ToArray();
                         var eventData = entities.Union(valueObjects);
 
-                        cloudEvents.AddRange(eventData.Select(x => new CloudEvent(@event.Subscription.Id ?? nameof(AzureEventBusProvider), @event.Payload.EventId, x)));
+                        cloudEvents.AddRange(eventData.Select(x => new CloudEvent(@event.Subscription.Name ?? nameof(AzureEventBusProvider), @event.Payload.EventId, x)));
                     }
                     else
                     {
-                        cloudEvents.Add(new CloudEvent(@event.Subscription.Id ?? nameof(AzureEventBusProvider), @event.Payload.EventId, @event.Payload.Arg));
+                        cloudEvents.Add(new CloudEvent(@event.Subscription.Name ?? nameof(AzureEventBusProvider), @event.Payload.EventId, @event.Payload.Arg));
                     }
                 }
 

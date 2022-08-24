@@ -6,7 +6,6 @@
   </PropertyGroup>
 
     <ItemGroup>
-		<PackageReference Include="Azure.Messaging.EventGrid" Version="4.8.1" />
 		<PackageReference Include="coverlet.collector" Version="3.1.2">
 		  <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
 		  <PrivateAssets>all</PrivateAssets>
