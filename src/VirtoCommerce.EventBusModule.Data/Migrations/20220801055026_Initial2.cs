@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
@@ -92,6 +92,59 @@ namespace VirtoCommerce.EventBusModule.Data.Migrations
                 name: "IX_EventBus2SubscriptionEvent_SubscriptionId",
                 table: "EventBus2SubscriptionEvent",
                 column: "SubscriptionId");
+
+            // Preserve compatibility: convert existing subscriptions to a newly added tables
+            migrationBuilder.Sql(@"
+                -- Make connections from existing subscriptions
+                with tmpConnections as
+                (
+                    select 
+                    newid() Id, 
+                    'AzureEventGrid' + cast(ROW_NUMBER() OVER(order by ConnectionString, AccessKey) as char(3)) Name, 
+                    'AzureEventGrid' ProviderName,
+                    '{\""ConnectionString\"": \""'+isnull(ConnectionString,'')+'\"", \""AccessKey\"": \""'+isnull(AccessKey,'')+'\""}' ConnectionOptionsSerialized,
+                    getDate() CreatedDate,
+                    getDate() ModifiedDate,
+                    'unknown' CreatedBy,
+                    'unknown' ModifiedBy
+                    from EventBusSubscription
+                    group by ConnectionString, AccessKey
+                )
+                insert into EventBus2ProviderConnection
+                select * from tmpConnections;
+
+                -- Convert subscriptions and link to newly created connections
+                with tmpConnections as
+                (
+                    select 
+                    newid() Id, 
+                    'AzureEventGrid' + cast(ROW_NUMBER() OVER(order by ConnectionString, AccessKey) as char(3)) Name, 
+                    AccessKey,
+                    ConnectionString
+                    from EventBusSubscription
+                    group by ConnectionString, AccessKey
+                )
+                insert into EventBus2Subscription
+                select 
+                    EventBusSubscription.Id Id,
+                    EventBusSubscription.Id [Name],
+                    tmpConnections.[Name] ConnectionName,
+                    '$' JsonPathFilter,
+                    '' PayloadTransformationTemplate,
+                    null EventSettingsSerialized,
+                    EventBusSubscription.CreatedDate,
+                    EventBusSubscription.ModifiedDate,
+                    EventBusSubscription.CreatedBy,
+                    EventBusSubscription.ModifiedBy
+                     from EventBusSubscription inner join tmpConnections on 
+	                    isnull(EventBusSubscription.AccessKey,'') = isnull(tmpConnections.AccessKey,'')
+	                    and isnull(EventBusSubscription.ConnectionString, '') = isnull(tmpConnections.ConnectionString, '');
+
+                -- Convert subscription events
+                insert into EventBus2SubscriptionEvent
+                select Id, EventId, SubscriptionId, CreatedDate, ModifiedDate, CreatedBy, ModifiedBy from EventBusSubscriptionEvent;
+
+            ");
         }
 
         protected override void Down(MigrationBuilder migrationBuilder)
