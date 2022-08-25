@@ -1,19 +1,14 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Caching.Memory;
 using VirtoCommerce.EventBusModule.Core.Models;
-using VirtoCommerce.EventBusModule.Core.Services;
-using VirtoCommerce.EventBusModule.Data.Caching;
 using VirtoCommerce.EventBusModule.Data.Model;
 using VirtoCommerce.EventBusModule.Data.Repositories;
 using VirtoCommerce.Platform.Core.Caching;
 using VirtoCommerce.Platform.Core.Common;
 using VirtoCommerce.Platform.Core.GenericCrud;
 using VirtoCommerce.Platform.Data.GenericCrud;
-using VirtoCommerce.Platform.Data.Infrastructure;
 
 namespace VirtoCommerce.EventBusModule.Data.Services
 {

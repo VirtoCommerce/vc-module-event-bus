@@ -1,5 +1,3 @@
-using VirtoCommerce.Platform.Core.Events;
-
 namespace VirtoCommerce.EventBusModule.Core.Models
 {
     public class EventData

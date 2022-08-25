@@ -19,7 +19,7 @@ namespace VirtoCommerce.EventBusModule.Core.Models
             }
             set
             {
-                ConnectionOptions = value.IsNullOrEmpty() ? null: JObject.Parse(value);
+                ConnectionOptions = value.IsNullOrEmpty() ? null : JObject.Parse(value);
             }
         }
         public object Clone()

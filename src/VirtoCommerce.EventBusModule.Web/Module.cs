@@ -5,15 +5,15 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using VirtoCommerce.EventBusModule.Core;
+using VirtoCommerce.EventBusModule.Core.Models;
+using VirtoCommerce.EventBusModule.Core.Options;
 using VirtoCommerce.EventBusModule.Core.Services;
 using VirtoCommerce.EventBusModule.Data.Repositories;
 using VirtoCommerce.EventBusModule.Data.Services;
+using VirtoCommerce.Platform.Core.GenericCrud;
 using VirtoCommerce.Platform.Core.Modularity;
 using VirtoCommerce.Platform.Core.Security;
-using VirtoCommerce.Platform.Core.GenericCrud;
 using VirtoCommerce.Platform.Data.GenericCrud;
-using VirtoCommerce.EventBusModule.Core.Models;
-using VirtoCommerce.EventBusModule.Core.Options;
 
 namespace VirtoCommerce.EventBusModule.Web
 {
@@ -30,21 +30,22 @@ namespace VirtoCommerce.EventBusModule.Web
                 options.UseSqlServer(provider.GetRequiredService<IConfiguration>().GetConnectionString("VirtoCommerce")));
 
             serviceCollection.AddTransient<Func<IEventBusRepository>>(provider => () => provider.CreateScope().ServiceProvider.GetRequiredService<IEventBusRepository>());
-            
+
             serviceCollection.AddTransient<ISearchService<SubscriptionSearchCriteria, SubscriptionSearchResult, Subscription>, SubscriptionSearchService>();
             serviceCollection.AddTransient<ICrudService<Subscription>, SubscriptionService>();
 
             serviceCollection.AddTransient<ISearchService<ProviderConnectionSearchCriteria, ProviderConnectionSearchResult, ProviderConnection>, ProviderConnectionSearchService>();
             serviceCollection.AddTransient<ICrudService<ProviderConnection>, ProviderConnectionService>();
 
-            serviceCollection.AddTransient<ICrudService<ProviderConnectionLog>, ProviderConnectionLogService>();
+            serviceCollection.AddTransient<ISearchService<ProviderConnectionLogSearchCriteria, ProviderConnectionLogSearchResult, ProviderConnectionLog>, ProviderConnectionLogSearchService>();
+            serviceCollection.AddTransient<ICrudService<ProviderConnectionLog>, ProviderConnectionLogService>();            
 
             serviceCollection.AddSingleton<IEventBusSubscriptionsManager, DefaultEventBusSubscriptionsManager>();
 
             serviceCollection.AddSingleton<IEventBusProviderConnectionsService, EventBusProviderConnectionsService>();
 
             serviceCollection.AddSingleton<IEventBusReadConfigurationService, EventBusReadConfigurationService>();
-            
+
             serviceCollection.AddSingleton<IEventBusProviderService, EventBusProviderService>();
 
             serviceCollection.AddSingleton<RegisteredEventService>();

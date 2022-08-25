@@ -1,7 +1,5 @@
-using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 using VirtoCommerce.EventBusModule.Core.Models;
 using VirtoCommerce.EventBusModule.Core.Services;
@@ -42,7 +40,7 @@ namespace VirtoCommerce.EventBusModule.Data.Services
             };
 
             var resultFromDatabase = (await _subscriptionSearchService.SearchAsync(criteria)).Results;
-            
+
             return resultFromAppSettings.Union(resultFromDatabase.Where(x => !resultFromAppSettings.Any(y => y.Name == x.Name))).ToList();
         }
 

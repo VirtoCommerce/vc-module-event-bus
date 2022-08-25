@@ -2,7 +2,6 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using Newtonsoft.Json.Linq;
 using VirtoCommerce.EventBusModule.Core.Models;
-using VirtoCommerce.EventBusModule.Core.Options;
 
 namespace VirtoCommerce.EventBusModule.Core.Services
 {

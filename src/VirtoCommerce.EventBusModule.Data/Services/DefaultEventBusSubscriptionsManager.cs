@@ -47,7 +47,7 @@ namespace VirtoCommerce.EventBusModule.Data.Services
         {
             Subscription result = null;
             if (CheckEvents(request.Events) &&
-                await _providerConnections.GetProviderConnectionAsync(request.ConnectionName)!=null
+                await _providerConnections.GetProviderConnectionAsync(request.ConnectionName) != null
                 )
             {
                 result = request.ToModel();
@@ -85,9 +85,15 @@ namespace VirtoCommerce.EventBusModule.Data.Services
 
                 foreach (var subscription in searchResult)
                 {
-                    var provider = await _providerConnections.GetConnectedProviderAsync(subscription.ConnectionName);
-
-                    await SendEvent(domainEvent, eventId, logs, domainEventJObject, subscription, provider);
+                    try
+                    {
+                        var provider = await _providerConnections.GetConnectedProviderAsync(subscription.ConnectionName);
+                        await SendEvent(domainEvent, eventId, logs, domainEventJObject, subscription, provider);
+                    }
+                    catch (Exception exc)
+                    {
+                        logs.Add(new ProviderConnectionLog() { ProviderName = subscription.ConnectionName, ErrorMessage = exc.ToString() });
+                    }                    
                 }
 
                 await _providerConnectionLogService.SaveChangesAsync(logs);
@@ -120,7 +126,7 @@ namespace VirtoCommerce.EventBusModule.Data.Services
 
                     if (!string.IsNullOrEmpty(result.ErrorMessage))
                     {
-                        logs.Add(new ProviderConnectionLog() {ProviderName = subscription.ConnectionName, ErrorMessage = result.ErrorMessage, Status = result.Status });
+                        logs.Add(new ProviderConnectionLog() { ProviderName = subscription.ConnectionName, ErrorMessage = result.ErrorMessage, Status = result.Status });
                     }
                 }
             }
@@ -157,7 +163,7 @@ namespace VirtoCommerce.EventBusModule.Data.Services
             }
             else
             {
-                var notRegisteredEvents = eventIds.Where(e => !allEvents.Any(all => all.Id == e.EventId)).Select(x=>x.EventId);
+                var notRegisteredEvents = eventIds.Where(e => !allEvents.Any(all => all.Id == e.EventId)).Select(x => x.EventId);
                 throw new PlatformException($"The events are not registered: {string.Join(",", notRegisteredEvents)}");
             }
         }

@@ -21,9 +21,19 @@ namespace VirtoCommerce.EventBusModule.Data.Services
             return _eventBusOptions.Connections?.FirstOrDefault(x => x.Name == name);
         }
 
+        public IList<ProviderConnection> GetProviderConnections()
+        {
+            return _eventBusOptions.Connections;
+        }
+
         public Subscription GetSubscription(string name)
         {
             return _eventBusOptions.Subscriptions?.FirstOrDefault(x => x.Name == name);
+        }
+
+        public IList<Subscription> GetSubscriptions()
+        {
+            return _eventBusOptions.Subscriptions;
         }
 
         public IList<Subscription> GetSubscriptionsByEventId(string eventId)

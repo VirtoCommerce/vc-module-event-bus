@@ -2,7 +2,6 @@ using System;
 using System.Collections.ObjectModel;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
-using Newtonsoft.Json.Linq;
 using VirtoCommerce.EventBusModule.Core.Models;
 using VirtoCommerce.Platform.Core.Common;
 using VirtoCommerce.Platform.Core.Domain;
@@ -27,7 +26,7 @@ namespace VirtoCommerce.EventBusModule.Data.Model
             if (subscription == null)
                 throw new ArgumentNullException(nameof(subscription));
 
-            subscription.Id = Id; 
+            subscription.Id = Id;
             subscription.CreatedBy = CreatedBy;
             subscription.CreatedDate = CreatedDate;
             subscription.ModifiedBy = ModifiedBy;

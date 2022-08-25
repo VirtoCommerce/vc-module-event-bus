@@ -1,8 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using VirtoCommerce.EventBusModule.Core.Models;
 using VirtoCommerce.EventBusModule.Data.Model;
 using VirtoCommerce.EventBusModule.Data.Repositories;
@@ -32,7 +30,6 @@ namespace VirtoCommerce.EventBusModule.Data.Services
             {
                 query = query.Where(x => x.ProviderName.Contains(criteria.Provider));
             }
-
             return query;
         }
 

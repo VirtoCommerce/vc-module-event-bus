@@ -6,7 +6,7 @@ using VirtoCommerce.Platform.Core.Domain;
 
 namespace VirtoCommerce.EventBusModule.Data.Model
 {
-    public class SubscriptionEventEntity :AuditableEntity, IDataEntity<SubscriptionEventEntity, SubscriptionEvent>
+    public class SubscriptionEventEntity : AuditableEntity, IDataEntity<SubscriptionEventEntity, SubscriptionEvent>
     {
         [StringLength(256)]
         public string EventId { get; set; }

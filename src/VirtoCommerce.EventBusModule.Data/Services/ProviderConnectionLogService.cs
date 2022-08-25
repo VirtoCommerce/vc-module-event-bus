@@ -1,7 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 using VirtoCommerce.EventBusModule.Core.Events;
 using VirtoCommerce.EventBusModule.Core.Models;
@@ -22,7 +20,7 @@ namespace VirtoCommerce.EventBusModule.Data.Services
 
         protected override async Task<IEnumerable<ProviderConnectionLogEntity>> LoadEntities(IRepository repository, IEnumerable<string> ids, string responseGroup)
         {
-            return await((IEventBusRepository)repository).GetProviderConnectionLogsByIdsAsync(ids);
+            return await ((IEventBusRepository)repository).GetProviderConnectionLogsByIdsAsync(ids);
         }
     }
 }

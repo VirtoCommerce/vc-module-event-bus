@@ -1,12 +1,8 @@
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
-using Microsoft.Extensions.Caching.Memory;
 using VirtoCommerce.EventBusModule.Core.Events;
 using VirtoCommerce.EventBusModule.Core.Models;
-using VirtoCommerce.EventBusModule.Core.Services;
-using VirtoCommerce.EventBusModule.Data.Caching;
 using VirtoCommerce.EventBusModule.Data.Model;
 using VirtoCommerce.EventBusModule.Data.Repositories;
 using VirtoCommerce.Platform.Core.Caching;
@@ -18,7 +14,7 @@ namespace VirtoCommerce.EventBusModule.Data.Services
 {
     public class SubscriptionService : CrudService<Subscription, SubscriptionEntity, SubscriptionChangeEvent, SubscriptionChangedEvent>
     {
-        
+
         public SubscriptionService(Func<IEventBusRepository> repositoryFactory, IPlatformMemoryCache platformMemoryCache, IEventPublisher eventPublisher) : base(repositoryFactory, platformMemoryCache, eventPublisher)
         {
         }

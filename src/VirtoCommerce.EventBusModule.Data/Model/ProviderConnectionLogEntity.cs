@@ -1,16 +1,12 @@
 using System;
-using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using VirtoCommerce.EventBusModule.Core.Models;
 using VirtoCommerce.Platform.Core.Common;
 using VirtoCommerce.Platform.Core.Domain;
 
 namespace VirtoCommerce.EventBusModule.Data.Model
 {
-    public class ProviderConnectionLogEntity :AuditableEntity, IDataEntity<ProviderConnectionLogEntity, ProviderConnectionLog>
+    public class ProviderConnectionLogEntity : AuditableEntity, IDataEntity<ProviderConnectionLogEntity, ProviderConnectionLog>
     {
         public int Status { get; set; }
         public string ErrorMessage { get; set; }
