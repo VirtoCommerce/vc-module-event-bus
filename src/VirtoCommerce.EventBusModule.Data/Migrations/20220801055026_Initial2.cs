@@ -100,9 +100,9 @@ namespace VirtoCommerce.EventBusModule.Data.Migrations
                 (
                     select 
                     newid() Id, 
-                    'AzureEventGrid' + cast(ROW_NUMBER() OVER(order by ConnectionString, AccessKey) as char(3)) Name, 
+                    TRIM('AzureEventGrid' + cast(ROW_NUMBER() OVER(order by ConnectionString, AccessKey) as char(3))) Name, 
                     'AzureEventGrid' ProviderName,
-                    '{\""ConnectionString\"": \""'+isnull(ConnectionString,'')+'\"", \""AccessKey\"": \""'+isnull(AccessKey,'')+'\""}' ConnectionOptionsSerialized,
+                    '{""ConnectionString"": ""'+isnull(ConnectionString,'')+'"", ""AccessKey"": ""'+isnull(AccessKey,'')+'""}' ConnectionOptionsSerialized,
                     getDate() CreatedDate,
                     getDate() ModifiedDate,
                     'unknown' CreatedBy,
@@ -118,7 +118,7 @@ namespace VirtoCommerce.EventBusModule.Data.Migrations
                 (
                     select 
                     newid() Id, 
-                    'AzureEventGrid' + cast(ROW_NUMBER() OVER(order by ConnectionString, AccessKey) as char(3)) Name, 
+                    TRIM('AzureEventGrid' + cast(ROW_NUMBER() OVER(order by ConnectionString, AccessKey) as char(3))) Name, 
                     AccessKey,
                     ConnectionString
                     from EventBusSubscription

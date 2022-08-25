@@ -20,11 +20,11 @@ namespace VirtoCommerce.EventBusModule.Core.Models
         {
             get
             {
-                return EventSettings?.ToString();
+                return EventSettings?.ToString(Newtonsoft.Json.Formatting.None);
             }
             set
             {
-                EventSettings = JObject.Parse(value);
+                EventSettings = value.IsNullOrEmpty() ? null : JObject.Parse(value);
             }
         }
         public ICollection<SubscriptionEvent> Events { get; set; }

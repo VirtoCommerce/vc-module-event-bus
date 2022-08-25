@@ -15,11 +15,11 @@ namespace VirtoCommerce.EventBusModule.Core.Models
         {
             get
             {
-                return ConnectionOptions?.ToString();
+                return ConnectionOptions?.ToString(Newtonsoft.Json.Formatting.None);
             }
             set
             {
-                ConnectionOptions = JObject.Parse(value);
+                ConnectionOptions = value.IsNullOrEmpty() ? null: JObject.Parse(value);
             }
         }
         public object Clone()
