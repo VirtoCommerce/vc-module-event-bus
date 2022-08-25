@@ -25,6 +25,7 @@ namespace VirtoCommerce.EventBusModule.Data.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_EventBus2ProviderConnection", x => x.Id);
+                    table.UniqueConstraint("UC_EventBus2ProviderConnection_Name", x => x.Name);
                 });
 
             migrationBuilder.CreateTable(
@@ -63,6 +64,7 @@ namespace VirtoCommerce.EventBusModule.Data.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_EventBus2Subscription", x => x.Id);
+                    table.UniqueConstraint("UC_EventBus2Subscription_Name", x => x.Name);
                 });
 
             migrationBuilder.CreateTable(
