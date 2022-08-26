@@ -26,9 +26,9 @@ namespace VirtoCommerce.EventBusModule.Data.Services
                 query = query.Where(x => x.Name.Contains(criteria.Name));
             }
 
-            if (!string.IsNullOrEmpty(criteria.Provider))
+            if (!string.IsNullOrEmpty(criteria.ProviderName))
             {
-                query = query.Where(x => x.ProviderName.Contains(criteria.Provider));
+                query = query.Where(x => x.ProviderName.Contains(criteria.ProviderName));
             }
             return query;
         }

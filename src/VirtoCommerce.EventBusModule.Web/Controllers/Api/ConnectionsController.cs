@@ -37,7 +37,7 @@ namespace VirtoCommerce.EventBusModule.Web.Controllers.Api
         }
 
         /// <summary>
-        /// Search for existing connections (DB registered + configuration registered)
+        /// Search for existing connections
         /// </summary>
         /// <param name="searchCriteria"></param>
         /// <returns></returns>
@@ -52,9 +52,9 @@ namespace VirtoCommerce.EventBusModule.Web.Controllers.Api
             {
                 cfgConnections = cfgConnections.Where(x => x.Name == searchCriteria.Name);
             }
-            if (!searchCriteria.Provider.IsNullOrEmpty())
+            if (!searchCriteria.ProviderName.IsNullOrEmpty())
             {
-                cfgConnections = cfgConnections.Where(x => x.ProviderName == searchCriteria.Provider);
+                cfgConnections = cfgConnections.Where(x => x.ProviderName == searchCriteria.ProviderName);
             }
             searchResult.TotalCount += cfgConnections.Count();
             searchResult.Results.AddRange(cfgConnections);
@@ -63,9 +63,9 @@ namespace VirtoCommerce.EventBusModule.Web.Controllers.Api
         }
 
         /// <summary>
-        /// Get existing connection (DB-registered only)
+        /// Get existing connection
         /// </summary>
-        /// <param name="id"></param>
+        /// <param name="name"></param>
         /// <returns></returns>
         [HttpGet("connections/{name}")]
         [Authorize(ModuleConstants.Security.Permissions.Read)]
@@ -111,7 +111,7 @@ namespace VirtoCommerce.EventBusModule.Web.Controllers.Api
         /// <summary>
         /// Delete existing connection (DB-registered only)
         /// </summary>
-        /// <param name="id"></param>
+        /// <param name="name"></param>
         /// <returns></returns>
         [HttpDelete("connections/{name}")]
         [Authorize(ModuleConstants.Security.Permissions.Delete)]
