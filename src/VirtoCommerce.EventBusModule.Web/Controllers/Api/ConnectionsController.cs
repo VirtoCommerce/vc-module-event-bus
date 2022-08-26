@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Azure.Core;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using VirtoCommerce.EventBusModule.Core;
@@ -18,16 +19,19 @@ namespace VirtoCommerce.EventBusModule.Web.Controllers.Api
     {
 
         private readonly IEventBusReadConfigurationService _eventBusReadConfigurationService;
+        private readonly IEventBusProviderConnectionsService _eventBusProviderConnectionsService;
         private readonly ICrudService<ProviderConnection> _providerConnectionService;
         private readonly ISearchService<ProviderConnectionSearchCriteria, ProviderConnectionSearchResult, ProviderConnection> _providerConnectionSearchService;
 
         public ConnectionsController(
             IEventBusReadConfigurationService eventBusReadConfigurationService,
+            IEventBusProviderConnectionsService eventBusProviderConnectionsService,
             ICrudService<ProviderConnection> providerConnectionService,
             ISearchService<ProviderConnectionSearchCriteria, ProviderConnectionSearchResult, ProviderConnection> providerConnectionSearchService
             )
         {
             _eventBusReadConfigurationService = eventBusReadConfigurationService;
+            _eventBusProviderConnectionsService = eventBusProviderConnectionsService;
             _providerConnectionService = providerConnectionService;
             _providerConnectionSearchService = providerConnectionSearchService;
         }
@@ -63,12 +67,13 @@ namespace VirtoCommerce.EventBusModule.Web.Controllers.Api
         /// </summary>
         /// <param name="id"></param>
         /// <returns></returns>
-        [HttpGet("connections/{id}")]
+        [HttpGet("connections/{name}")]
         [Authorize(ModuleConstants.Security.Permissions.Read)]
-        public async Task<ActionResult<ProviderConnection>> GetConnectionById(string id)
+        public async Task<ActionResult<ProviderConnection>> GetConnectionByName(string name)
         {
-            var connections = await _providerConnectionService.GetAsync(new List<string> { id });
-            return Ok(connections.FirstOrDefault());
+            var conn = await _eventBusProviderConnectionsService.GetProviderConnectionAsync(name);
+
+            return Ok(conn);
         }
 
         /// <summary>
@@ -78,7 +83,7 @@ namespace VirtoCommerce.EventBusModule.Web.Controllers.Api
         /// <returns></returns>
         [HttpPost("connections")]
         [Authorize(ModuleConstants.Security.Permissions.Create)]
-        public async Task<ActionResult<string>> CreateConnection([FromBody] ProviderConnectionRequest request)
+        public async Task<ActionResult> CreateConnection([FromBody] ProviderConnectionRequest request)
         {
             await _providerConnectionService.SaveChangesAsync(new List<ProviderConnection>() { request.ToModel() });
             return Ok();
@@ -91,9 +96,16 @@ namespace VirtoCommerce.EventBusModule.Web.Controllers.Api
         /// <returns></returns>
         [HttpPut("connections")]
         [Authorize(ModuleConstants.Security.Permissions.Update)]
-        public Task UpdateConnection([FromBody] ProviderConnectionRequest request)
+        public async Task<ActionResult> UpdateConnection([FromBody] ProviderConnectionRequest request)
         {
-            return _providerConnectionService.SaveChangesAsync(new List<ProviderConnection>() { request.ToModel() });
+            var conn = await _eventBusProviderConnectionsService.GetProviderConnectionAsync(request.Name);
+            if (conn != null && conn.Id != null)
+            {
+                var connToUpdate = request.ToModel();
+                connToUpdate.Id = conn.Id;
+                await _providerConnectionService.SaveChangesAsync(new List<ProviderConnection>() { connToUpdate });
+            }
+            return Ok();
         }
 
         /// <summary>
@@ -101,11 +113,16 @@ namespace VirtoCommerce.EventBusModule.Web.Controllers.Api
         /// </summary>
         /// <param name="id"></param>
         /// <returns></returns>
-        [HttpDelete("connections/{id}")]
+        [HttpDelete("connections/{name}")]
         [Authorize(ModuleConstants.Security.Permissions.Delete)]
-        public Task DeleteConnection(string id)
+        public async Task<ActionResult> DeleteConnection(string name)
         {
-            return _providerConnectionService.DeleteAsync(new[] { id });
+            var conn = await _eventBusProviderConnectionsService.GetProviderConnectionAsync(name);
+            if (conn != null && conn.Id != null)
+            {
+                await _providerConnectionService.DeleteAsync(new[] { conn.Id });
+            }
+            return Ok();
         }
     }
 }
