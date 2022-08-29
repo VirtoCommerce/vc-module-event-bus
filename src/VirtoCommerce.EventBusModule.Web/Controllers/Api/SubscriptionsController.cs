@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Azure.Core;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using VirtoCommerce.EventBusModule.Core;
@@ -20,20 +21,23 @@ namespace VirtoCommerce.EventBusModule.Web.Controllers.Api
         private readonly RegisteredEventService _registeredEventService;
         private readonly IEventBusSubscriptionsManager _eventBusSubscriptionsManager;
         private readonly IEventBusReadConfigurationService _eventBusReadConfigurationService;
-        private readonly ICrudService<Subscription> _subscriptionService;
+        private readonly IEventBusSubscriptionsService _eventBusSubscriptionsService;
+        private readonly ICrudService<Subscription> _subscriptionCrudService;
         private readonly ISearchService<SubscriptionSearchCriteria, SubscriptionSearchResult, Subscription> _subscriptionSearchService;
 
         public SubscriptionsController(RegisteredEventService registeredEventService,
             IEventBusSubscriptionsManager eventBusSubscriptionsManager,
             IEventBusReadConfigurationService eventBusReadConfigurationService,
-            ICrudService<Subscription> subscriptionService,
+            IEventBusSubscriptionsService eventBusSubscriptionsService,
+            ICrudService<Subscription> subscriptionCrudService,
             ISearchService<SubscriptionSearchCriteria, SubscriptionSearchResult, Subscription> subscriptionSearchService
             )
         {
             _registeredEventService = registeredEventService;
             _eventBusSubscriptionsManager = eventBusSubscriptionsManager;
             _eventBusReadConfigurationService = eventBusReadConfigurationService;
-            _subscriptionService = subscriptionService;
+            _eventBusSubscriptionsService = eventBusSubscriptionsService;
+            _subscriptionCrudService = subscriptionCrudService;
             _subscriptionSearchService = subscriptionSearchService;
         }
 
@@ -77,16 +81,16 @@ namespace VirtoCommerce.EventBusModule.Web.Controllers.Api
         }
 
         /// <summary>
-        /// Get specific subscription (DB-registered only)
+        /// Get specific subscription by name
         /// </summary>
-        /// <param name="id"></param>
+        /// <param name="name"></param>
         /// <returns></returns>
-        [HttpGet("subscriptions/{id}")]
+        [HttpGet("subscriptions/{name}")]
         [Authorize(ModuleConstants.Security.Permissions.Read)]
-        public async Task<ActionResult<Subscription>> GetSubscriptionById(string id)
+        public async Task<ActionResult<Subscription>> GetSubscriptionById(string name)
         {
-            var subscriptions = await _subscriptionService.GetAsync(new List<string> { id });
-            return Ok(subscriptions.FirstOrDefault());
+            var subscription = await _eventBusSubscriptionsService.GetSubscriptionAsync(name);
+            return Ok(subscription);
         }
 
         /// <summary>
@@ -109,21 +113,33 @@ namespace VirtoCommerce.EventBusModule.Web.Controllers.Api
         /// <returns></returns>
         [HttpPut("subscriptions")]
         [Authorize(ModuleConstants.Security.Permissions.Update)]
-        public Task UpdateSubscription([FromBody] SubscriptionRequest request)
+        public async Task<ActionResult> UpdateSubscription([FromBody] SubscriptionRequest request)
         {
-            return _eventBusSubscriptionsManager.SaveSubscriptionAsync(request);
+            var subscription = await _eventBusSubscriptionsService.GetSubscriptionAsync(request.Name);
+            if (subscription != null && subscription.Id != null)
+            {
+                var subscrToUpdate = request.ToModel();
+                subscrToUpdate.Id = subscription.Id;
+                await _subscriptionCrudService.SaveChangesAsync(new List<Subscription>() { subscrToUpdate });
+            }
+            return Ok();
         }
 
         /// <summary>
-        /// Delete existing subscription (DB-registered only)
+        /// Delete existing subscription by name (DB-registered only)
         /// </summary>
-        /// <param name="id"></param>
+        /// <param name="name"></param>
         /// <returns></returns>
-        [HttpDelete("subscriptions/{id}")]
+        [HttpDelete("subscriptions/{name}")]
         [Authorize(ModuleConstants.Security.Permissions.Delete)]
-        public Task DeleteSubscription(string id)
+        public async Task<ActionResult> DeleteSubscription(string name)
         {
-            return _subscriptionService.DeleteAsync(new[] { id });
+            var subscription = await _eventBusSubscriptionsService.GetSubscriptionAsync(name);
+            if (subscription != null && subscription.Id != null)
+            {
+                await _subscriptionCrudService.DeleteAsync(new [] { subscription.Id });
+            }
+            return Ok();
         }
     }
 }

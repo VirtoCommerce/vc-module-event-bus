@@ -20,19 +20,19 @@ namespace VirtoCommerce.EventBusModule.Web.Controllers.Api
 
         private readonly IEventBusReadConfigurationService _eventBusReadConfigurationService;
         private readonly IEventBusProviderConnectionsService _eventBusProviderConnectionsService;
-        private readonly ICrudService<ProviderConnection> _providerConnectionService;
+        private readonly ICrudService<ProviderConnection> _providerConnectionCrudService;
         private readonly ISearchService<ProviderConnectionSearchCriteria, ProviderConnectionSearchResult, ProviderConnection> _providerConnectionSearchService;
 
         public ConnectionsController(
             IEventBusReadConfigurationService eventBusReadConfigurationService,
             IEventBusProviderConnectionsService eventBusProviderConnectionsService,
-            ICrudService<ProviderConnection> providerConnectionService,
+            ICrudService<ProviderConnection> providerConnectionCrudService,
             ISearchService<ProviderConnectionSearchCriteria, ProviderConnectionSearchResult, ProviderConnection> providerConnectionSearchService
             )
         {
             _eventBusReadConfigurationService = eventBusReadConfigurationService;
             _eventBusProviderConnectionsService = eventBusProviderConnectionsService;
-            _providerConnectionService = providerConnectionService;
+            _providerConnectionCrudService = providerConnectionCrudService;
             _providerConnectionSearchService = providerConnectionSearchService;
         }
 
@@ -85,7 +85,7 @@ namespace VirtoCommerce.EventBusModule.Web.Controllers.Api
         [Authorize(ModuleConstants.Security.Permissions.Create)]
         public async Task<ActionResult> CreateConnection([FromBody] ProviderConnectionRequest request)
         {
-            await _providerConnectionService.SaveChangesAsync(new List<ProviderConnection>() { request.ToModel() });
+            await _providerConnectionCrudService.SaveChangesAsync(new List<ProviderConnection>() { request.ToModel() });
             return Ok();
         }
 
@@ -103,13 +103,13 @@ namespace VirtoCommerce.EventBusModule.Web.Controllers.Api
             {
                 var connToUpdate = request.ToModel();
                 connToUpdate.Id = conn.Id;
-                await _providerConnectionService.SaveChangesAsync(new List<ProviderConnection>() { connToUpdate });
+                await _providerConnectionCrudService.SaveChangesAsync(new List<ProviderConnection>() { connToUpdate });
             }
             return Ok();
         }
 
         /// <summary>
-        /// Delete existing connection (DB-registered only)
+        /// Delete existing connection by name (DB-registered only)
         /// </summary>
         /// <param name="name"></param>
         /// <returns></returns>
@@ -120,7 +120,7 @@ namespace VirtoCommerce.EventBusModule.Web.Controllers.Api
             var conn = await _eventBusProviderConnectionsService.GetProviderConnectionAsync(name);
             if (conn != null && conn.Id != null)
             {
-                await _providerConnectionService.DeleteAsync(new[] { conn.Id });
+                await _providerConnectionCrudService.DeleteAsync(new[] { conn.Id });
             }
             return Ok();
         }
