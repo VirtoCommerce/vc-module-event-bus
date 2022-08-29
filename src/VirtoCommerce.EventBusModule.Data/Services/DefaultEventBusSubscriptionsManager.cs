@@ -100,7 +100,7 @@ namespace VirtoCommerce.EventBusModule.Data.Services
             }
         }
 
-        private async Task SendEvent(DomainEvent domainEvent, string eventId, List<ProviderConnectionLog> logs, JObject domainEventJObject, Subscription subscription, EventBusProvider provider)
+        protected virtual async Task SendEvent(DomainEvent domainEvent, string eventId, List<ProviderConnectionLog> logs, JObject domainEventJObject, Subscription subscription, EventBusProvider provider)
         {
             if (provider != null)
             {
@@ -132,7 +132,7 @@ namespace VirtoCommerce.EventBusModule.Data.Services
             }
         }
 
-        private void InvokeHandler(Type eventType, IHandlerRegistrar registrar)
+        protected virtual void InvokeHandler(Type eventType, IHandlerRegistrar registrar)
         {
             var registerExecutorMethod = registrar
                 .GetType()
@@ -154,7 +154,7 @@ namespace VirtoCommerce.EventBusModule.Data.Services
         #endregion HandleEvent
 
 
-        private bool CheckEvents(IList<SubscriptionEventRequest> eventIds)
+        protected virtual bool CheckEvents(IList<SubscriptionEventRequest> eventIds)
         {
             var allEvents = _registeredEventService.GetAllEvents();
             if (eventIds.All(x => allEvents.Any(e => e.Id == x.EventId)))
