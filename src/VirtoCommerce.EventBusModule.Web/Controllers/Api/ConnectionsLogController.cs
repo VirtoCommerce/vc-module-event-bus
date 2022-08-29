@@ -26,7 +26,7 @@ namespace VirtoCommerce.EventBusModule.Web.Controllers.Api
         /// <returns></returns>
         [HttpPost("logs/search")]
         [Authorize(ModuleConstants.Security.Permissions.Create)]
-        public async Task<ActionResult<string>> SearchProviderConnectionLog([FromBody] ProviderConnectionLogSearchCriteria searchCriteria)
+        public async Task<ActionResult<ProviderConnectionLogSearchResult>> SearchProviderConnectionLog([FromBody] ProviderConnectionLogSearchCriteria searchCriteria)
         {
             var result = await _providerConnectionLogSearchService.SearchAsync(searchCriteria);
             return Ok(result);
