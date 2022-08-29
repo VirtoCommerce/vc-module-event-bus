@@ -16,14 +16,15 @@ The event description is based on CloudEvents: "specification for describing eve
 
 
 ## Key features
-* Notify of new messages or changes from any module
-* Destination to
-  * [Azure Event Grid](https://azure.microsoft.com/en-us/services/event-grid)
-  * !!! Coming Soon !!! - AWS SQS, AWS SNS, Azure Service Bus, Google Cloud Pub/Sub
-* [CloudEvents](https://cloudevents.io/) format
-* Support multiple destination providers
-* Configurable via API
-* High Performance
+* Notify of new events from any module;
+* Support multiple destination providers;
+* Support for custom destination providers (Contact us if you need a new destination);
+* Configurable via API as well as thru application configuration (appsettings.json, environment variables, etc.);
+* Additional events filtering with JsonPath expression;
+* Preprocessing an event data with Liquid-template allows to finely tune the payload for destination provider;
+* High Performance;
+* Contains one predefined destination provider:
+    * [Azure Event Grid](https://azure.microsoft.com/en-us/services/event-grid) with [CloudEvents](https://cloudevents.io/)-based data format.
 
 ## Documentation
 * [Module Documentation](https://virtocommerce.com/docs/latest/modules/event-bus/)
