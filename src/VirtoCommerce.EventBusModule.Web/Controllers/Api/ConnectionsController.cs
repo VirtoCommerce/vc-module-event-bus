@@ -1,7 +1,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using Azure.Core;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using VirtoCommerce.EventBusModule.Core;
@@ -56,7 +55,7 @@ namespace VirtoCommerce.EventBusModule.Web.Controllers.Api
             {
                 cfgConnections = cfgConnections.Where(x => x.ProviderName == searchCriteria.ProviderName);
             }
-            searchResult.TotalCount += cfgConnections.Count();
+            searchResult.TotalCount += cfgConnections?.Count() ?? 0;
             searchResult.Results.AddRange(cfgConnections);
 
             return Ok(searchResult);

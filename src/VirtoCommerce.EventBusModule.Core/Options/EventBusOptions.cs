@@ -5,7 +5,7 @@ namespace VirtoCommerce.EventBusModule.Core.Options
 {
     public class EventBusOptions
     {
-        public IList<Subscription> Subscriptions { get; set; }
-        public IList<ProviderConnection> Connections { get; set; }
+        public IList<Subscription> Subscriptions { get; set; } = new List<Subscription>();
+        public IList<ProviderConnection> Connections { get; set; } = new List<ProviderConnection>();
     }
 }

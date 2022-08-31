@@ -1,7 +1,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using Azure.Core;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using VirtoCommerce.EventBusModule.Core;
@@ -74,7 +73,7 @@ namespace VirtoCommerce.EventBusModule.Web.Controllers.Api
             {
                 cfgSubscriptions = cfgSubscriptions.Where(x => x.ConnectionName == searchCriteria.ConnectionName);
             }
-            searchResult.TotalCount += cfgSubscriptions.Count();
+            searchResult.TotalCount += cfgSubscriptions?.Count() ?? 0;
             searchResult.Results.AddRange(cfgSubscriptions);
 
             return Ok(searchResult);
@@ -137,7 +136,7 @@ namespace VirtoCommerce.EventBusModule.Web.Controllers.Api
             var subscription = await _eventBusSubscriptionsService.GetSubscriptionAsync(name);
             if (subscription != null && subscription.Id != null)
             {
-                await _subscriptionCrudService.DeleteAsync(new [] { subscription.Id });
+                await _subscriptionCrudService.DeleteAsync(new[] { subscription.Id });
             }
             return Ok();
         }
