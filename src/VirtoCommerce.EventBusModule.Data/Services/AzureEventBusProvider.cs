@@ -29,6 +29,11 @@ namespace VirtoCommerce.EventBusModule.Data.Services
             return client != null;
         }
 
+        public override void Disconnect()
+        {
+            // Intentionally left empty because no specific implementation for AzureEventGrid
+        }
+
         public override async Task<SendEventResult> SendEventsAsync(IEnumerable<Event> events)
         {
             var result = new SendEventResult();
