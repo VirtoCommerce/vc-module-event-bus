@@ -16,7 +16,7 @@ namespace VirtoCommerce.EventBusModule.Data.Services
 {
     public class ProviderConnectionService : CrudService<ProviderConnection, ProviderConnectionEntity, ProviderConnectionChangeEvent, ProviderConnectionChangedEvent>
     {
-        IEventBusProviderConnectionsService _eventBusProviderConnectionsService;
+        protected readonly IEventBusProviderConnectionsService _eventBusProviderConnectionsService;
 
         public ProviderConnectionService(
             Func<IEventBusRepository> repositoryFactory,
@@ -35,7 +35,7 @@ namespace VirtoCommerce.EventBusModule.Data.Services
 
         protected override Task AfterDeleteAsync(IEnumerable<ProviderConnection> models, IEnumerable<GenericChangedEntry<ProviderConnection>> changedEntries)
         {
-            // Force EventBusConnection to remove from active connections cache
+            // Force deleted connection to remove from active connections cache if exists
             _ = models.Select(async x => await _eventBusProviderConnectionsService.RemoveConnectedProviderAsync(x.ProviderName));
             return base.AfterDeleteAsync(models, changedEntries);
         }
