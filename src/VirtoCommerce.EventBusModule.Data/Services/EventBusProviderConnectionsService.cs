@@ -1,5 +1,4 @@
 using System.Collections.Concurrent;
-using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using VirtoCommerce.EventBusModule.Core.Models;
@@ -11,9 +10,6 @@ namespace VirtoCommerce.EventBusModule.Data.Services
 {
     public class EventBusProviderConnectionsService : IEventBusProviderConnectionsService
     {
-        /// <summary>
-        /// Connected providers cache
-        /// </summary>
         private ConcurrentDictionary<string, EventBusProvider> Connections { get; } = new ConcurrentDictionary<string, EventBusProvider>();
 
         private readonly IEventBusProviderService _eventBusProviderService;
@@ -30,7 +26,7 @@ namespace VirtoCommerce.EventBusModule.Data.Services
             _eventBusReadConfigurationService = eventBusReadConfigurationService;
         }
 
-        public virtual async Task<EventBusProvider> GetConnectedProviderAsync(string providerConnectionName)
+        public async Task<EventBusProvider> GetConnectedProviderAsync(string providerConnectionName)
         {
             if (!Connections.ContainsKey(providerConnectionName))
             {
@@ -50,7 +46,7 @@ namespace VirtoCommerce.EventBusModule.Data.Services
             return result;
         }
 
-        public virtual async Task<ProviderConnection> GetProviderConnectionAsync(string providerConnectionName)
+        public async Task<ProviderConnection> GetProviderConnectionAsync(string providerConnectionName)
         {
             // Connection from appsettings have priority
             var connection = _eventBusReadConfigurationService.GetProviderConnection(providerConnectionName);
@@ -60,17 +56,6 @@ namespace VirtoCommerce.EventBusModule.Data.Services
                 throw new PlatformException($@"The provider connection {providerConnectionName} is not registered");
             }
             return connection;
-        }
-
-        public virtual Task RemoveConnectedProviderAsync(string providerConnectionName)
-        {
-            if (Connections.ContainsKey(providerConnectionName))
-            {
-                Connections[providerConnectionName].Disconnect();
-                Connections.Remove(providerConnectionName, out _);
-            }
-
-            return Task.CompletedTask;
         }
     }
 }

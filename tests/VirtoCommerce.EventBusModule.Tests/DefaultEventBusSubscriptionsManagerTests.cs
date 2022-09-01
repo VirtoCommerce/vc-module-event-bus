@@ -157,9 +157,5 @@ namespace VirtoCommerce.EventBusModule.Tests
         public override void SetConnectionOptions(JObject options)
         {
         }
-
-        public override void Disconnect()
-        {
-        }
     }
 }

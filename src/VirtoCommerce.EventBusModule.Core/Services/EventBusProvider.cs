@@ -11,6 +11,5 @@ namespace VirtoCommerce.EventBusModule.Core.Services
         public abstract bool IsConnected();
         public abstract void SetConnectionOptions(JObject options);
         public abstract bool Connect();
-        public abstract void Disconnect();
     }
 }

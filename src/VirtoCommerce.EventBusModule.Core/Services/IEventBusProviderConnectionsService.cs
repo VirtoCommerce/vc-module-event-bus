@@ -16,12 +16,5 @@ namespace VirtoCommerce.EventBusModule.Core.Services
         public Task<EventBusProvider> GetConnectedProviderAsync(string providerConnectionName);
 
         public Task<ProviderConnection> GetProviderConnectionAsync(string providerConnectionName);
-
-        /// <summary>
-        /// Forces specified provider to disconnect and remove from the collections cache
-        /// </summary>
-        /// <param name="providerConnectionName"></param>
-        /// <returns></returns>
-        public Task RemoveConnectedProviderAsync(string providerConnectionName);
     }
 }
