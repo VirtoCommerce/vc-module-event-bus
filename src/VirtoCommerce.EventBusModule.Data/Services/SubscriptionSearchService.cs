@@ -24,12 +24,12 @@ namespace VirtoCommerce.EventBusModule.Data.Services
 
             if (!string.IsNullOrEmpty(criteria.Name))
             {
-                query = query.Where(x => x.Name.Contains(criteria.Name));
+                query = query.Where(x => x.Name.Equals(criteria.Name));
             }
 
             if (!string.IsNullOrEmpty(criteria.ConnectionName))
             {
-                query = query.Where(x => x.ConnectionName.Contains(criteria.ConnectionName));
+                query = query.Where(x => x.ConnectionName.Equals(criteria.ConnectionName));
             }
 
             if (!criteria.EventIds.IsNullOrEmpty())
