@@ -6,7 +6,9 @@ using Microsoft.AspNetCore.Mvc;
 using VirtoCommerce.EventBusModule.Core;
 using VirtoCommerce.EventBusModule.Core.Models;
 using VirtoCommerce.EventBusModule.Core.Services;
+using VirtoCommerce.EventBusModule.Data.Services;
 using VirtoCommerce.Platform.Core.Common;
+using VirtoCommerce.Platform.Core.Exceptions;
 using VirtoCommerce.Platform.Core.GenericCrud;
 
 namespace VirtoCommerce.EventBusModule.Web.Controllers.Api
@@ -19,18 +21,21 @@ namespace VirtoCommerce.EventBusModule.Web.Controllers.Api
 
         private readonly IEventBusReadConfigurationService _eventBusReadConfigurationService;
         private readonly IEventBusProviderConnectionsService _eventBusProviderConnectionsService;
-        private readonly ICrudService<ProviderConnection> _providerConnectionCrudService;
+        private readonly ISearchService<SubscriptionSearchCriteria, SubscriptionSearchResult, Subscription> _subscriptionSearchService;
+        private readonly ICrudService<ProviderConnection> _providerConnectionCrudService;        
         private readonly ISearchService<ProviderConnectionSearchCriteria, ProviderConnectionSearchResult, ProviderConnection> _providerConnectionSearchService;
 
         public ConnectionsController(
             IEventBusReadConfigurationService eventBusReadConfigurationService,
             IEventBusProviderConnectionsService eventBusProviderConnectionsService,
+            ISearchService<SubscriptionSearchCriteria, SubscriptionSearchResult, Subscription> subscriptionSearchService,
             ICrudService<ProviderConnection> providerConnectionCrudService,
             ISearchService<ProviderConnectionSearchCriteria, ProviderConnectionSearchResult, ProviderConnection> providerConnectionSearchService
             )
         {
             _eventBusReadConfigurationService = eventBusReadConfigurationService;
             _eventBusProviderConnectionsService = eventBusProviderConnectionsService;
+            _subscriptionSearchService = subscriptionSearchService;
             _providerConnectionCrudService = providerConnectionCrudService;
             _providerConnectionSearchService = providerConnectionSearchService;
         }
@@ -116,6 +121,13 @@ namespace VirtoCommerce.EventBusModule.Web.Controllers.Api
         [Authorize(ModuleConstants.Security.Permissions.Delete)]
         public async Task<ActionResult> DeleteConnection(string name)
         {
+            var subscriptions = await _subscriptionSearchService.SearchAsync(new SubscriptionSearchCriteria() { ConnectionName = name });
+
+            if (subscriptions.TotalCount != 0)
+            {
+                throw new PlatformException($@"Can't delete provider connection {name}. Please remove related connections first.");
+            }
+
             var conn = await _eventBusProviderConnectionsService.GetProviderConnectionAsync(name);
             if (conn != null && conn.Id != null)
             {

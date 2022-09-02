@@ -44,5 +44,20 @@ namespace VirtoCommerce.EventBusModule.Data.Services
             return resultFromAppSettings.Union(resultFromDatabase.Where(x => !resultFromAppSettings.Any(y => y.Name == x.Name))).ToList();
         }
 
+        public async Task<IList<Subscription>> GetSubscriptionsByConnectionNameAsync(string connectionName)
+        {
+            var resultFromAppSettings = _eventBusReadConfigurationService.GetSubscriptions().Where(x => x.ConnectionName == connectionName);
+
+            var criteria = new SubscriptionSearchCriteria()
+            {
+                ConnectionName = connectionName,
+                Skip = 0,
+                Take = int.MaxValue,
+            };
+
+            var resultFromDatabase = (await _subscriptionSearchService.SearchAsync(criteria)).Results;
+
+            return resultFromAppSettings.Union(resultFromDatabase).ToList();
+        }
     }
 }
