@@ -51,10 +51,6 @@ namespace VirtoCommerce.EventBusModule.Data.Services
             // Connection from appsettings have priority
             var connection = _eventBusReadConfigurationService.GetProviderConnection(providerConnectionName);
             connection ??= (await _providerConnectionSearchService.SearchAsync(new ProviderConnectionSearchCriteria() { Name = providerConnectionName }))?.Results?.FirstOrDefault();
-            if (connection == null)
-            {
-                throw new PlatformException($@"The provider connection {providerConnectionName} is not registered");
-            }
             return connection;
         }
     }

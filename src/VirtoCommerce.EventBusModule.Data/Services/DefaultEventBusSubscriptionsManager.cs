@@ -14,6 +14,7 @@ using VirtoCommerce.Platform.Core.Common;
 using VirtoCommerce.Platform.Core.Events;
 using VirtoCommerce.Platform.Core.Exceptions;
 using VirtoCommerce.Platform.Core.GenericCrud;
+using static Microsoft.EntityFrameworkCore.DbLoggerCategory.Database;
 
 namespace VirtoCommerce.EventBusModule.Data.Services
 {
@@ -47,7 +48,7 @@ namespace VirtoCommerce.EventBusModule.Data.Services
         {
             Subscription result = null;
             if (CheckEvents(request.Events) &&
-                await _providerConnections.GetProviderConnectionAsync(request.ConnectionName) != null
+                await CheckConnection(request.ConnectionName)
                 )
             {
                 result = request.ToModel();
@@ -55,6 +56,17 @@ namespace VirtoCommerce.EventBusModule.Data.Services
             }
 
             return result;
+        }
+
+        private async Task<bool> CheckConnection(string connectionName)
+        {
+            var connection = await _providerConnections.GetProviderConnectionAsync(connectionName);
+            if (connection == null)
+            {
+                throw new PlatformException($@"The provider connection {connectionName} is not registered");
+            }
+
+            return connection != null;
         }
 
         #endregion Subscription
