@@ -125,7 +125,7 @@ namespace VirtoCommerce.EventBusModule.Web.Controllers.Api
 
             if (subscriptions.TotalCount != 0)
             {
-                throw new PlatformException($@"Can't delete provider connection {name}. Please remove related connections first.");
+                throw new PlatformException($@"Can't delete provider connection {name}. Please remove related subscriptions first.");
             }
 
             var conn = await _eventBusProviderConnectionsService.GetProviderConnectionAsync(name);
