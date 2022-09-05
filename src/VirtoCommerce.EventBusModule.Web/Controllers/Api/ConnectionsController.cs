@@ -60,10 +60,16 @@ namespace VirtoCommerce.EventBusModule.Web.Controllers.Api
             {
                 cfgConnections = cfgConnections.Where(x => x.ProviderName == searchCriteria.ProviderName);
             }
-            searchResult.TotalCount += cfgConnections?.Count() ?? 0;
-            searchResult.Results.AddRange(cfgConnections);
+            var totalResult = new ProviderConnectionSearchResult()
+            {
+                TotalCount = searchResult.TotalCount + (cfgConnections?.Count() ?? 0),
+                Results = new List<ProviderConnection>()
+            };
 
-            return Ok(searchResult);
+            totalResult.Results.AddRange(cfgConnections);
+            totalResult.Results.AddRange(searchResult.Results);
+
+            return Ok(totalResult);
         }
 
         /// <summary>
