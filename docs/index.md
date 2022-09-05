@@ -514,7 +514,7 @@ Look at the subscription example:
     }
 ]
 ```
-As you can see, *PayloadTransformationTemplate* value set to some value. It's a one-line, double-comma escaped value of a scriban template:
+As you can see, *PayloadTransformationTemplate* value set to some value. It's a one-line, double-comma escaped value of a following scriban template:
 ``` scriban
 {
   "EventId": "{{ id }}",
@@ -536,8 +536,8 @@ As you can see, *PayloadTransformationTemplate* value set to some value. It's a 
   ]
 }
 ```
-When the data in *OrderChangedEvent* applied to that template, the renderer produces following payload (example) for some event data:
-
+The template just get old and new statuses of the changed order, then enlists items names and SKUs.
+Look at the result of applying the template to the data in *OrderChangedEvent* applied:
 ``` json
 {
   "EventId": "34bbb7e4-328e-4923-b212-17be93db9f4f",
@@ -557,4 +557,6 @@ When the data in *OrderChangedEvent* applied to that template, the renderer prod
 ```
 This selected payload only would be send to the provider.
 
-[Good place to test your scriban template](https://scribanonline.azurewebsites.net)
+## References:
+* [Scriban syntax](https://github.com/scriban/scriban/tree/master/doc)
+* [Test your scriban template](https://scribanonline.azurewebsites.net)
