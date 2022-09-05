@@ -537,18 +537,22 @@ As you can see, *PayloadTransformationTemplate* value set to some value. It's a 
 }
 ```
 The template just get old and new statuses of the changed order, then enlists items names and SKUs.
-Look at the result of applying the template to the data in *OrderChangedEvent* applied:
+Look at the result of applying the template to the data in *OrderChangedEvent* for some order with 2 items:
 ``` json
 {
-  "EventId": "34bbb7e4-328e-4923-b212-17be93db9f4f",
+  "EventId": "f90bcd6b-e32b-4d53-9e32-69b9b7fef584",
   "OrderInfo": [
     {
       "NewStatus": "Processing",
       "OldStatus": "New",
       "Items": [
         {
-          "Name": "Samsung Galaxy Note 4 SM-N910C 32GB",
-          "Sku": "SAGN4N910CBK"
+          "Name": "Samsung Galaxy S6 SM-G920F 32GB, White Pearl, 1.5 GHz ARM Cortex A53 Quad-Core, 3, 32",
+          "Sku": "IZZ-25623049"
+        },
+        {
+          "Name": "Microsoft Lumia 640 XL RM-1065 8GB Dual SIM, Black, true, true, 1.2 GHz ARM Cortex A7 Quad-Core, 1, 8",
+          "Sku": "UWT-27354339"
         }
       ]
     }
