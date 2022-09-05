@@ -469,3 +469,92 @@ If you want to send a new event, you need to create a new module and [raise a Vi
 
 ## Support for Custom Destination Providers 
 Feel free to contact us if you need a new destination.
+
+# More examples (close to real cases)
+## Additional event filtering example
+Look at the subscription example forwarding order changed event if the state changed to specified only:
+
+``` json
+"Subscriptions": [
+    {
+        "ConnectionName": "AzureEventGrid",
+        "Name": "Eventgrid forwarder",
+        "JsonPathFilter": "$.ChangedEntries[?(@.NewEntry.Status == 'Processing' && @.OldEntry.Status != 'Processing')]",
+        "Events": [
+            {
+                "EventId": "VirtoCommerce.OrdersModule.Core.Events.OrderChangedEvent"
+            }
+        ]
+    }
+]
+```
+Please read carefully *JsonPathFilter* expression above. The event data will be forwarded to the connection if the selection with specified *JsonPathFilter* results any value.
+
+In example: any order comes in status *Processing* from any other non-processing state. Another words: we check that new status in the event body is *Processing* and old status value is something different.
+
+You can construct more sophisticated expressions for events filtering. 
+
+As we use Newtonsoft JsonNet library to select tokens in the json-documents, there are good place to learn JsonPath: [Newtonsoft JsonNet documentation: Querying JSON with JSON Path](https://www.newtonsoft.com/json/help/html/QueryJsonSelectToken.htm).
+
+## Payload transformation template example
+The transformation template allows you to transform the event data to a custom payload for your specific case. Also, it is useful to shrink an amount of transferred data.
+Look at the subscription example:
+``` json
+"Subscriptions": [
+    {
+        "ConnectionName": "AzureEventGrid",
+        "Name": "Eventgrid forwarder",
+        "JsonPathFilter": "$.ChangedEntries[?(@.NewEntry.Status == 'Processing' && @.OldEntry.Status != 'Processing')]",
+        "PayloadTransformationTemplate": "{ \"EventId\": \"{{ id }}\", \"OrderInfo\": [ {{for entry in changed_entries}} { \"NewStatus\": \"{{ entry.new_entry.status }}\", \"OldStatus\": \"{{ entry.old_entry.status }}\", \"Items\":[ {{for item in entry.new_entry.items}} { \"Name\": \"{{item.name}}\", \"Sku\": \"{{item.sku}}\" }, {{end}} ] }, {{end}} ] }",
+        "Events": [
+            {
+                "EventId": "VirtoCommerce.OrdersModule.Core.Events.OrderChangedEvent"
+            }
+        ]
+    }
+]
+```
+As you can see, *PayloadTransformationTemplate* value set to some value. It's a one-line, double-comma escaped value of a scriban template:
+``` scriban
+{
+  "EventId": "{{ id }}",
+  "OrderInfo": [
+    {{for entry in changed_entries}}
+      {
+        "NewStatus": "{{ entry.new_entry.status }}",
+        "OldStatus": "{{ entry.old_entry.status }}",
+        "Items":[
+          {{for item in entry.new_entry.items}}
+            {
+              "Name": "{{item.name}}",
+              "Sku": "{{item.sku}}"
+            },
+          {{end}}
+        ]
+      },
+    {{end}}
+  ]
+}
+```
+When the data in *OrderChangedEvent* applied to that template, the renderer produces following payload (example) for some event data:
+
+``` json
+{
+  "EventId": "34bbb7e4-328e-4923-b212-17be93db9f4f",
+  "OrderInfo": [
+    {
+      "NewStatus": "Processing",
+      "OldStatus": "New",
+      "Items": [
+        {
+          "Name": "Samsung Galaxy Note 4 SM-N910C 32GB",
+          "Sku": "SAGN4N910CBK"
+        }
+      ]
+    }
+  ]
+}
+```
+This selected payload only would be send to the provider.
+
+[Good place to test your scriban template](https://scribanonline.azurewebsites.net)

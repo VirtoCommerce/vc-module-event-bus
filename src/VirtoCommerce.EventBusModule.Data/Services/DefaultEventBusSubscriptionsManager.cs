@@ -124,8 +124,7 @@ namespace VirtoCommerce.EventBusModule.Data.Services
 
                     if (!subscription.PayloadTransformationTemplate.IsNullOrEmpty())
                     {
-                        var template = Template.Parse(subscription.PayloadTransformationTemplate);
-                        payload = JsonConvert.DeserializeObject(template.Render(domainEvent));
+                        payload = JsonConvert.DeserializeObject(Template.Parse(subscription.PayloadTransformationTemplate).Render(domainEvent));
                     }
                     else
                     {
