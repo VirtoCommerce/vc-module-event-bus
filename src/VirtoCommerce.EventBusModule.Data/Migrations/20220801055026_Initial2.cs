@@ -97,6 +97,8 @@ namespace VirtoCommerce.EventBusModule.Data.Migrations
 
             // Preserve compatibility: convert existing subscriptions to a newly added tables
             migrationBuilder.Sql(@"
+                IF 'EventBusSubscription' in (select [name] from sys.tables)
+                BEGIN
                 -- Make connections from existing subscriptions
                 with tmpConnections as
                 (
@@ -145,7 +147,7 @@ namespace VirtoCommerce.EventBusModule.Data.Migrations
                 -- Convert subscription events
                 insert into EventBus2SubscriptionEvent
                 select Id, EventId, SubscriptionId, CreatedDate, ModifiedDate, CreatedBy, ModifiedBy from EventBusSubscriptionEvent;
-
+                END
             ");
         }
 

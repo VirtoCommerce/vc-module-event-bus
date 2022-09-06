@@ -192,7 +192,7 @@ Example:
 |-|-|
 |ConnectionName|Name of the connection the event data should be forwarded to.|
 |Name|Human-readable name to distinguish subscriptions. Should be unique in configuration|
-|JsonPathFilter|`JsonPath` filter expression that allows you to additionally filter events that have specific value in the body. If the body with applied `JsonPath` filter does not yield any value, the module will not call the provider. The default value is `$`, which means any event body is OK and may be transferred to the provider.|
+|JsonPathFilter|`JsonPath` filter expression that allows you to additionally filter events that have specific value in the body. If the body with applied `JsonPath` filter does not yield any value, the module will not call the provider. The default value is `$`, which means any event body is OK and may be transferred to the provider. We use Newtonsoft.Json to [query Jsons](https://www.newtonsoft.com/json/help/html/SelectToken.htm#SelectTokenJSONPath).  Find out more about JsonPath [here](http://goessner.net/articles/JsonPath/). Also [there](https://jsonpath.com) is an useful tool to test your jsons and queries.|
 |PayloadTransformationTemplate|An optional setting where you can specify a Scriban-template to transform event data to a different form. If omitted, null, or an empty string, the event data will be transferred unchanged to the provider (full body).|
 |EventSettingsSerialized|An optional setting where you can set subscription-specific metadata for the provider as details of the event interpretation. This may include some rules, instructions for the provider, etc. For example, if you hypothetically have a workflow provider, you can set what such provider needs to do as a reaction for the event catch: start a new workflow chain or signal an existing workflow instance. The value varies from provider to provider. Please read the provider instruction.|
 |Events|Array of the event full names the subscription in question should catch.|
@@ -488,9 +488,9 @@ Look at the subscription example forwarding order changed event if the state cha
     }
 ]
 ```
-Please read carefully *JsonPathFilter* expression above. The event data will be forwarded to the connection if the selection with specified *JsonPathFilter* results any value.
+Please read carefully `JsonPathFilter` expression above. The event data will be forwarded to the connection if the selection with specified `JsonPathFilter` results any value.
 
-In example: any order comes in status *Processing* from any other non-processing state. Another words: we check that new status in the event body is *Processing* and old status value is something different.
+In example: any order comes in status `Processing` from any other non-processing state. Another words: we check that new status in the event body is `Processing` and old status value is something different.
 
 You can construct more sophisticated expressions for events filtering. 
 
@@ -514,7 +514,7 @@ Look at the subscription example:
     }
 ]
 ```
-As you can see, *PayloadTransformationTemplate* value set to some value. It's a one-line, double-comma escaped value of a following Scriban-template:
+As you can see, `PayloadTransformationTemplate` value set to some value. It's a one-line, double-comma escaped value of a following Scriban-template:
 ``` scriban
 {
   "EventId": "{{ id }}",
@@ -537,7 +537,7 @@ As you can see, *PayloadTransformationTemplate* value set to some value. It's a 
 }
 ```
 The template just get old and new statuses of the changed order, then enlists items names and SKUs.
-Look at the result of applying the template to the data in *OrderChangedEvent* for some order with 2 items:
+Look at the result of applying the template to the data in `OrderChangedEvent` for some order with 2 items:
 ``` json
 {
   "EventId": "f90bcd6b-e32b-4d53-9e32-69b9b7fef584",
@@ -561,6 +561,6 @@ Look at the result of applying the template to the data in *OrderChangedEvent* f
 ```
 This selected payload only would be send to the provider.
 
-## References:
+### References:
 * [Scriban syntax](https://github.com/scriban/scriban/tree/master/doc)
 * [Test your Scriban-template](https://scribanonline.azurewebsites.net)
