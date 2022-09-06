@@ -2,72 +2,340 @@
 
 [![CI status](https://github.com/VirtoCommerce/vc-module-event-bus/workflows/Module%20CI/badge.svg?branch=dev)](https://github.com/VirtoCommerce/vc-module-event-bus/actions?query=workflow%3A"Module+CI") [![Quality gate](https://sonarcloud.io/api/project_badges/measure?project=VirtoCommerce_vc-module-event-bus&metric=alert_status&branch=dev)](https://sonarcloud.io/dashboard?id=VirtoCommerce_vc-module-event-bus) [![Reliability rating](https://sonarcloud.io/api/project_badges/measure?project=VirtoCommerce_vc-module-event-bus&metric=reliability_rating&branch=dev)](https://sonarcloud.io/dashboard?id=VirtoCommerce_vc-module-event-bus) [![Security rating](https://sonarcloud.io/api/project_badges/measure?project=VirtoCommerce_vc-module-event-bus&metric=security_rating&branch=dev)](https://sonarcloud.io/dashboard?id=VirtoCommerce_vc-module-event-bus) [![Sqale rating](https://sonarcloud.io/api/project_badges/measure?project=VirtoCommerce_vc-module-event-bus&metric=sqale_rating&branch=dev)](https://sonarcloud.io/dashboard?id=VirtoCommerce_vc-module-event-bus)
 
-The module enables you to be notified of new Virto Commerce events or changes via a Message Queue of your choice.
+This module enables you to be notified of new Virto Commerce events or changes via the message queue of your choice.
 
 The module is used to trigger an asynchronous background process in response to an event on the Virto Commerce platform.
 
 ![Event Bus Schema Overview](media/event-bus-overview.PNG)
 
-As a payload, a Virto Commerce Event delivers one of the predefined Messages or any Change to a resource.
+As a payload, a Virto Commerce event delivers one of the predefined messages or any change to a resource.
 
-That enables event-driven, reactive programming. It uses a publish-subscribe model. Publishers emit events but have no expectation about which events are handled. Subscribers decide which events they want to handle.
-
-The event description is based on CloudEvents: "specification for describing event data in a common way".
+This enables event-driven, reactive programming, which uses a publish-subscribe model. Publishers emit events but have no expectation about which events are handled. Subscribers decide which events they want to handle.
 
 ## Key features
-* Notify of new events from any module
-* Destination to:
-    * [Azure Event Grid](https://azure.microsoft.com/en-us/services/event-grid)
-    * Contact us if you need a new Destination
-* [CloudEvents](https://cloudevents.io/) format
-* Support multiple destination providers
-* Configurable via API
-* High Performance
 
-## Example uses for Event Bus
+* Notification on new events from any module
+* Supporting multiple destination providers
+* Supporting custom destination providers (contact us if you need a new destination)
+* Configurable via API as well as through application configuration (`appsettings.json`, environment variables, etc.)
+* Additional event filtering with the `JsonPath` expression
+* Preprocessing event data with Scriban-template enables fine-tuning the payload for the destination provider
+* High performance
+* Predefined destination provider:  [Azure Event Grid](https://azure.microsoft.com/en-us/services/event-grid) with [CloudEvents](https://cloudevents.io/)-based data format
 
-### Serverless application architectures
+## Example Uses for Event Bus
+
+### Serverless Application Architectures
 Event Bus connects Virto Commerce and event handlers. For example, use Azure Event Grid to instantly trigger a serverless function to run currency exchange each time a new price is added to a price list.
 
+### Approval Process Automation
+Event Bus allows you to speed up automation and simplify the approval process enforcement. For example, Azure Event Grid can notify Azure Automation when a new order is created or a new customer is registered. These events can be used to automatically check the entity configurations are compliant, put metadata, change status, or send an email notification.
 
-### Approval process automation
-Event Bus allows you to speed automation and simplify approval process enforcement. For example, Azure Event Grid can notify Azure Automation when a new order is created, or a new customer registered. These events can be used to automatically check that entity configurations are compliant, put metadata, change status, or send an email notification.
+### Application Integration
+Event Bus connects your app with other services. For example, you can create an application topic to send Virto Commerce event data to Event Grid and take advantage of its reliable delivery, advanced routing, and direct integration with Azure.
 
-
-### Application integration
-Event Bus connects your app with other services. For example, create an application topic to send Virto Commerce event data to Event Grid and take advantage of its reliable delivery, advanced routing, and direct integration with Azure.
 Alternatively, you can use Event Grid with Logic Apps to process data anywhere, without writing any code.
 
+## Configuring Event Translation
+There are two ways to configure event translation within the Event Bus module:
+* Configuration options
+* API endpoints
 
-## Destinations
-
-### Azure Event Grid Provider
-
-#### Overview
-
-[Azure Event Grid](https://azure.microsoft.com/en-us/services/event-grid/) can be used to push messages to Azure Functions, HTTP endpoints (webhooks), and several other Azure tools.
-
-Azure Event Grid supports CloudEvents 1.0. And Azure Event Grid client library also supports sending/receiving events in the form of CloudEvents.
-
-To connect Azure Event Grid, you will need to set:
-
-* `provider` - String - Ex: "AzureEventGrid"
-* `connectionString` - String - The URI of the Topic
-* `accessKey` - String - Partially hidden on retrieval
-
-To set up a subscription with Azure Event Grid you first need to create a Topic in the [Azure Portal](https://azure.microsoft.com/en-us/services/event-grid/). When creating your Event Grid topic, you need to set the input schema to “CloudEvents v1.0” in the “Advanced” tab. To allow Virto Commerce platform to push messages to your Topic, you need to provide an access key. These can also be found in the Azure Portal after creating the Topic in the section Access Keys.
-
-#### Error Handling
-Event Grid provides durable delivery. It delivers each message at least once for each subscription. Events are sent to the registered endpoint of each subscription immediately. If an endpoint doesn't acknowledge receipt of an event, Event Grid retries delivery of the event.
-More details in [Azure Portal](https://docs.microsoft.com/en-us/azure/event-grid/delivery-and-retry)
-
-## Scenarios
+Both of them share equal options data structures.
 
 !!! note
-    All operations are accessible via Rest API only. You will need to create [an API Key and grant permission before the call](https://virtocommerce.com/docs/latest/user-guide/security/#generate-api-key).
+    In order to access API endpoints, you will need to [create an API Key and grant permission before the call](https://virtocommerce.com/docs/latest/user-guide/security/#generate-api-key).
 
-### List of actual event/resources
-As an API Client, I want to Get a list of actual events/resources, so that I know the existing events and can create a subscription.
+### Configuring Provider Connections
+Each provider connection definition is a link between provider type and connection options. You can have multiple connections to various destinations through a single provider.
+
+#### Provider Connection Options Data Structure
+
+Example:
+```json
+{
+    "Name": "AzureEventGrid cloud",
+    "ProviderName": "AzureEventGrid",
+    "ConnectionOptionsSerialized": "{\"ConnectionString\": \"https://*.*.eventgrid.azure.net/api/events\", \"AccessKey\": \"kvpXffggvvMiNjBeBKdroX1r45UvZloXMwlM7i1TyqoiI=\"}"
+}
+```
+#### Description:
+|Name|Description|
+|-|-|
+|Name|Human-readable connection name to distinguish the connection. Should be unique in the configuration|
+|ProviderName|Predefined destination provider name. Unique for each type of providers. Refers to the name of desired provider|
+|ConnectionOptionsSerialized|Provider-specific connection options|
+
+### Managing Provider Connections through Configuration
+Add connections array under the `EventBus:Connections` key. Connections configured in such a manner cannot be removed or updated through REST API.
+
+If you have connections with the same name in the DB and configuration options, the one specified in the configuration options will be preferred.
+
+### Managing Provider Connections through REST API
+
+#### Adding New Connection
+Endpoint: `/api/eventbus/connections`
+
+Method: `POST`
+
+Request: 
+```json
+{
+  "name": "string",
+  "providerName": "string",
+  "connectionOptionsSerialized": "string"
+}
+```
+The request body is the same as in the connection option description above.
+
+#### Removing Connection by Name
+Endpoint: `/api/eventbus/connections/{name}`
+
+Method: `DELETE`
+
+Request parameter: Provider connection name
+
+#### Updating connection
+Endpoint: `/api/eventbus/connections`
+
+Method: `PUT`
+
+Request: 
+```json
+{
+  "name": "string",
+  "providerName": "string",
+  "connectionOptionsSerialized": "string"
+}
+```
+The request body is the same as in the connection option description above.
+
+#### **Getting Connection by Name**
+Endpoint: `/api/eventbus/connections/{name}`
+
+Method: `GET`
+
+Request parameter: Provider connection name
+
+Response:
+```json
+{
+  "name": "string", // Connection name
+  "providerName": "string", // Provider name
+  "connectionOptionsSerialized": "string", // Provider-specific connection options
+  "createdDate": "2022-08-26T13:52:55.932Z",
+  "modifiedDate": "2022-08-26T13:52:55.932Z",
+  "createdBy": "string", // If null, the connection specified in the configuration
+  "modifiedBy": "string", // If null, the connection specified in the configuration
+  "id": "string" // If null, the connection specified in the configuration
+}
+```
+
+#### Searching for Connections
+
+Endpoint: `/api/eventbus/connections/{name}`
+
+Method: `GET`
+
+Request:
+```json
+{
+  "name": "string", // Connection name (optional, pass to search by name)
+  "providerName": "string", // Provider name (optional, pass to search by provider name)
+  "skip": 0, // providers to skip in paged loading
+  "take": 0  // providers to take in paged loading
+}
+```
+
+Response:
+```json
+{
+  "totalCount": 0, 
+  "results": [
+    {
+      "name": "string", // Connection name
+      "providerName": "string", // Provider name
+      "connectionOptionsSerialized": "string", // Provider-specific connection options
+      "createdDate": "2022-08-26T13:52:55.932Z",
+      "modifiedDate": "2022-08-26T13:52:55.932Z",
+      "createdBy": "string", // If null, the connection specified in the configuration
+      "modifiedBy": "string", // If null, the connection specified in the configuration
+      "id": "string" // If null, the connection specified in the configuration
+    }
+  ]
+}
+```
+
+### Configuring Subscriptions
+
+Subscription is a rule that specifies which events should be caught and forwarded to a selected provider connection. You can also translate the event body to fit the payload needs of a provider.
+
+#### Subscription Options Data Structure
+
+Example:
+```json
+{
+  "ConnectionName": "AzureEventGrid",
+  "Name": "Eventgrid forwarder",
+  "JsonPathFilter": "$",
+  "PayloadTransformationTemplate": "",
+  "EventSettingsSerialized": null,
+  "Events": [
+      {
+          "EventId": "VirtoCommerce.YourModule.Web.Events.NewCompanyRegistrationRequestEvent"
+      }
+  ]
+}
+```
+#### Description:
+|Name|Description|
+|-|-|
+|ConnectionName|Name of the connection the event data should be forwarded to.|
+|Name|Human-readable name to distinguish subscriptions. Should be unique in configuration|
+|JsonPathFilter|`JsonPath` filter expression that allows you to additionally filter events that have specific value in the body. If the body with applied `JsonPath` filter does not yield any value, the module will not call the provider. The default value is `$`, which means any event body is OK and may be transferred to the provider. We use Newtonsoft.Json to [query Jsons](https://www.newtonsoft.com/json/help/html/SelectToken.htm#SelectTokenJSONPath).  Find out more about JsonPath [here](http://goessner.net/articles/JsonPath/). Also [there](https://jsonpath.com) is an useful tool to test your jsons and queries.|
+|PayloadTransformationTemplate|An optional setting where you can specify a Scriban-template to transform event data to a different form. If omitted, null, or an empty string, the event data will be transferred unchanged to the provider (full body).|
+|EventSettingsSerialized|An optional setting where you can set subscription-specific metadata for the provider as details of the event interpretation. This may include some rules, instructions for the provider, etc. For example, if you hypothetically have a workflow provider, you can set what such provider needs to do as a reaction for the event catch: start a new workflow chain or signal an existing workflow instance. The value varies from provider to provider. Please read the provider instruction.|
+|Events|Array of the event full names the subscription in question should catch.|
+
+### Managing Subscriptions through Configuration
+Add the subscription array under the key "EventBus:Subscriptions". Subscriptions configured in such a manner cannot be removed or updated through REST API.
+
+If you have subscriptions with the same name in the DB and configuration options, the one specified in the configuration options will be preferred.
+
+### Managing Subscriptions through REST API
+
+#### **Get specific subscription by name**
+Endpoint: `/api/eventbus/subscriptions/{name}`
+
+Method: `GET`
+
+Request parameter: Subscription name
+
+Response:
+```json
+{
+  "name": "string",
+  "connectionName": "string",
+  "jsonPathFilter": "string",
+  "payloadTransformationTemplate": "string",
+  "eventSettingsSerialized": "string",
+  "events": [
+    {
+      "eventId": "string"
+    }
+  ],
+  "createdDate": "2022-08-29T11:30:09.038Z",
+  "modifiedDate": "2022-08-29T11:30:09.038Z",
+  "createdBy": "string", // If null, the subscription specified in the configuration
+  "modifiedBy": "string", // If null, the subscription specified in the configuration
+  "id": "string" // If null, the subscription specified in the configuration
+}
+```
+#### **Registering New Subscription in Database**
+
+Endpoint: `/api/eventbus/subscriptions`
+
+Method: `POST`
+
+Request body (also check the subscription option description above):
+
+```json
+{
+  "name": "string",
+  "connectionName": "string",
+  "jsonPathFilter": "string",
+  "payloadTransformationTemplate": "string",
+  "eventSettingsSerialized": "string",
+  "events": [
+    {
+      "eventId": "string"
+    }
+  ]
+}
+```
+
+#### Updating Existing Subscription (DB Registered Only)
+You may want to update the event subscription, so that you could update a set of events.
+
+Endpoint: `/api/eventbus/subscriptions`
+
+Method: `PUT`
+
+Request body (also check the subscription option description above):
+
+```json
+{
+  "name": "string",
+  "connectionName": "string",
+  "jsonPathFilter": "string",
+  "payloadTransformationTemplate": "string",
+  "eventSettingsSerialized": "string",
+  "events": [
+    {
+      "eventId": "string"
+    }
+  ]
+}
+```
+
+#### Deleting Existing Subscription by Name (DB Registered Only)
+You may want to remove the event subscription, so that you could stop receiving event notifications.
+
+Endpoint: `/api/eventbus/subscriptions/{name}`
+
+Method: `DELETE`
+
+
+#### Viewing List of Subscriptions or Searching for Existing Subscriptions (DB Registered and Configuration Registered)
+You may want to see the event subscriptions, so that you know which subscriptions exist.
+
+Endpoint: `/api/eventbus/subscriptions/search`
+
+Method: `POST`
+
+Request body:
+
+```json
+{
+  "name": "string", // Subscription name (optional, pass to search by name)
+  "connectionName": "string", // Provider connection name (optional, pass to search by it)
+  "eventIds": [ // Optional. Pass to search subscriptions by event ids
+    "string"
+  ],
+  "skip": 0, // subscriptions to skip in paged loading
+  "take": 0 // subscriptions to take in paged loading
+}
+```
+
+Response:
+
+```json
+{
+  "totalCount": 0,
+  "results": [
+    {
+      "name": "string",
+      "connectionName": "string",
+      "jsonPathFilter": "string",
+      "payloadTransformationTemplate": "string",
+      "eventSettingsSerialized": "string",
+      "events": [
+        {
+          "eventId": "string",
+        }
+      ],
+      "createdDate": "2022-08-29T11:53:53.653Z",
+      "modifiedDate": "2022-08-29T11:53:53.653Z",
+      "createdBy": "string", // If null, the subscription specified in the configuration
+      "modifiedBy": "string", // If null, the subscription specified in the configuration
+      "id": "string" // If null, the subscription specified in the configuration
+    }
+  ]
+}
+
+```
+### Discovering Current List of Events or Resources
+If you want to see the full list of the existing events to properly create a subscription, here is how:
 
 Endpoint: `/api/eventbus/events`
 
@@ -76,6 +344,7 @@ Method: `GET`
 Request: `/api/eventbus/events?skip=0&take=20`
 
 Response:
+
 ```json
 [
   {
@@ -85,177 +354,60 @@ Response:
 ]
 ```
 
+## Destination Providers
 
-### Add event subscription
-As an API Client, I want to Add an Event Subscription, so that I can receive a set of the events in a particular Event Provider.
+### Azure Event Grid Provider
 
-!!! note
-    Need to create Azure Event Grid Topic and get `connection string` and `access key`.
+#### Overview
 
-Endpoint: `/api/eventbus/subscriptions`
+[Azure Event Grid](https://azure.microsoft.com/en-us/services/event-grid/) can be used to push messages to Azure Functions, HTTP endpoints (webhooks), and some other Azure tools.
 
-Method: `PUT`
+Azure Event Grid supports CloudEvents 1.0, while the Azure Event Grid client library also supports sending and receiving events in the form of CloudEvents.
 
-Request Body:
+The Event Bus module contains Azure Event Grid provider, which is ready to use. To connect to it, you need to define the provider connection with the `AzureEventGrid` provider name, and fill connection option data structure (the `ConnectionOptionsSerialized` field) with the following value:
+
 ```json
 {
-  "provider": "AzureEventGrid",
-  "connectionString": "https://demo-demo.eastus-1.eventgrid.azure.net/api/events",
-  "accessKey": "TXSO992J8UQ420HucBgsCs8qiDjFPerCYp0mS6hceM4=",
-  "eventIds": [
-    "VirtoCommerce.CatalogModule.Core.Events.ProductChangedEvent"
-  ]
+  "ConnectionString": "https://*.*.eventgrid.azure.net/api/events", 
+  "AccessKey": "kvpXffggvvMiNjBeBKdroX1r45UvZloXMwlM7i1TyqoiI="
 }
 ```
 
-### Update event subscription
-As an API Client, I want to Update the Event Subscription, so that I can actualize the set of events.
+* `connectionString`: String that defines the URI of the topic
+* `accessKey`: String that is partially hidden on retrieval
 
-Endpoint: `/api/eventbus/subscriptions`
+To set up a subscription with Azure Event Grid, you need first to create a topic in the [Azure Portal](https://azure.microsoft.com/en-us/services/event-grid/). When creating your Event Grid topic, you need to set the input schema to `CloudEvents v1.0` in the *Advanced* tab. To allow Virto Commerce Platform to push messages to your topic, you need to provide an access key. These can also be found in the Azure Portal after creating the topic in the *Access Keys* section.
 
-Method: `POST`
+The `EventSettingsSerialized` option of the subscription is not used by this provider and should be skipped.
 
-Request: `/api/eventbus/subscriptions`
+#### Error Handling
+Event Grid provides durable delivery. It delivers each message at least once for each subscription. Events are sent to the registered endpoint of each subscription immediately. If an endpoint does not acknowledge the receipt of an event, Event Grid retries delivery of the event.
 
-Request Body:
+You can find more details about this in [Azure Portal](https://docs.microsoft.com/en-us/azure/event-grid/delivery-and-retry).
+
+
+
+#### Default Event Data Model for Azure Event Grid
+As mentioned above, you can specify the payload transformation through the Scriban-template with the `payloadTransformationTemplate` option.
+
+If you skip this option, the Event Grid provider will apply the following structure as a payload in the `CloudEvents` format, as here:
+
 ```json
-{
-  "provider": "AzureEventGrid",
-  "connectionString": "https://demo-demo.eastus-1.eventgrid.azure.net/api/events",
-  "accessKey": "TXSO992J8UQ420HucBgsCs8qiDjFPerCYp0mS6hceM4=",
-  "eventIds": [
-    "VirtoCommerce.CatalogModule.Core.Events.ProductChangedEvent",
-    "VirtoCommerce.CatalogModule.Core.Events.CategoryChangedEvent",
-  ]
+{​​​​​
+    "ObjectId": "4038511b-604a-4031-9aba-775bbac43a39",
+    "ObjectType": "VirtoCommerce.OrdersModule.Core.Model.CustomerOrder",
+    "EventId": "VirtoCommerce.OrdersModule.Core.Events.OrderChangedEvent"
 }
 ```
 
+* `ObjectId` (string type): Object unique identifier
+* `ObjectType` (string type): Full name of related object type
+* `EventId` (string type): Full name of the Event ID; required
 
-### View list of subscriptions
-As an API Client, I want to See the Event Subscriptions, so that I know which Subscriptions exist.
+The Event Grid provider discovers all objects related to the event being transferred and generates payloads for each of them.
 
-Endpoint: `/api/eventbus/subscriptions/search`
+#### Sample Event in `CloudEvents` 1.0 JSON Format
 
-Method: `POST`
-
-Request: `/api/eventbus/subscriptions/search`
-
-Request Body:
-```json
-{
-  "skip": 0,
-  "take": 20
-}
-```
-
-Response:
-```json
-{
-  "totalCount": 3,
-  "results": [
-    {
-      "provider": "AzureEventGrid",
-      "connectionString": "https://demo-demo.eastus-1.eventgrid.azure.net/api/events",
-      "accessKey": "TXSO992J8UQ420HucBgsCs8qiDjFPerCYp0mS6hceM4=",
-      "status": 200,
-      "events": [
-        {
-          "subscriptionId": "0819d3a7-9040-4f7f-b444-12b3cd508e46",
-          "eventId": "VirtoCommerce.CatalogModule.Core.Events.ProductChangedEvent",
-          "createdDate": "2021-01-29T09:56:10.7840966Z",
-          "modifiedDate": "2021-01-29T09:56:10.7840966Z",
-          "createdBy": "admin",
-          "modifiedBy": "admin",
-          "id": "fb905b9b-2366-408b-a92c-dde2a7d3d02f"
-        }
-      ],
-      "createdDate": "2021-01-29T09:56:10.7273016Z",
-      "modifiedDate": "2021-01-29T10:07:41.8614757Z",
-      "createdBy": "admin",
-      "modifiedBy": "admin",
-      "id": "0819d3a7-9040-4f7f-b444-12b3cd508e46"
-    },
-    ...
-    ]
-}
-
-```
-
-
-### Remove event subscription
-As an API Client, I want to Remove an Event Subscription, so that I can stop receiving events.
-
-Endpoint: `/api/eventbus/subscriptions/{id}`
-
-Method: `DELETE`
-
-Request: `/api/eventbus/subscriptions/{id}`
-
-
-### View health status
-A subscription has `status` and `errorMessage` properties which can help to identify the problem.
-
-!!! note
-    This property keeps the status of the last operation. Use Azure Application Insights to monitor and review historical data.
-
-
-Success:
-```json
-    "status": 200
-```
-
-Error:
-```json
-    "status": 401,
-    "errorMessage": "Service request failed.\r\nStatus: 401 (The request authorization key is not authorized for QA-VC-AZUREEVENTGRID.EASTUS-1.EVENTGRID.AZURE.NET. This is due to the reason: The input is not a valid Base-64 string as it contains a non-base 64 character, more than two padding characters, or an illegal character among the padding characters. . Report '085078ab-df03-49f7-bdde-c1cead053943:9:1/29/2021 11:56:00 AM (UTC)' to our forums for assistance or raise a support ticket.)\r\n\r\nContent:\r\n{\r\n    \"error\": {\r\n        \"code\": \"Unauthorized\",\r\n        \"message\": \"The request authorization key is not authorized for QA-VC-AZUREEVENTGRID.EASTUS-1.EVENTGRID.AZURE.NET. This is due to the reason: The input is not a valid Base-64 string as it contains a non-base 64 character, more than two padding characters, or an illegal character among the padding characters. . Report '085078ab-df03-49f7-bdde-c1cead053943:9:1/29/2021 11:56:00 AM (UTC)' to our forums for assistance or raise a support ticket.\",\r\n        \"details\": [{\r\n          ",
-```
-
-
-## Data Model
-
-### Event Subscription
-```cs
-    public class SubscriptionInfo : AuditableEntity
-    {
-        public string Provider { get; set; }
-        public string ConnectionString { get; set; }
-        public string AccessKey { get; set; }
-        public int Status { get; set; }
-        public string ErrorMessage { get; set; }
-        public SubscriptionEvent[] Events { get; set; }
-    }
-
-    public class SubscriptionEvent : AuditableEntity
-    {
-        public string SubscriptionId { get; set; }
-        public string EventId { get; set; }
-    } 
-```
-
-* `Provider` - String - Required - Provider Name. Ex: AzureEventGrid
-* `ConnectionString` - String - Required - Connection string for specific provider. Ex: The URI of the Topic.
-* `Status` - Int - Optional - Subscription health status. Http response status code from the last operation for specific provider. Ex: 200.
-* `ErrorMessage` - String - Optional - Error message from the last operation.
-* `SubscriptionEvent` - String - Required - Array of the events.
-
-
-
-### Event data model
-
-```cs
-    public class EventData
-    {
-        public string ObjectId { get; set; }
-        public string ObjectType { get; set; }
-        public string EventId { get; set; }
-    }
-```
-
-* `ObjectId` - String - Object Unique Key
-* `ObjectType` - String - Object Type
-* `EventId` - String - Required - Event Id
-
-### Sample event in CloudEvents 1.0 JSON format
 ```json
 {​​​​​
   "id": "9ec0a767-5789-4149-83ea-bd227570e54a",
@@ -272,7 +424,143 @@ Error:
 }​​​​​
 ```
 
-### How to send custom event from Virto Commerce
-The module reads list of the events from installed modules.
-If you want to send a new event, you need create a new module and [raise a Virto Commerce Event](https://virtocommerce.com/docs/latest/fundamentals/extensibility/extending-using-events/).
-After this the event will be accessible via API and you can create an subscription.  
+
+## Health Status and Searching for Fail Log
+There is API endpoint that allows you to view the fail log.
+
+Endpoint: `/api/eventbus/logs/search`
+
+Method: `POST`
+
+Request:
+
+```json
+{
+  "providerConnectionName": "string", // Optional. Pass to filter the log by provider connection
+  "startCreatedDate": "2022-08-29T12:42:07.944Z", // Start date of event occurrence
+  "endCreatedDate": "2022-08-29T12:42:07.944Z", // Start date of event occurrence
+  "skip": 0, // errors to skip in paged loading
+  "take": 0 // errors to take in paged loading
+}
+```
+
+Response:
+
+```json
+{
+  "totalCount": 0,
+  "results": [
+    {
+      "providerName": "string", // Provider connection name
+      "status": 0, // Error status
+      "errorMessage": "string", // Error message
+      "createdDate": "2022-08-29T12:47:07.793Z", // Date of occurrence
+    }
+  ]
+}
+```
+
+Records in response are always ordered by the date of occurrence, descending.
+
+## How to Send Custom Event from Virto Commerce
+The module reads the list of the events from installed modules.
+
+If you want to send a new event, you need to create a new module and [raise a Virto Commerce event](https://virtocommerce.com/docs/latest/fundamentals/extensibility/extending-using-events/). After this, the event will be accessible via API, and you will be able to create a subscription.  
+
+## Support for Custom Destination Providers 
+Feel free to contact us if you need a new destination.
+
+# More examples (close to real cases)
+## Additional event filtering example
+Look at the subscription example forwarding order changed event if the state changed to specified only:
+
+``` json
+"Subscriptions": [
+    {
+        "ConnectionName": "AzureEventGrid",
+        "Name": "Eventgrid forwarder",
+        "JsonPathFilter": "$.ChangedEntries[?(@.NewEntry.Status == 'Processing' && @.OldEntry.Status != 'Processing')]",
+        "Events": [
+            {
+                "EventId": "VirtoCommerce.OrdersModule.Core.Events.OrderChangedEvent"
+            }
+        ]
+    }
+]
+```
+Please read carefully `JsonPathFilter` expression above. The event data will be forwarded to the connection if the selection with specified `JsonPathFilter` results any value.
+
+In example: any order comes in status `Processing` from any other non-processing state. Another words: we check that new status in the event body is `Processing` and old status value is something different.
+
+You can construct more sophisticated expressions for events filtering. 
+
+As we use Newtonsoft JsonNet library to select tokens in the json-documents, there are good place to learn JsonPath: [Newtonsoft JsonNet documentation: Querying JSON with JSON Path](https://www.newtonsoft.com/json/help/html/QueryJsonSelectToken.htm).
+
+## Payload transformation template example
+The transformation template allows you to transform the event data to a custom payload for your specific case. Also, it is useful to shrink an amount of transferred data.
+Look at the subscription example:
+``` json
+"Subscriptions": [
+    {
+        "ConnectionName": "AzureEventGrid",
+        "Name": "Eventgrid forwarder",
+        "JsonPathFilter": "$.ChangedEntries[?(@.NewEntry.Status == 'Processing' && @.OldEntry.Status != 'Processing')]",
+        "PayloadTransformationTemplate": "{ \"EventId\": \"{{ id }}\", \"OrderInfo\": [ {{for entry in changed_entries}} { \"NewStatus\": \"{{ entry.new_entry.status }}\", \"OldStatus\": \"{{ entry.old_entry.status }}\", \"Items\":[ {{for item in entry.new_entry.items}} { \"Name\": \"{{item.name}}\", \"Sku\": \"{{item.sku}}\" }, {{end}} ] }, {{end}} ] }",
+        "Events": [
+            {
+                "EventId": "VirtoCommerce.OrdersModule.Core.Events.OrderChangedEvent"
+            }
+        ]
+    }
+]
+```
+As you can see, `PayloadTransformationTemplate` value set to some value. It's a one-line, double-comma escaped value of a following Scriban-template:
+``` scriban
+{
+  "EventId": "{{ id }}",
+  "OrderInfo": [
+    {{for entry in changed_entries}}
+      {
+        "NewStatus": "{{ entry.new_entry.status }}",
+        "OldStatus": "{{ entry.old_entry.status }}",
+        "Items":[
+          {{for item in entry.new_entry.items}}
+            {
+              "Name": "{{item.name}}",
+              "Sku": "{{item.sku}}"
+            },
+          {{end}}
+        ]
+      },
+    {{end}}
+  ]
+}
+```
+The template just get old and new statuses of the changed order, then enlists items names and SKUs.
+Look at the result of applying the template to the data in `OrderChangedEvent` for some order with 2 items:
+``` json
+{
+  "EventId": "f90bcd6b-e32b-4d53-9e32-69b9b7fef584",
+  "OrderInfo": [
+    {
+      "NewStatus": "Processing",
+      "OldStatus": "New",
+      "Items": [
+        {
+          "Name": "Samsung Galaxy S6 SM-G920F 32GB, White Pearl, 1.5 GHz ARM Cortex A53 Quad-Core, 3, 32",
+          "Sku": "IZZ-25623049"
+        },
+        {
+          "Name": "Microsoft Lumia 640 XL RM-1065 8GB Dual SIM, Black, true, true, 1.2 GHz ARM Cortex A7 Quad-Core, 1, 8",
+          "Sku": "UWT-27354339"
+        }
+      ]
+    }
+  ]
+}
+```
+This selected payload only would be send to the provider.
+
+### References:
+* [Scriban syntax](https://github.com/scriban/scriban/tree/master/doc)
+* [Test your Scriban-template](https://scribanonline.azurewebsites.net)

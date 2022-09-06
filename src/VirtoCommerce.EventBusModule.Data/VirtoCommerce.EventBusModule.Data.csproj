@@ -18,7 +18,7 @@
         <ProjectReference Include="..\VirtoCommerce.EventBusModule.Core\VirtoCommerce.EventBusModule.Core.csproj" />
     </ItemGroup>
     <ItemGroup>
-        <PackageReference Include="Azure.Messaging.EventGrid" Version="4.8.1" />
+        <PackageReference Include="Azure.Messaging.EventGrid" Version="4.11.0" />
         <PackageReference Include="Microsoft.EntityFrameworkCore" Version="6.0.0" />
         <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="6.0.0">
             <PrivateAssets>all</PrivateAssets>
@@ -31,6 +31,7 @@
             <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
         </PackageReference>
         <PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.1.1" PrivateAssets="All" />
+        <PackageReference Include="Scriban" Version="5.5.0" />
         <PackageReference Include="VirtoCommerce.Platform.Data" Version="3.200.0" />
     </ItemGroup>
 

@@ -1,8 +1,8 @@
-using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 using Moq;
+using Newtonsoft.Json.Linq;
 using VirtoCommerce.EventBusModule.Core.Models;
 using VirtoCommerce.EventBusModule.Core.Services;
 using VirtoCommerce.EventBusModule.Data.Services;
@@ -10,6 +10,7 @@ using VirtoCommerce.Platform.Core.Bus;
 using VirtoCommerce.Platform.Core.Caching;
 using VirtoCommerce.Platform.Core.Events;
 using VirtoCommerce.Platform.Core.Exceptions;
+using VirtoCommerce.Platform.Core.GenericCrud;
 using Xunit;
 
 namespace VirtoCommerce.EventBusModule.Tests
@@ -26,12 +27,12 @@ namespace VirtoCommerce.EventBusModule.Tests
         public async Task SaveSubscriptionAsync_TrySaveKnownType_Saved()
         {
             //Arrange
-            var subcriptionServiceMock = new Mock<ISubscriptionService>();
+            var subcriptionServiceMock = new Mock<ICrudService<Subscription>>();
 
             var eventBus = new InProcessBus(GetLogger<InProcessBus>());
             var eventBusManager = GetEventBusSubscriptionsManager(eventBus, subcriptionServiceMock.Object);
             eventBusManager.RegisterEvents();
-            var request = new SubscriptionRequest() { EventIds = new[] { typeof(FakeEvent).FullName } };
+            var request = new SubscriptionRequest() { ConnectionName = "FakeProvider", Events = new List<SubscriptionEventRequest>() { new SubscriptionEventRequest() { EventId = typeof(FakeEvent).FullName } } };
 
             //Act
             var result = await eventBusManager.SaveSubscriptionAsync(request);
@@ -44,12 +45,12 @@ namespace VirtoCommerce.EventBusModule.Tests
         public async Task SaveSubscriptionAsync_TrySaveUnknownType_ThrowException()
         {
             //Arrange
-            var subcriptionServiceMock = new Mock<ISubscriptionService>();
+            var subcriptionServiceMock = new Mock<ICrudService<Subscription>>();
 
             var eventBus = new InProcessBus(GetLogger<InProcessBus>());
             var eventBusManager = GetEventBusSubscriptionsManager(eventBus, subcriptionServiceMock.Object);
             eventBusManager.RegisterEvents();
-            var request = new SubscriptionRequest() { EventIds = new[] { typeof(UnknownEvent).FullName } };
+            var request = new SubscriptionRequest() { ConnectionName = "FakeProvider", Events = new List<SubscriptionEventRequest>() { new SubscriptionEventRequest() { EventId = typeof(UnknownEvent).FullName } } };
 
             //Act
             var ex = await Assert.ThrowsAsync<PlatformException>(() => eventBusManager.SaveSubscriptionAsync(request));
@@ -65,7 +66,7 @@ namespace VirtoCommerce.EventBusModule.Tests
             //Arrange
             var eventBusManager = GetEventBusSubscriptionsManager();
 
-            var request = new SubscriptionRequest() { Provider = "Known_Provider", EventIds = Array.Empty<string>() };
+            var request = new SubscriptionRequest() { ConnectionName = "Known_Provider", Events = new List<SubscriptionEventRequest>() };
 
             //Act
             var result = await eventBusManager.SaveSubscriptionAsync(request);
@@ -80,17 +81,17 @@ namespace VirtoCommerce.EventBusModule.Tests
             //Arrange
             var eventBusManager = GetEventBusSubscriptionsManager();
 
-            var request = new SubscriptionRequest() { Provider = "Unknown_Provider", EventIds = Array.Empty<string>() };
+            var request = new SubscriptionRequest() { ConnectionName = "Unknown_Provider", Events = new List<SubscriptionEventRequest>() };
 
             //Act
-            var ex = await Assert.ThrowsAsync<PlatformException>(() => eventBusManager.SaveSubscriptionAsync(request));
+            var ex = await Assert.ThrowsAsync<PlatformException>(async () => await eventBusManager.SaveSubscriptionAsync(request));
 
             //Assert
             Assert.Equal(typeof(PlatformException), ex.GetType());
-            Assert.Equal("The provider Unknown_Provider is not registered", ex.Message);
+            Assert.Equal("The provider connection Unknown_Provider is not registered", ex.Message);
         }
 
-        private static DefaultEventBusSubscriptionsManager GetEventBusSubscriptionsManager(IHandlerRegistrar handlerRegistrar, ISubscriptionService subscriptionService)
+        private static DefaultEventBusSubscriptionsManager GetEventBusSubscriptionsManager(IHandlerRegistrar handlerRegistrar, ICrudService<Subscription> subscriptionService)
         {
             var registeredEventServiceMock = new Mock<RegisteredEventService>(Mock.Of<IPlatformMemoryCache>());
             var eventTypes = new List<PlatformEventInfo>
@@ -99,29 +100,62 @@ namespace VirtoCommerce.EventBusModule.Tests
             };
             registeredEventServiceMock.Setup(x => x.GetAllEvents()).Returns(eventTypes);
 
-            var eventBusProviderServiceMock = new Mock<IEventBusProviderService>();
-            eventBusProviderServiceMock.Setup(x => x.IsProviderRegistered(It.IsAny<string>())).Returns(true);
+            var eventBusProviderServiceMock = new Mock<IEventBusProviderConnectionsService>();
+            eventBusProviderServiceMock.Setup(x => x.GetProviderConnectionAsync(It.Is<string>(x => x == "FakeProvider"))).ReturnsAsync(new ProviderConnection());
+            eventBusProviderServiceMock.Setup(x => x.GetConnectedProviderAsync(It.IsAny<string>())).ReturnsAsync(new FakeProvider());
 
             return new DefaultEventBusSubscriptionsManager(handlerRegistrar,
                 registeredEventServiceMock.Object,
                 subscriptionService,
-                Mock.Of<ISubscriptionSearchService>(),
+                Mock.Of<ICrudService<ProviderConnectionLog>>(),
+                Mock.Of<IEventBusSubscriptionsService>(),
                 eventBusProviderServiceMock.Object);
         }
 
         private static DefaultEventBusSubscriptionsManager GetEventBusSubscriptionsManager()
         {
-            var eventBusProviderServiceMock = new Mock<IEventBusProviderService>();
-            eventBusProviderServiceMock.Setup(x => x.IsProviderRegistered(It.Is<string>(x => x == "Known_Provider"))).Returns(true);
+
+            var providerConnectionSearchServiceMock = new Mock<ISearchService<ProviderConnectionSearchCriteria, ProviderConnectionSearchResult, ProviderConnection>>();
+            providerConnectionSearchServiceMock.Setup(x => x.SearchAsync(It.Is<ProviderConnectionSearchCriteria>(x => x.Name == "Known_Provider"))).ReturnsAsync(
+                new ProviderConnectionSearchResult()
+                {
+                    TotalCount = 1,
+                    Results = new List<ProviderConnection>() { new ProviderConnection() { ProviderName = "Known_Provider" } }
+                });
+
+            var eventBusProviderConnectionsService = new EventBusProviderConnectionsService(Mock.Of<IEventBusProviderService>(), providerConnectionSearchServiceMock.Object, Mock.Of<IEventBusReadConfigurationService>());
 
             return new DefaultEventBusSubscriptionsManager(new InProcessBus(GetLogger<InProcessBus>()),
                 new Mock<RegisteredEventService>(Mock.Of<IPlatformMemoryCache>()).Object,
-                Mock.Of<ISubscriptionService>(),
-                Mock.Of<ISubscriptionSearchService>(),
-                eventBusProviderServiceMock.Object);
+                Mock.Of<ICrudService<Subscription>>(),
+                Mock.Of<ICrudService<ProviderConnectionLog>>(),
+                Mock.Of<IEventBusSubscriptionsService>(),
+                eventBusProviderConnectionsService);
         }
     }
 
     class FakeEvent : DomainEvent { }
     class UnknownEvent { }
+
+    class FakeProvider : EventBusProvider
+    {
+        public override bool Connect()
+        {
+            return true;
+        }
+
+        public override bool IsConnected()
+        {
+            return true;
+        }
+
+        public override Task<SendEventResult> SendEventsAsync(IEnumerable<Event> events)
+        {
+            return Task.FromResult(new SendEventResult());
+        }
+
+        public override void SetConnectionOptions(JObject options)
+        {
+        }
+    }
 }

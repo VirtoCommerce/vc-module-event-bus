@@ -5,7 +5,7 @@ namespace VirtoCommerce.EventBusModule.Core.Services
 {
     public interface IEventBusSubscriptionsManager
     {
-        Task<SubscriptionInfo> SaveSubscriptionAsync(SubscriptionRequest request);
+        Task<Subscription> SaveSubscriptionAsync(SubscriptionRequest request);
 
         void RegisterEvents();
     }

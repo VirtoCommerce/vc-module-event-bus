@@ -4,44 +4,52 @@ using System.Linq;
 using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
-using VirtoCommerce.EventBusModule.Core.Extensions;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
+using Scriban;
 using VirtoCommerce.EventBusModule.Core.Models;
 using VirtoCommerce.EventBusModule.Core.Services;
 using VirtoCommerce.Platform.Core.Bus;
 using VirtoCommerce.Platform.Core.Common;
 using VirtoCommerce.Platform.Core.Events;
 using VirtoCommerce.Platform.Core.Exceptions;
+using VirtoCommerce.Platform.Core.GenericCrud;
+using static Microsoft.EntityFrameworkCore.DbLoggerCategory.Database;
 
 namespace VirtoCommerce.EventBusModule.Data.Services
 {
     public class DefaultEventBusSubscriptionsManager : IEventBusSubscriptionsManager
     {
-        private readonly ISubscriptionService _subscriptionService;
+        private readonly ICrudService<Subscription> _subscriptionService;
+        private readonly ICrudService<ProviderConnectionLog> _providerConnectionLogService;
         private readonly IHandlerRegistrar _eventHandlerRegistrar;
         private readonly RegisteredEventService _registeredEventService;
-        private readonly ISubscriptionSearchService _subscriptionSearchService;
-        private readonly IEventBusProviderService _eventBusFactory;
+        private readonly IEventBusSubscriptionsService _subscriptionsService;
+        private readonly IEventBusProviderConnectionsService _providerConnections;
 
         public DefaultEventBusSubscriptionsManager(IHandlerRegistrar eventHandlerRegistrar,
             RegisteredEventService registeredEventService,
-            ISubscriptionService subscriptionService,
-            ISubscriptionSearchService subscriptionSearchService,
-            IEventBusProviderService eventBusFactory)
+            ICrudService<Subscription> subscriptionService,
+            ICrudService<ProviderConnectionLog> providerConnectionLogService,
+            IEventBusSubscriptionsService subscriptionsService,
+            IEventBusProviderConnectionsService providerConnections)
         {
             _eventHandlerRegistrar = eventHandlerRegistrar;
             _registeredEventService = registeredEventService;
             _subscriptionService = subscriptionService;
-            _subscriptionSearchService = subscriptionSearchService;
-            _eventBusFactory = eventBusFactory;
+            _subscriptionsService = subscriptionsService;
+            _providerConnectionLogService = providerConnectionLogService;
+            _providerConnections = providerConnections;
         }
 
-        #region Subcription
+        #region Subscription
 
-        public virtual async Task<SubscriptionInfo> SaveSubscriptionAsync(SubscriptionRequest request)
+        public virtual async Task<Subscription> SaveSubscriptionAsync(SubscriptionRequest request)
         {
-            SubscriptionInfo result = null;
-            if (CheckEvents(request.EventIds) &&
-                CheckProvider(request.Provider))
+            Subscription result = null;
+            if (CheckEvents(request.Events) &&
+                await CheckConnection(request.ConnectionName)
+                )
             {
                 result = request.ToModel();
                 await _subscriptionService.SaveChangesAsync(new[] { result });
@@ -50,7 +58,18 @@ namespace VirtoCommerce.EventBusModule.Data.Services
             return result;
         }
 
-        #endregion Subcription
+        private async Task<bool> CheckConnection(string connectionName)
+        {
+            var connection = await _providerConnections.GetProviderConnectionAsync(connectionName);
+            if (connection == null)
+            {
+                throw new PlatformException($@"The provider connection {connectionName} is not registered");
+            }
+
+            return connection != null;
+        }
+
+        #endregion Subscription
 
         #region HandleEvent
 
@@ -68,51 +87,63 @@ namespace VirtoCommerce.EventBusModule.Data.Services
         protected virtual async Task HandleEvent(DomainEvent domainEvent, CancellationToken cancellationToken)
         {
             var eventId = domainEvent.GetType().FullName;
-            var criteria = new SubscriptionSearchCriteria()
+
+            var searchResult = await _subscriptionsService.GetSubscriptionsByEventIdAsync(eventId);
+
+            if (searchResult.Count > 0)
             {
-                EventIds = new[] { eventId },
-                Skip = 0,
-                Take = int.MaxValue,
-            };
-            var searchResult = await _subscriptionSearchService.SearchAsync(criteria);
+                var logs = new List<ProviderConnectionLog>();
+                var domainEventJObject = JObject.FromObject(domainEvent);
 
-            if (searchResult.TotalCount > 0)
-            {
-                var entities = domainEvent.GetObjectsWithDerived<IEntity>()
-                                             .Select(x => new EventData { ObjectId = x.Id, ObjectType = x.GetType().FullName, EventId = eventId })
-                                             .ToArray();
-                var valueObjects = domainEvent.GetObjectsWithDerived<ValueObject>()
-                                             .Select(x => new EventData { ObjectId = x.GetCacheKey(), ObjectType = x.GetType().FullName, EventId = eventId })
-                                             .ToArray();
-                var eventData = entities.Union(valueObjects).ToArray();
-
-                var activeSubscritions = new List<SubscriptionInfo>();
-
-                foreach (var subscription in searchResult.Results)
+                foreach (var subscription in searchResult)
                 {
-                    var provider = _eventBusFactory.CreateProvider(subscription.Provider);
-
-                    if (provider != null)
+                    try
                     {
-                        var result = await provider.SendEventAsync(subscription, eventData);
-
-                        subscription.Status = result.Status;
-                        subscription.ErrorMessage = string.Empty;
-
-                        if (!string.IsNullOrEmpty(result.ErrorMessage))
-                        {
-                            subscription.ErrorMessage = new string(result.ErrorMessage.Take(1024).ToArray());
-                        }
-
-                        activeSubscritions.Add(subscription);
+                        var provider = await _providerConnections.GetConnectedProviderAsync(subscription.ConnectionName);
+                        await SendEvent(domainEvent, eventId, logs, domainEventJObject, subscription, provider);
                     }
+                    catch (Exception exc)
+                    {
+                        logs.Add(new ProviderConnectionLog() { ProviderName = subscription.ConnectionName, ErrorMessage = exc.ToString() });
+                    }                    
                 }
 
-                await _subscriptionService.SaveChangesAsync(activeSubscritions.ToArray());
+                await _providerConnectionLogService.SaveChangesAsync(logs);
             }
         }
 
-        private void InvokeHandler(Type eventType, IHandlerRegistrar registrar)
+        protected virtual async Task SendEvent(DomainEvent domainEvent, string eventId, List<ProviderConnectionLog> logs, JObject domainEventJObject, Subscription subscription, EventBusProvider provider)
+        {
+            if (provider != null)
+            {
+
+                var tokens = domainEventJObject.SelectTokens(subscription.JsonPathFilter);
+                if (tokens.Any())
+                {
+                    object payload = null;
+
+                    if (!subscription.PayloadTransformationTemplate.IsNullOrEmpty())
+                    {
+                        payload = JsonConvert.DeserializeObject(Template.Parse(subscription.PayloadTransformationTemplate).Render(domainEvent));
+                    }
+                    else
+                    {
+                        payload = domainEvent;
+                    }
+
+                    var eventData = new Event() { Subscription = subscription, Payload = new EventPayload() { EventId = eventId, Arg = payload } };
+
+                    var result = await provider.SendEventsAsync(new List<Event>() { eventData });
+
+                    if (!string.IsNullOrEmpty(result.ErrorMessage))
+                    {
+                        logs.Add(new ProviderConnectionLog() { ProviderName = subscription.ConnectionName, ErrorMessage = result.ErrorMessage, Status = result.Status });
+                    }
+                }
+            }
+        }
+
+        protected virtual void InvokeHandler(Type eventType, IHandlerRegistrar registrar)
         {
             var registerExecutorMethod = registrar
                 .GetType()
@@ -134,29 +165,17 @@ namespace VirtoCommerce.EventBusModule.Data.Services
         #endregion HandleEvent
 
 
-        private bool CheckEvents(string[] eventIds)
+        protected virtual bool CheckEvents(IList<SubscriptionEventRequest> eventIds)
         {
             var allEvents = _registeredEventService.GetAllEvents();
-            if (eventIds.All(x => allEvents.Any(e => e.Id == x)))
+            if (eventIds.All(x => allEvents.Any(e => e.Id == x.EventId)))
             {
                 return true;
             }
             else
             {
-                var notRegisteredEvents = eventIds.Where(e => !allEvents.Any(all => all.Id == e));
+                var notRegisteredEvents = eventIds.Where(e => !allEvents.Any(all => all.Id == e.EventId)).Select(x => x.EventId);
                 throw new PlatformException($"The events are not registered: {string.Join(",", notRegisteredEvents)}");
-            }
-        }
-
-        private bool CheckProvider(string providerName)
-        {
-            if (_eventBusFactory.IsProviderRegistered(providerName))
-            {
-                return true;
-            }
-            else
-            {
-                throw new PlatformException($"The provider {providerName} is not registered");
             }
         }
     }

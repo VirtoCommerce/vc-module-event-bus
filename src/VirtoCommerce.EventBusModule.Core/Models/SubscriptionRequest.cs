@@ -1,25 +1,26 @@
+using System.Collections.Generic;
 using System.Linq;
 
 namespace VirtoCommerce.EventBusModule.Core.Models
 {
     public class SubscriptionRequest
     {
-        public string SubscriptionId { get; set; }
-        public string Provider { get; set; }
-        public string ConnectionString { get; set; }
-        public string AccessKey { get; set; }
-        public string[] EventIds { get; set; }
-
-
-        public SubscriptionInfo ToModel()
+        public string Name { get; set; }
+        public string ConnectionName { get; set; }
+        public string JsonPathFilter { get; set; } = "$";
+        public string PayloadTransformationTemplate { get; set; } = string.Empty;
+        public string EventSettingsSerialized { get; set; } = "{}";
+        public List<SubscriptionEventRequest> Events { get; set; }
+        public Subscription ToModel()
         {
-            return new SubscriptionInfo
+            return new Subscription
             {
-                Id = SubscriptionId,
-                Provider = Provider,
-                ConnectionString = ConnectionString,
-                AccessKey = AccessKey,
-                Events = EventIds.Select(x => new SubscriptionEvent { EventId = x }).ToArray()
+                Name = Name,
+                ConnectionName = ConnectionName,
+                JsonPathFilter = JsonPathFilter,
+                PayloadTransformationTemplate = PayloadTransformationTemplate,
+                EventSettingsSerialized = EventSettingsSerialized,
+                Events = Events.Select(x => new SubscriptionEvent { EventId = x.EventId }).ToArray()
             };
         }
     }
