@@ -19,7 +19,7 @@ This enables event-driven, reactive programming, which uses a publish-subscribe 
 * Supporting custom destination providers (contact us if you need a new destination)
 * Configurable via API as well as through application configuration (`appsettings.json`, environment variables, etc.)
 * Additional event filtering with the `JsonPath` expression
-* Preprocessing event data with Liquid template enables fine-tuning the payload for the destination provider
+* Preprocessing event data with Scriban-template enables fine-tuning the payload for the destination provider
 * High performance
 * Predefined destination provider:  [Azure Event Grid](https://azure.microsoft.com/en-us/services/event-grid) with [CloudEvents](https://cloudevents.io/)-based data format
 
@@ -193,7 +193,7 @@ Example:
 |ConnectionName|Name of the connection the event data should be forwarded to.|
 |Name|Human-readable name to distinguish subscriptions. Should be unique in configuration|
 |JsonPathFilter|`JsonPath` filter expression that allows you to additionally filter events that have specific value in the body. If the body with applied `JsonPath` filter does not yield any value, the module will not call the provider. The default value is `$`, which means any event body is OK and may be transferred to the provider.|
-|PayloadTransformationTemplate|An optional setting where you can specify a Liquid template to transform event data to a different form. If omitted, null, or an empty string, the event data will be transferred unchanged to the provider (full body).|
+|PayloadTransformationTemplate|An optional setting where you can specify a Scriban-template to transform event data to a different form. If omitted, null, or an empty string, the event data will be transferred unchanged to the provider (full body).|
 |EventSettingsSerialized|An optional setting where you can set subscription-specific metadata for the provider as details of the event interpretation. This may include some rules, instructions for the provider, etc. For example, if you hypothetically have a workflow provider, you can set what such provider needs to do as a reaction for the event catch: start a new workflow chain or signal an existing workflow instance. The value varies from provider to provider. Please read the provider instruction.|
 |Events|Array of the event full names the subscription in question should catch.|
 
@@ -388,7 +388,7 @@ You can find more details about this in [Azure Portal](https://docs.microsoft.co
 
 
 #### Default Event Data Model for Azure Event Grid
-As mentioned above, you can specify the payload transformation through the Liquid template with the `payloadTransformationTemplate` option.
+As mentioned above, you can specify the payload transformation through the Scriban-template with the `payloadTransformationTemplate` option.
 
 If you skip this option, the Event Grid provider will apply the following structure as a payload in the `CloudEvents` format, as here:
 
@@ -514,7 +514,7 @@ Look at the subscription example:
     }
 ]
 ```
-As you can see, *PayloadTransformationTemplate* value set to some value. It's a one-line, double-comma escaped value of a following scriban template:
+As you can see, *PayloadTransformationTemplate* value set to some value. It's a one-line, double-comma escaped value of a following Scriban-template:
 ``` scriban
 {
   "EventId": "{{ id }}",
@@ -563,4 +563,4 @@ This selected payload only would be send to the provider.
 
 ## References:
 * [Scriban syntax](https://github.com/scriban/scriban/tree/master/doc)
-* [Test your scriban template](https://scribanonline.azurewebsites.net)
+* [Test your Scriban-template](https://scribanonline.azurewebsites.net)
