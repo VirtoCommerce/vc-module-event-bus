@@ -45,5 +45,5 @@ namespace VirtoCommerce.EventBusModule.Core.Extensions
 
             return result.ToArray();
         }
-    }    
+    }
 }
