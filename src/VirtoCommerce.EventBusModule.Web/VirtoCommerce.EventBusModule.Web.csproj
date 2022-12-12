@@ -19,6 +19,9 @@
     <ItemGroup>
         <PackageReference Include="VirtoCommerce.Platform.Core" Version="3.200.0" />
         <ProjectReference Include="..\VirtoCommerce.EventBusModule.Core\VirtoCommerce.EventBusModule.Core.csproj" />
+        <ProjectReference Include="..\VirtoCommerce.EventBusModule.Data.MySql\VirtoCommerce.EventBusModule.Data.MySql.csproj" />
+        <ProjectReference Include="..\VirtoCommerce.EventBusModule.Data.PostgreSql\VirtoCommerce.EventBusModule.Data.PostgreSql.csproj" />
+        <ProjectReference Include="..\VirtoCommerce.EventBusModule.Data.SqlServer\VirtoCommerce.EventBusModule.Data.SqlServer.csproj" />
         <ProjectReference Include="..\VirtoCommerce.EventBusModule.Data\VirtoCommerce.EventBusModule.Data.csproj" />
     </ItemGroup>
     <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">

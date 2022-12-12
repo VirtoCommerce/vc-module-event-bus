@@ -8,12 +8,14 @@ using VirtoCommerce.EventBusModule.Core;
 using VirtoCommerce.EventBusModule.Core.Models;
 using VirtoCommerce.EventBusModule.Core.Options;
 using VirtoCommerce.EventBusModule.Core.Services;
+using VirtoCommerce.EventBusModule.Data.MySql;
+using VirtoCommerce.EventBusModule.Data.PostgreSql;
 using VirtoCommerce.EventBusModule.Data.Repositories;
 using VirtoCommerce.EventBusModule.Data.Services;
+using VirtoCommerce.EventBusModule.Data.SqlServer;
 using VirtoCommerce.Platform.Core.GenericCrud;
 using VirtoCommerce.Platform.Core.Modularity;
 using VirtoCommerce.Platform.Core.Security;
-using VirtoCommerce.Platform.Data.GenericCrud;
 
 namespace VirtoCommerce.EventBusModule.Web
 {
@@ -26,9 +28,25 @@ namespace VirtoCommerce.EventBusModule.Web
         public void Initialize(IServiceCollection serviceCollection)
         {
             serviceCollection.AddTransient<IEventBusRepository, EventBusRepository>();
-            serviceCollection.AddDbContext<EventBusDbContext>((provider, options) =>
-                options.UseSqlServer(provider.GetRequiredService<IConfiguration>().GetConnectionString("VirtoCommerce")));
 
+            serviceCollection.AddDbContext<EventBusDbContext>((provider, options) =>
+            {
+                var databaseProvider = Configuration.GetValue("DatabaseProvider", "SqlServer");
+                var connectionString = Configuration.GetConnectionString(ModuleInfo.Id) ?? Configuration.GetConnectionString("VirtoCommerce");
+
+                switch (databaseProvider)
+                {
+                    case "MySql":
+                        options.UseMySqlDatabase(connectionString);
+                        break;
+                    case "PostgreSql":
+                        options.UsePostgreSqlDatabase(connectionString);
+                        break;
+                    default:
+                        options.UseSqlServerDatabase(connectionString);
+                        break;
+                }
+            });
             serviceCollection.AddTransient<Func<IEventBusRepository>>(provider => () => provider.CreateScope().ServiceProvider.GetRequiredService<IEventBusRepository>());
 
             serviceCollection.AddTransient<ISearchService<SubscriptionSearchCriteria, SubscriptionSearchResult, Subscription>, SubscriptionSearchService>();
