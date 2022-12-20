@@ -1,1 +1,0 @@
-Add-Migration Initial2 -Context VirtoCommerce.EventBusModule.Data.Repositories.EventBusDbContext  -Verbose -OutputDir Migrations -Project VirtoCommerce.EventBusModule.Data -StartupProject VirtoCommerce.EventBusModule.Data  -Debug
