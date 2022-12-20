@@ -56,7 +56,7 @@ namespace VirtoCommerce.EventBusModule.Web
             serviceCollection.AddTransient<ICrudService<ProviderConnection>, ProviderConnectionService>();
 
             serviceCollection.AddTransient<ISearchService<ProviderConnectionLogSearchCriteria, ProviderConnectionLogSearchResult, ProviderConnectionLog>, ProviderConnectionLogSearchService>();
-            serviceCollection.AddTransient<ICrudService<ProviderConnectionLog>, ProviderConnectionLogService>();            
+            serviceCollection.AddTransient<ICrudService<ProviderConnectionLog>, ProviderConnectionLogService>();
 
             serviceCollection.AddSingleton<IEventBusSubscriptionsManager, DefaultEventBusSubscriptionsManager>();
 
@@ -88,7 +88,6 @@ namespace VirtoCommerce.EventBusModule.Web
             using (var serviceScope = appBuilder.ApplicationServices.CreateScope())
             {
                 var dbContext = serviceScope.ServiceProvider.GetRequiredService<EventBusDbContext>();
-                dbContext.Database.EnsureCreated();
                 dbContext.Database.Migrate();
             }
 
