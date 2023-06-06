@@ -21,9 +21,9 @@ namespace VirtoCommerce.EventBusModule.Data.Services
         {
         }
 
-        protected override async Task<IList<SubscriptionEntity>> LoadEntities(IRepository repository, IList<string> ids, string responseGroup)
+        protected override Task<IList<SubscriptionEntity>> LoadEntities(IRepository repository, IList<string> ids, string responseGroup)
         {
-            return await ((IEventBusRepository)repository).GetSubscriptionsByIdsAsync(ids);
+            return ((IEventBusRepository)repository).GetSubscriptionsByIdsAsync(ids);
         }
     }
 }

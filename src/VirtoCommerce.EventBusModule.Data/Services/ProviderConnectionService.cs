@@ -20,9 +20,9 @@ namespace VirtoCommerce.EventBusModule.Data.Services
         {
         }
 
-        protected override async Task<IList<ProviderConnectionEntity>> LoadEntities(IRepository repository, IList<string> ids, string responseGroup)
+        protected override Task<IList<ProviderConnectionEntity>> LoadEntities(IRepository repository, IList<string> ids, string responseGroup)
         {
-            return await ((IEventBusRepository)repository).GetProviderConnectionsByIdsAsync(ids);
+            return ((IEventBusRepository)repository).GetProviderConnectionsByIdsAsync(ids);
         }
     }
 }
