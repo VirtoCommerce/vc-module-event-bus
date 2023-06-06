@@ -1,7 +1,9 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Microsoft.Extensions.Options;
 using VirtoCommerce.EventBusModule.Core.Models;
+using VirtoCommerce.EventBusModule.Core.Services;
 using VirtoCommerce.EventBusModule.Data.Model;
 using VirtoCommerce.EventBusModule.Data.Repositories;
 using VirtoCommerce.Platform.Core.Caching;
@@ -11,9 +13,10 @@ using VirtoCommerce.Platform.Data.GenericCrud;
 
 namespace VirtoCommerce.EventBusModule.Data.Services
 {
-    public class ProviderConnectionLogSearchService : SearchService<ProviderConnectionLogSearchCriteria, ProviderConnectionLogSearchResult, ProviderConnectionLog, ProviderConnectionLogEntity>
+    public class ProviderConnectionLogSearchService : SearchService<ProviderConnectionLogSearchCriteria, ProviderConnectionLogSearchResult, ProviderConnectionLog, ProviderConnectionLogEntity>, IProviderConnectionLogSearchService
     {
-        public ProviderConnectionLogSearchService(Func<IEventBusRepository> repositoryFactory, IPlatformMemoryCache platformMemoryCache, ICrudService<ProviderConnectionLog> crudService) : base(repositoryFactory, platformMemoryCache, crudService)
+        public ProviderConnectionLogSearchService(Func<IEventBusRepository> repositoryFactory, IPlatformMemoryCache platformMemoryCache, IProviderConnectionLogService crudService, IOptions<CrudOptions> crudOptions)
+            : base(repositoryFactory, platformMemoryCache, crudService, crudOptions)
         {
         }
 

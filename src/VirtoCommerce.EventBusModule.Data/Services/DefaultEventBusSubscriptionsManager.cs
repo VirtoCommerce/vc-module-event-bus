@@ -13,15 +13,13 @@ using VirtoCommerce.Platform.Core.Bus;
 using VirtoCommerce.Platform.Core.Common;
 using VirtoCommerce.Platform.Core.Events;
 using VirtoCommerce.Platform.Core.Exceptions;
-using VirtoCommerce.Platform.Core.GenericCrud;
-using static Microsoft.EntityFrameworkCore.DbLoggerCategory.Database;
 
 namespace VirtoCommerce.EventBusModule.Data.Services
 {
     public class DefaultEventBusSubscriptionsManager : IEventBusSubscriptionsManager
     {
-        private readonly ICrudService<Subscription> _subscriptionService;
-        private readonly ICrudService<ProviderConnectionLog> _providerConnectionLogService;
+        private readonly ISubscriptionService _subscriptionService;
+        private readonly IProviderConnectionLogService _providerConnectionLogService;
         private readonly IHandlerRegistrar _eventHandlerRegistrar;
         private readonly RegisteredEventService _registeredEventService;
         private readonly IEventBusSubscriptionsService _subscriptionsService;
@@ -29,8 +27,8 @@ namespace VirtoCommerce.EventBusModule.Data.Services
 
         public DefaultEventBusSubscriptionsManager(IHandlerRegistrar eventHandlerRegistrar,
             RegisteredEventService registeredEventService,
-            ICrudService<Subscription> subscriptionService,
-            ICrudService<ProviderConnectionLog> providerConnectionLogService,
+            ISubscriptionService subscriptionService,
+            IProviderConnectionLogService providerConnectionLogService,
             IEventBusSubscriptionsService subscriptionsService,
             IEventBusProviderConnectionsService providerConnections)
         {
@@ -105,7 +103,7 @@ namespace VirtoCommerce.EventBusModule.Data.Services
                     catch (Exception exc)
                     {
                         logs.Add(new ProviderConnectionLog() { ProviderName = subscription.ConnectionName, ErrorMessage = exc.ToString() });
-                    }                    
+                    }
                 }
 
                 await _providerConnectionLogService.SaveChangesAsync(logs);

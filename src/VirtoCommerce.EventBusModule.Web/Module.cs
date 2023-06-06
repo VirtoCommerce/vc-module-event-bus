@@ -1,11 +1,9 @@
 using System;
-using System.Linq;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using VirtoCommerce.EventBusModule.Core;
-using VirtoCommerce.EventBusModule.Core.Models;
 using VirtoCommerce.EventBusModule.Core.Options;
 using VirtoCommerce.EventBusModule.Core.Services;
 using VirtoCommerce.EventBusModule.Data.MySql;
@@ -13,7 +11,6 @@ using VirtoCommerce.EventBusModule.Data.PostgreSql;
 using VirtoCommerce.EventBusModule.Data.Repositories;
 using VirtoCommerce.EventBusModule.Data.Services;
 using VirtoCommerce.EventBusModule.Data.SqlServer;
-using VirtoCommerce.Platform.Core.GenericCrud;
 using VirtoCommerce.Platform.Core.Modularity;
 using VirtoCommerce.Platform.Core.Security;
 
@@ -27,9 +24,7 @@ namespace VirtoCommerce.EventBusModule.Web
 
         public void Initialize(IServiceCollection serviceCollection)
         {
-            serviceCollection.AddTransient<IEventBusRepository, EventBusRepository>();
-
-            serviceCollection.AddDbContext<EventBusDbContext>((provider, options) =>
+            serviceCollection.AddDbContext<EventBusDbContext>(options =>
             {
                 var databaseProvider = Configuration.GetValue("DatabaseProvider", "SqlServer");
                 var connectionString = Configuration.GetConnectionString(ModuleInfo.Id) ?? Configuration.GetConnectionString("VirtoCommerce");
@@ -47,16 +42,18 @@ namespace VirtoCommerce.EventBusModule.Web
                         break;
                 }
             });
+
+            serviceCollection.AddTransient<IEventBusRepository, EventBusRepository>();
             serviceCollection.AddTransient<Func<IEventBusRepository>>(provider => () => provider.CreateScope().ServiceProvider.GetRequiredService<IEventBusRepository>());
 
-            serviceCollection.AddTransient<ISearchService<SubscriptionSearchCriteria, SubscriptionSearchResult, Subscription>, SubscriptionSearchService>();
-            serviceCollection.AddTransient<ICrudService<Subscription>, SubscriptionService>();
+            serviceCollection.AddTransient<ISubscriptionSearchService, SubscriptionSearchService>();
+            serviceCollection.AddTransient<ISubscriptionService, SubscriptionService>();
 
-            serviceCollection.AddTransient<ISearchService<ProviderConnectionSearchCriteria, ProviderConnectionSearchResult, ProviderConnection>, ProviderConnectionSearchService>();
-            serviceCollection.AddTransient<ICrudService<ProviderConnection>, ProviderConnectionService>();
+            serviceCollection.AddTransient<IProviderConnectionSearchService, ProviderConnectionSearchService>();
+            serviceCollection.AddTransient<IProviderConnectionService, ProviderConnectionService>();
 
-            serviceCollection.AddTransient<ISearchService<ProviderConnectionLogSearchCriteria, ProviderConnectionLogSearchResult, ProviderConnectionLog>, ProviderConnectionLogSearchService>();
-            serviceCollection.AddTransient<ICrudService<ProviderConnectionLog>, ProviderConnectionLogService>();
+            serviceCollection.AddTransient<IProviderConnectionLogSearchService, ProviderConnectionLogSearchService>();
+            serviceCollection.AddTransient<IProviderConnectionLogService, ProviderConnectionLogService>();
 
             serviceCollection.AddSingleton<IEventBusSubscriptionsManager, DefaultEventBusSubscriptionsManager>();
 
@@ -76,24 +73,21 @@ namespace VirtoCommerce.EventBusModule.Web
 
         public void PostInitialize(IApplicationBuilder appBuilder)
         {
-            //Register module permissions
-            var permissionsProvider = appBuilder.ApplicationServices.GetRequiredService<IPermissionsRegistrar>();
-            permissionsProvider.RegisterPermissions(ModuleConstants.Security.Permissions.AllPermissions.Select(x =>
-                new Permission() { GroupName = "EventBus", Name = x }).ToArray());
+            // Register permissions
+            var permissionsRegistrar = appBuilder.ApplicationServices.GetRequiredService<IPermissionsRegistrar>();
+            permissionsRegistrar.RegisterPermissions(ModuleInfo.Id, "EventBus", ModuleConstants.Security.Permissions.AllPermissions);
 
-            var webHookManager = appBuilder.ApplicationServices.GetService<IEventBusSubscriptionsManager>();
-            webHookManager.RegisterEvents();
+            var eventBusSubscriptionsManager = appBuilder.ApplicationServices.GetService<IEventBusSubscriptionsManager>();
+            eventBusSubscriptionsManager.RegisterEvents();
 
-            //Force migrations
-            using (var serviceScope = appBuilder.ApplicationServices.CreateScope())
-            {
-                var dbContext = serviceScope.ServiceProvider.GetRequiredService<EventBusDbContext>();
-                dbContext.Database.Migrate();
-            }
-
-            //register Azure Event Grid provider
+            // Register Azure Event Grid provider
             var eventBusProviderService = appBuilder.ApplicationServices.GetRequiredService<IEventBusProviderService>();
             eventBusProviderService.RegisterProvider<AzureEventBusProvider>("AzureEventGrid");
+
+            // Apply migrations
+            using var serviceScope = appBuilder.ApplicationServices.CreateScope();
+            var dbContext = serviceScope.ServiceProvider.GetRequiredService<EventBusDbContext>();
+            dbContext.Database.Migrate();
         }
 
         public void Uninstall()
