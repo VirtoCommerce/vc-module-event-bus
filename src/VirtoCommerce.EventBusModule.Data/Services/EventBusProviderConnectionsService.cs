@@ -3,8 +3,6 @@ using System.Linq;
 using System.Threading.Tasks;
 using VirtoCommerce.EventBusModule.Core.Models;
 using VirtoCommerce.EventBusModule.Core.Services;
-using VirtoCommerce.Platform.Core.Exceptions;
-using VirtoCommerce.Platform.Core.GenericCrud;
 
 namespace VirtoCommerce.EventBusModule.Data.Services
 {
@@ -13,12 +11,12 @@ namespace VirtoCommerce.EventBusModule.Data.Services
         private ConcurrentDictionary<string, EventBusProvider> Connections { get; } = new ConcurrentDictionary<string, EventBusProvider>();
 
         private readonly IEventBusProviderService _eventBusProviderService;
-        private readonly ISearchService<ProviderConnectionSearchCriteria, ProviderConnectionSearchResult, ProviderConnection> _providerConnectionSearchService;
+        private readonly IProviderConnectionSearchService _providerConnectionSearchService;
         private readonly IEventBusReadConfigurationService _eventBusReadConfigurationService;
 
         public EventBusProviderConnectionsService(
             IEventBusProviderService eventBusProviderService,
-            ISearchService<ProviderConnectionSearchCriteria, ProviderConnectionSearchResult, ProviderConnection> providerConnectionSearchService,
+            IProviderConnectionSearchService providerConnectionSearchService,
             IEventBusReadConfigurationService eventBusReadConfigurationService)
         {
             _eventBusProviderService = eventBusProviderService;
