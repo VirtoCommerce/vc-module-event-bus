@@ -1,12 +1,10 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <module xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
   <id>VirtoCommerce.EventBus</id>
-  <version>3.400.0</version>
+  <version>3.401.0</version>
   <version-tag />
-
   <platformVersion>3.400.0</platformVersion>
   <dependencies />
-
   <title>Event Bus module</title>
   <description>The module enables you to be notified of new messages or changes via a Message Queue of your choice</description>
   <authors>
