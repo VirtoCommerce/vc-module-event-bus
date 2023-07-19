@@ -12,9 +12,10 @@ namespace VirtoCommerce.EventBusModule.Data.Repositories
         IQueryable<SubscriptionEventEntity> SubscriptionEvents { get; }
         IQueryable<ProviderConnectionEntity> ProviderConnections { get; }
         IQueryable<ProviderConnectionLogEntity> ProviderConnectionLogs { get; }
-        Task<SubscriptionEntity[]> GetSubscriptionsByIdsAsync(IEnumerable<string> ids);
-        Task<ProviderConnectionEntity[]> GetProviderConnectionsByIdsAsync(IEnumerable<string> ids);
-        Task<ProviderConnectionLogEntity[]> GetProviderConnectionLogsByIdsAsync(IEnumerable<string> ids);
-        Task DeleteSubscriptionsByIdsAsync(IEnumerable<string> ids);
+
+        Task<IList<SubscriptionEntity>> GetSubscriptionsByIdsAsync(IList<string> ids);
+        Task<IList<ProviderConnectionEntity>> GetProviderConnectionsByIdsAsync(IList<string> ids);
+        Task<IList<ProviderConnectionLogEntity>> GetProviderConnectionLogsByIdsAsync(IList<string> ids);
+        Task DeleteSubscriptionsByIdsAsync(IList<string> ids);
     }
 }

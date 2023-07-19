@@ -3,7 +3,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using VirtoCommerce.EventBusModule.Core;
 using VirtoCommerce.EventBusModule.Core.Models;
-using VirtoCommerce.Platform.Core.GenericCrud;
+using VirtoCommerce.EventBusModule.Core.Services;
 
 namespace VirtoCommerce.EventBusModule.Web.Controllers.Api
 {
@@ -12,9 +12,9 @@ namespace VirtoCommerce.EventBusModule.Web.Controllers.Api
     [Authorize]
     public class ConnectionsLogController : ControllerBase
     {
-        private readonly ISearchService<ProviderConnectionLogSearchCriteria, ProviderConnectionLogSearchResult, ProviderConnectionLog> _providerConnectionLogSearchService;
+        private readonly IProviderConnectionLogSearchService _providerConnectionLogSearchService;
 
-        public ConnectionsLogController(ISearchService<ProviderConnectionLogSearchCriteria, ProviderConnectionLogSearchResult, ProviderConnectionLog> providerConnectionLogSearchService)
+        public ConnectionsLogController(IProviderConnectionLogSearchService providerConnectionLogSearchService)
         {
             _providerConnectionLogSearchService = providerConnectionLogSearchService;
         }

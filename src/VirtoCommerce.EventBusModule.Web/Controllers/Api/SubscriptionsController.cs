@@ -8,7 +8,6 @@ using VirtoCommerce.EventBusModule.Core.Models;
 using VirtoCommerce.EventBusModule.Core.Services;
 using VirtoCommerce.EventBusModule.Data.Services;
 using VirtoCommerce.Platform.Core.Common;
-using VirtoCommerce.Platform.Core.GenericCrud;
 
 namespace VirtoCommerce.EventBusModule.Web.Controllers.Api
 {
@@ -21,15 +20,15 @@ namespace VirtoCommerce.EventBusModule.Web.Controllers.Api
         private readonly IEventBusSubscriptionsManager _eventBusSubscriptionsManager;
         private readonly IEventBusReadConfigurationService _eventBusReadConfigurationService;
         private readonly IEventBusSubscriptionsService _eventBusSubscriptionsService;
-        private readonly ICrudService<Subscription> _subscriptionCrudService;
-        private readonly ISearchService<SubscriptionSearchCriteria, SubscriptionSearchResult, Subscription> _subscriptionSearchService;
+        private readonly ISubscriptionService _subscriptionCrudService;
+        private readonly ISubscriptionSearchService _subscriptionSearchService;
 
         public SubscriptionsController(RegisteredEventService registeredEventService,
             IEventBusSubscriptionsManager eventBusSubscriptionsManager,
             IEventBusReadConfigurationService eventBusReadConfigurationService,
             IEventBusSubscriptionsService eventBusSubscriptionsService,
-            ICrudService<Subscription> subscriptionCrudService,
-            ISearchService<SubscriptionSearchCriteria, SubscriptionSearchResult, Subscription> subscriptionSearchService
+            ISubscriptionService subscriptionCrudService,
+            ISubscriptionSearchService subscriptionSearchService
             )
         {
             _registeredEventService = registeredEventService;

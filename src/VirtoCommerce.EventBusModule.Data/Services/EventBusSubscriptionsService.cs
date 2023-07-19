@@ -3,17 +3,16 @@ using System.Linq;
 using System.Threading.Tasks;
 using VirtoCommerce.EventBusModule.Core.Models;
 using VirtoCommerce.EventBusModule.Core.Services;
-using VirtoCommerce.Platform.Core.GenericCrud;
 
 namespace VirtoCommerce.EventBusModule.Data.Services
 {
     public class EventBusSubscriptionsService : IEventBusSubscriptionsService
     {
-        private readonly ISearchService<SubscriptionSearchCriteria, SubscriptionSearchResult, Subscription> _subscriptionSearchService;
+        private readonly ISubscriptionSearchService _subscriptionSearchService;
         private readonly IEventBusReadConfigurationService _eventBusReadConfigurationService;
 
         public EventBusSubscriptionsService(
-            ISearchService<SubscriptionSearchCriteria, SubscriptionSearchResult, Subscription> subscriptionSearchService,
+            ISubscriptionSearchService subscriptionSearchService,
             IEventBusReadConfigurationService eventBusReadConfigurationService)
         {
             _subscriptionSearchService = subscriptionSearchService;

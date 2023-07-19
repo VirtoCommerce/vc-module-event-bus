@@ -9,22 +9,28 @@ namespace VirtoCommerce.EventBusModule.Data.Repositories
 {
     public class EventBusRepository : DbContextRepositoryBase<EventBusDbContext>, IEventBusRepository
     {
-        public EventBusRepository(EventBusDbContext dbContext) : base(dbContext)
+        public EventBusRepository(EventBusDbContext dbContext)
+            : base(dbContext)
         {
         }
 
         public IQueryable<SubscriptionEntity> Subscriptions => DbContext.Set<SubscriptionEntity>();
 
         public IQueryable<SubscriptionEventEntity> SubscriptionEvents => DbContext.Set<SubscriptionEventEntity>();
+
         public IQueryable<ProviderConnectionEntity> ProviderConnections => DbContext.Set<ProviderConnectionEntity>();
+
         public IQueryable<ProviderConnectionLogEntity> ProviderConnectionLogs => DbContext.Set<ProviderConnectionLogEntity>();
 
-        public Task<SubscriptionEntity[]> GetSubscriptionsByIdsAsync(IEnumerable<string> ids) => Subscriptions
+        public async Task<IList<SubscriptionEntity>> GetSubscriptionsByIdsAsync(IList<string> ids)
+        {
+            return await Subscriptions
                 .Where(x => ids.Contains(x.Id))
                 .Include(x => x.Events)
-                .ToArrayAsync();
+                .ToListAsync();
+        }
 
-        public async Task DeleteSubscriptionsByIdsAsync(IEnumerable<string> ids)
+        public async Task DeleteSubscriptionsByIdsAsync(IList<string> ids)
         {
             var subscriptions = await GetSubscriptionsByIdsAsync(ids);
             foreach (var subscription in subscriptions)
@@ -33,12 +39,18 @@ namespace VirtoCommerce.EventBusModule.Data.Repositories
             }
         }
 
-        public Task<ProviderConnectionEntity[]> GetProviderConnectionsByIdsAsync(IEnumerable<string> ids) => ProviderConnections
+        public async Task<IList<ProviderConnectionEntity>> GetProviderConnectionsByIdsAsync(IList<string> ids)
+        {
+            return await ProviderConnections
                 .Where(x => ids.Contains(x.Id))
-                .ToArrayAsync();
+                .ToListAsync();
+        }
 
-        public Task<ProviderConnectionLogEntity[]> GetProviderConnectionLogsByIdsAsync(IEnumerable<string> ids) => ProviderConnectionLogs
+        public async Task<IList<ProviderConnectionLogEntity>> GetProviderConnectionLogsByIdsAsync(IList<string> ids)
+        {
+            return await ProviderConnectionLogs
                 .Where(x => ids.Contains(x.Id))
-                .ToArrayAsync();
+                .ToListAsync();
+        }
     }
 }
