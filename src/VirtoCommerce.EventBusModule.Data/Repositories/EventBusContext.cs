@@ -2,10 +2,11 @@ using System.Reflection;
 using EntityFrameworkCore.Triggers;
 using Microsoft.EntityFrameworkCore;
 using VirtoCommerce.EventBusModule.Data.Model;
+using VirtoCommerce.Platform.Data.Infrastructure;
 
 namespace VirtoCommerce.EventBusModule.Data.Repositories
 {
-    public class EventBusDbContext : DbContextWithTriggers
+    public class EventBusDbContext : DbContextBase
     {
         protected const int _idLength = 128;
         public EventBusDbContext(DbContextOptions<EventBusDbContext> options)

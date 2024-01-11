@@ -95,6 +95,9 @@ namespace VirtoCommerce.EventBusModule.Data.Services
 
         public override void SetConnectionOptions(JObject options)
         {
+            if (options == null)
+                throw new ArgumentNullException(nameof(options));
+
             var evtGridOptions = options.ToObject<AzureEventGridOptions>();
 
             client = new EventGridPublisherClient(new Uri(evtGridOptions.ConnectionString), new AzureKeyCredential(evtGridOptions.AccessKey));
