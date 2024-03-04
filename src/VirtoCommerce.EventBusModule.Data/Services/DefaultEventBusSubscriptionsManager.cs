@@ -136,7 +136,7 @@ namespace VirtoCommerce.EventBusModule.Data.Services
             }
         }
 
-        [Obsolete(DiagnosticId = "VC0008", UrlFormat = "https://docs.virtocommerce.org/products/products-virto3-versions")]
+        [Obsolete("Register event handler for DomainEvent", DiagnosticId = "VC0008", UrlFormat = "https://docs.virtocommerce.org/products/products-virto3-versions")]
         protected virtual void InvokeHandler(Type eventType, IHandlerRegistrar registrar)
         {
             var registerExecutorMethod = registrar
