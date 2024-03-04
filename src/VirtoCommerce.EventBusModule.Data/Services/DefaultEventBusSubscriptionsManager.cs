@@ -73,12 +73,7 @@ namespace VirtoCommerce.EventBusModule.Data.Services
 
         public virtual void RegisterEvents()
         {
-            var allEvents = _registeredEventService.GetAllEvents();
-
-            foreach (var @event in allEvents)
-            {
-                InvokeHandler(@event.Type, _eventHandlerRegistrar);
-            }
+            _eventHandlerRegistrar.RegisterHandler<DomainEvent>(HandleEvent);
         }
 
 
@@ -141,6 +136,7 @@ namespace VirtoCommerce.EventBusModule.Data.Services
             }
         }
 
+        [Obsolete(DiagnosticId = "VC0008", UrlFormat = "https://docs.virtocommerce.org/products/products-virto3-versions")]
         protected virtual void InvokeHandler(Type eventType, IHandlerRegistrar registrar)
         {
             var registerExecutorMethod = registrar

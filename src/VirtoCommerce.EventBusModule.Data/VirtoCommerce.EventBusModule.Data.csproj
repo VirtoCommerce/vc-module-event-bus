@@ -14,7 +14,7 @@
     <PackageReference Include="Azure.Messaging.EventGrid" Version="4.21.0" />
     <PackageReference Include="Microsoft.SourceLink.GitHub" Version="8.0.0" PrivateAssets="All" />
     <PackageReference Include="Scriban" Version="5.9.0" />
-    <PackageReference Include="VirtoCommerce.Platform.Data" Version="3.800.0" />
+    <PackageReference Include="VirtoCommerce.Platform.Data" Version="3.812.0-alpha.12876-vcst-430" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\VirtoCommerce.EventBusModule.Core\VirtoCommerce.EventBusModule.Core.csproj" />
