@@ -20,12 +20,13 @@ namespace VirtoCommerce.EventBusModule.Data.Services
     {
         private readonly ISubscriptionService _subscriptionService;
         private readonly IProviderConnectionLogService _providerConnectionLogService;
-        private readonly IHandlerRegistrar _eventHandlerRegistrar;
+        private readonly IEventHandlerRegistrar _eventHandlerRegistrar;
         private readonly RegisteredEventService _registeredEventService;
         private readonly IEventBusSubscriptionsService _subscriptionsService;
         private readonly IEventBusProviderConnectionsService _providerConnections;
 
-        public DefaultEventBusSubscriptionsManager(IHandlerRegistrar eventHandlerRegistrar,
+        public DefaultEventBusSubscriptionsManager(
+            IEventHandlerRegistrar eventHandlerRegistrar,
             RegisteredEventService registeredEventService,
             ISubscriptionService subscriptionService,
             IProviderConnectionLogService providerConnectionLogService,
@@ -73,7 +74,7 @@ namespace VirtoCommerce.EventBusModule.Data.Services
 
         public virtual void RegisterEvents()
         {
-            _eventHandlerRegistrar.RegisterHandler<DomainEvent>(HandleEvent);
+            _eventHandlerRegistrar.RegisterEventHandler<DomainEvent>(HandleEvent);
         }
 
 
