@@ -20,12 +20,13 @@ namespace VirtoCommerce.EventBusModule.Data.Services
     {
         private readonly ISubscriptionService _subscriptionService;
         private readonly IProviderConnectionLogService _providerConnectionLogService;
-        private readonly IHandlerRegistrar _eventHandlerRegistrar;
+        private readonly IEventHandlerRegistrar _eventHandlerRegistrar;
         private readonly RegisteredEventService _registeredEventService;
         private readonly IEventBusSubscriptionsService _subscriptionsService;
         private readonly IEventBusProviderConnectionsService _providerConnections;
 
-        public DefaultEventBusSubscriptionsManager(IHandlerRegistrar eventHandlerRegistrar,
+        public DefaultEventBusSubscriptionsManager(
+            IEventHandlerRegistrar eventHandlerRegistrar,
             RegisteredEventService registeredEventService,
             ISubscriptionService subscriptionService,
             IProviderConnectionLogService providerConnectionLogService,
@@ -73,12 +74,7 @@ namespace VirtoCommerce.EventBusModule.Data.Services
 
         public virtual void RegisterEvents()
         {
-            var allEvents = _registeredEventService.GetAllEvents();
-
-            foreach (var @event in allEvents)
-            {
-                InvokeHandler(@event.Type, _eventHandlerRegistrar);
-            }
+            _eventHandlerRegistrar.RegisterEventHandler<DomainEvent>(HandleEvent);
         }
 
 
@@ -141,6 +137,7 @@ namespace VirtoCommerce.EventBusModule.Data.Services
             }
         }
 
+        [Obsolete("Register event handler for DomainEvent", DiagnosticId = "VC0008", UrlFormat = "https://docs.virtocommerce.org/products/products-virto3-versions")]
         protected virtual void InvokeHandler(Type eventType, IHandlerRegistrar registrar)
         {
             var registerExecutorMethod = registrar
