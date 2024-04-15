@@ -45,8 +45,9 @@ namespace VirtoCommerce.EventBusModule.Data.Services
                     // To allow this you should make a descendant from ProviderSpecificEventSettings,
                     // then add deserialization from @event.Subscription.EventSettings
 
-                    var eventId = @event.Payload.EventId;
                     var subscriptionName = @event.Subscription.Name ?? nameof(AzureEventBusProvider);
+                    var eventId = @event.Payload.EventId;
+                    var eventData = Array.Empty<object>();
 
                     if (string.IsNullOrEmpty(@event.Subscription.PayloadTransformationTemplate) && @event.Payload.Arg is IEvent nativeEvent)
                     {
@@ -54,22 +55,17 @@ namespace VirtoCommerce.EventBusModule.Data.Services
                         // of eventbus module (compatibility)
 
                         var entities = nativeEvent.GetObjectsWithDerived<IEntity>()
-                             .Select(x => new { ObjectId = x.Id, ObjectType = x.GetType().FullName, EventId = eventId })
-                             .ToArray();
+                             .Select(x => new { ObjectId = x.Id, ObjectType = x.GetType().FullName, EventId = eventId });
 
                         var valueObjects = nativeEvent.GetObjectsWithDerived<ValueObject>()
-                            .Select(x => new { ObjectId = x.GetCacheKey(), ObjectType = x.GetType().FullName, EventId = eventId })
-                            .ToArray();
+                            .Select(x => new { ObjectId = x.GetCacheKey(), ObjectType = x.GetType().FullName, EventId = eventId });
 
-                        if (entities.Length > 0 || valueObjects.Length > 0)
-                        {
-                            var eventData = entities.Union(valueObjects);
-                            cloudEvents.AddRange(eventData.Select(x => new CloudEvent(subscriptionName, eventId, x)));
-                        }
-                        else
-                        {
-                            cloudEvents.Add(new CloudEvent(subscriptionName, eventId, @event.Payload.Arg));
-                        }
+                        eventData = entities.Union(valueObjects).ToArray<object>();
+                    }
+
+                    if (eventData.Length > 0)
+                    {
+                        cloudEvents.AddRange(eventData.Select(x => new CloudEvent(subscriptionName, eventId, x)));
                     }
                     else
                     {
