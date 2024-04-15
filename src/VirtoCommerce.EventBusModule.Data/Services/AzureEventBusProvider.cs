@@ -55,13 +55,13 @@ namespace VirtoCommerce.EventBusModule.Data.Services
 
                         var entities = nativeEvent.GetObjectsWithDerived<IEntity>()
                              .Select(x => new { ObjectId = x.Id, ObjectType = x.GetType().FullName, EventId = eventId })
-                             .ToList();
+                             .ToArray();
 
                         var valueObjects = nativeEvent.GetObjectsWithDerived<ValueObject>()
                             .Select(x => new { ObjectId = x.GetCacheKey(), ObjectType = x.GetType().FullName, EventId = eventId })
-                            .ToList();
+                            .ToArray();
 
-                        if (entities.Count > 0 || valueObjects.Count > 0)
+                        if (entities.Length > 0 || valueObjects.Length > 0)
                         {
                             var eventData = entities.Union(valueObjects);
                             cloudEvents.AddRange(eventData.Select(x => new CloudEvent(subscriptionName, eventId, x)));
