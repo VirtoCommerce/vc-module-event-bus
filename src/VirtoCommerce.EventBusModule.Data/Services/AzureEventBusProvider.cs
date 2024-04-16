@@ -18,7 +18,8 @@ namespace VirtoCommerce.EventBusModule.Data.Services
 {
     public class AzureEventBusProvider : EventBusProvider
     {
-        private EventGridPublisherClient client;
+        private EventGridPublisherClient _client;
+
         public override bool Connect()
         {
             return true;
@@ -26,7 +27,7 @@ namespace VirtoCommerce.EventBusModule.Data.Services
 
         public override bool IsConnected()
         {
-            return client != null;
+            return _client != null;
         }
 
         public override async Task<SendEventResult> SendEventsAsync(IEnumerable<Event> events)
@@ -40,9 +41,13 @@ namespace VirtoCommerce.EventBusModule.Data.Services
                 foreach (var @event in events)
                 {
                     // Currently, AzureEventBusProvider does not have azure-specific event translation settings.
-                    // Here we can add those in the future if need
+                    // Here we can add those in the future if needed.
                     // To allow this you should make a descendant from ProviderSpecificEventSettings,
                     // then add deserialization from @event.Subscription.EventSettings
+
+                    var subscriptionName = @event.Subscription.Name ?? nameof(AzureEventBusProvider);
+                    var eventId = @event.Payload.EventId;
+                    var eventData = Array.Empty<object>();
 
                     if (string.IsNullOrEmpty(@event.Subscription.PayloadTransformationTemplate) && @event.Payload.Arg is IEvent nativeEvent)
                     {
@@ -50,22 +55,25 @@ namespace VirtoCommerce.EventBusModule.Data.Services
                         // of eventbus module (compatibility)
 
                         var entities = nativeEvent.GetObjectsWithDerived<IEntity>()
-                             .Select(x => new { ObjectId = x.Id, ObjectType = x.GetType().FullName, EventId = @event.Payload.EventId })
-                             .ToArray();
-                        var valueObjects = nativeEvent.GetObjectsWithDerived<ValueObject>()
-                                                     .Select(x => new { ObjectId = x.GetCacheKey(), ObjectType = x.GetType().FullName, EventId = @event.Payload.EventId })
-                                                     .ToArray();
-                        var eventData = entities.Union(valueObjects);
+                             .Select(x => new { ObjectId = x.Id, ObjectType = x.GetType().FullName, EventId = eventId });
 
-                        cloudEvents.AddRange(eventData.Select(x => new CloudEvent(@event.Subscription.Name ?? nameof(AzureEventBusProvider), @event.Payload.EventId, x)));
+                        var valueObjects = nativeEvent.GetObjectsWithDerived<ValueObject>()
+                            .Select(x => new { ObjectId = x.GetCacheKey(), ObjectType = x.GetType().FullName, EventId = eventId });
+
+                        eventData = entities.Union(valueObjects).ToArray<object>();
+                    }
+
+                    if (eventData.Length > 0)
+                    {
+                        cloudEvents.AddRange(eventData.Select(x => new CloudEvent(subscriptionName, eventId, x)));
                     }
                     else
                     {
-                        cloudEvents.Add(new CloudEvent(@event.Subscription.Name ?? nameof(AzureEventBusProvider), @event.Payload.EventId, @event.Payload.Arg));
+                        cloudEvents.Add(new CloudEvent(subscriptionName, eventId, @event.Payload.Arg));
                     }
                 }
 
-                var eventGridResponse = await client.SendEventsAsync(cloudEvents);
+                var eventGridResponse = await _client.SendEventsAsync(cloudEvents);
 
                 result.Status = eventGridResponse.Status;
             }
@@ -95,12 +103,11 @@ namespace VirtoCommerce.EventBusModule.Data.Services
 
         public override void SetConnectionOptions(JObject options)
         {
-            if (options == null)
-                throw new ArgumentNullException(nameof(options));
+            ArgumentNullException.ThrowIfNull(options);
 
             var evtGridOptions = options.ToObject<AzureEventGridOptions>();
 
-            client = new EventGridPublisherClient(new Uri(evtGridOptions.ConnectionString), new AzureKeyCredential(evtGridOptions.AccessKey));
+            _client = new EventGridPublisherClient(new Uri(evtGridOptions.ConnectionString), new AzureKeyCredential(evtGridOptions.AccessKey));
         }
     }
 }
