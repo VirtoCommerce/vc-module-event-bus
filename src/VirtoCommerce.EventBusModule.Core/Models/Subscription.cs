@@ -3,9 +3,11 @@ using System.Collections.Generic;
 using System.Linq;
 using Newtonsoft.Json.Linq;
 using VirtoCommerce.Platform.Core.Common;
+using VirtoCommerce.Platform.Core.Swagger;
 
 namespace VirtoCommerce.EventBusModule.Core.Models
 {
+    [SwaggerSchemaId("EventBusSubscription")]
     public class Subscription : AuditableEntity, ICloneable
     {
         public string Name { get; set; }
