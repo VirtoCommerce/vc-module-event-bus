@@ -1,8 +1,10 @@
 using System.Collections.Generic;
 using System.Linq;
+using VirtoCommerce.Platform.Core.Swagger;
 
 namespace VirtoCommerce.EventBusModule.Core.Models
 {
+    [SwaggerSchemaId("EventBusSubscriptionRequest")]
     public class SubscriptionRequest
     {
         public string Name { get; set; }
