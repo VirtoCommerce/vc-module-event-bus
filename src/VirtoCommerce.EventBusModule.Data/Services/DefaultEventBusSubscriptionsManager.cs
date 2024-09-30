@@ -77,9 +77,9 @@ namespace VirtoCommerce.EventBusModule.Data.Services
             _eventHandlerRegistrar.RegisterEventHandler(this);
         }
 
-        public virtual Task Handle(DomainEvent domainEvent, CancellationToken cancellationToken)
+        public Task Handle(DomainEvent message, CancellationToken token = new CancellationToken())
         {
-            return HandleEvent(domainEvent, cancellationToken);
+            return HandleEvent(message, token);
         }
 
 
