@@ -4,7 +4,7 @@
   <version>3.804.0</version>
   <version-tag />
 
-  <platformVersion>3.825.0</platformVersion>
+  <platformVersion>3.853.0</platformVersion>
   <dependencies />
 
   <title>Event Bus module</title>
@@ -16,6 +16,7 @@
   <owners>
     <owner>Virto Commerce</owner>
   </owners>
+  <projectUrl>https://github.com/VirtoCommerce/vc-module-event-bus</projectUrl>
   <iconUrl>Modules/$(VirtoCommerce.EventBus)/Content/logo.svg</iconUrl>
   <requireLicenseAcceptance>false</requireLicenseAcceptance>
   <releaseNotes />

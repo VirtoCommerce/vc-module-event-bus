@@ -16,7 +16,7 @@ using VirtoCommerce.Platform.Core.Exceptions;
 
 namespace VirtoCommerce.EventBusModule.Data.Services
 {
-    public class DefaultEventBusSubscriptionsManager : IEventBusSubscriptionsManager
+    public class DefaultEventBusSubscriptionsManager : IEventBusSubscriptionsManager, ICancellableEventHandler<DomainEvent>
     {
         private readonly ISubscriptionService _subscriptionService;
         private readonly IProviderConnectionLogService _providerConnectionLogService;
@@ -74,7 +74,12 @@ namespace VirtoCommerce.EventBusModule.Data.Services
 
         public virtual void RegisterEvents()
         {
-            _eventHandlerRegistrar.RegisterEventHandler<DomainEvent>(HandleEvent);
+            _eventHandlerRegistrar.RegisterEventHandler(this);
+        }
+
+        public virtual Task Handle(DomainEvent domainEvent, CancellationToken cancellationToken)
+        {
+            return HandleEvent(domainEvent, cancellationToken);
         }
 
 
