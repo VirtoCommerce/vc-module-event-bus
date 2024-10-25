@@ -1,0 +1,10 @@
+{
+  "permissions": {
+    "eventbus:subscriptions:access": "访问订阅",
+    "eventbus:subscriptions:read": "查看订阅相关数据",
+    "eventbus:subscriptions:сreate": "创建订阅",
+    "eventbus:events:read": "查看事件相关数据",
+    "eventbus:subscriptions:update": "更新订阅",
+    "eventbus:subscriptions:delete": "删除订阅"
+  }
+}

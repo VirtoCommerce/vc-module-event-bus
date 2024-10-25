@@ -1,0 +1,10 @@
+{
+  "permissions": {
+    "eventbus:subscriptions:access": "Accesso alle sottoscrizioni",
+    "eventbus:subscriptions:read": "Visualizza dati relativi alle sottoscrizioni",
+    "eventbus:subscriptions:сreate": "Crea una sottoscrizione",
+    "eventbus:events:read": "Visualizza dati relativi agli eventi",
+    "eventbus:subscriptions:update": "Aggiorna sottoscrizioni",
+    "eventbus:subscriptions:delete": "Elimina sottoscrizioni"
+  }
+}
