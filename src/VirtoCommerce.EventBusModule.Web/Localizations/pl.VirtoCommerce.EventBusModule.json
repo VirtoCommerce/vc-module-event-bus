@@ -1,0 +1,10 @@
+{
+  "permissions": {
+    "eventbus:subscriptions:access": "Dostęp do subskrypcji",
+    "eventbus:subscriptions:read": "Przeglądanie danych związanych z subskrypcjami",
+    "eventbus:subscriptions:сreate": "Tworzenie subskrypcji",
+    "eventbus:events:read": "Przeglądanie danych związanych z wydarzeniami",
+    "eventbus:subscriptions:update": "Aktualizacja subskrypcji",
+    "eventbus:subscriptions:delete": "Usuwanie subskrypcji"
+  }
+}

@@ -1,0 +1,10 @@
+{
+  "permissions": {
+    "eventbus:subscriptions:access": "サブスクリプションへのアクセス",
+    "eventbus:subscriptions:read": "サブスクリプション関連データの表示",
+    "eventbus:subscriptions:сreate": "サブスクリプションの作成",
+    "eventbus:events:read": "イベント関連データの表示",
+    "eventbus:subscriptions:update": "サブスクリプションの更新",
+    "eventbus:subscriptions:delete": "サブスクリプションの削除"
+  }
+}

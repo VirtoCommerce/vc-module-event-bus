@@ -1,0 +1,10 @@
+{
+  "permissions": {
+    "eventbus:subscriptions:access": "Acesso às inscrições",
+    "eventbus:subscriptions:read": "Visualizar dados relacionados às inscrições",
+    "eventbus:subscriptions:сreate": "Criar uma inscrição",
+    "eventbus:events:read": "Visualizar dados relacionados aos eventos",
+    "eventbus:subscriptions:update": "Atualizar inscrições",
+    "eventbus:subscriptions:delete": "Excluir inscrições"
+  }
+}

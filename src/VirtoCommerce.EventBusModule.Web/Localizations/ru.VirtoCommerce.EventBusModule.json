@@ -1,0 +1,10 @@
+{
+  "permissions": {
+    "eventbus:subscriptions:access": "Доступ к подпискам",
+    "eventbus:subscriptions:read": "Просмотр данных, связанных с подписками",
+    "eventbus:subscriptions:сreate": "Создание подписки",
+    "eventbus:events:read": "Просмотр данных, связанных с событиями",
+    "eventbus:subscriptions:update": "Обновление подписок",
+    "eventbus:subscriptions:delete": "Удаление подписок"
+  }
+}

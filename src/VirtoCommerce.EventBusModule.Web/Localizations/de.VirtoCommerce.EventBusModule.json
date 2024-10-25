@@ -1,0 +1,10 @@
+{
+  "permissions": {
+    "eventbus:subscriptions:access": "Zugriff auf Abonnements",
+    "eventbus:subscriptions:read": "Abonnementbezogene Daten anzeigen",
+    "eventbus:subscriptions:сreate": "Ein Abonnement erstellen",
+    "eventbus:events:read": "Ereignisbezogene Daten anzeigen",
+    "eventbus:subscriptions:update": "Abonnements aktualisieren",
+    "eventbus:subscriptions:delete": "Abonnements löschen"
+  }
+}
