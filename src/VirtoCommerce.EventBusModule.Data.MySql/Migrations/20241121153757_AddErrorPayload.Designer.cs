@@ -2,57 +2,60 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
-using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using VirtoCommerce.EventBusModule.Data.Repositories;
 
 #nullable disable
 
-namespace VirtoCommerce.EventBusModule.Data.PostgreSql.Migrations
+namespace VirtoCommerce.EventBusModule.Data.MySql.Migrations
 {
     [DbContext(typeof(EventBusDbContext))]
-    partial class EventBusDbContextModelSnapshot : ModelSnapshot
+    [Migration("20241121153757_AddErrorPayload")]
+    partial class AddErrorPayload
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
                 .HasAnnotation("ProductVersion", "8.0.8")
-                .HasAnnotation("Relational:MaxIdentifierLength", 63);
+                .HasAnnotation("Relational:MaxIdentifierLength", 64);
 
-            NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
+            MySqlModelBuilderExtensions.AutoIncrementColumns(modelBuilder);
 
             modelBuilder.Entity("VirtoCommerce.EventBusModule.Data.Model.ProviderConnectionEntity", b =>
                 {
                     b.Property<string>("Id")
                         .ValueGeneratedOnAdd()
                         .HasMaxLength(128)
-                        .HasColumnType("character varying(128)");
+                        .HasColumnType("varchar(128)");
 
                     b.Property<string>("ConnectionOptionsSerialized")
-                        .HasColumnType("text");
+                        .HasColumnType("longtext");
 
                     b.Property<string>("CreatedBy")
                         .HasMaxLength(64)
-                        .HasColumnType("character varying(64)");
+                        .HasColumnType("varchar(64)");
 
                     b.Property<DateTime>("CreatedDate")
-                        .HasColumnType("timestamp with time zone");
+                        .HasColumnType("datetime(6)");
 
                     b.Property<string>("ModifiedBy")
                         .HasMaxLength(64)
-                        .HasColumnType("character varying(64)");
+                        .HasColumnType("varchar(64)");
 
                     b.Property<DateTime?>("ModifiedDate")
-                        .HasColumnType("timestamp with time zone");
+                        .HasColumnType("datetime(6)");
 
                     b.Property<string>("Name")
                         .HasMaxLength(128)
-                        .HasColumnType("character varying(128)");
+                        .HasColumnType("varchar(128)");
 
                     b.Property<string>("ProviderName")
                         .HasMaxLength(128)
-                        .HasColumnType("character varying(128)");
+                        .HasColumnType("varchar(128)");
 
                     b.HasKey("Id");
 
@@ -64,34 +67,34 @@ namespace VirtoCommerce.EventBusModule.Data.PostgreSql.Migrations
                     b.Property<string>("Id")
                         .ValueGeneratedOnAdd()
                         .HasMaxLength(128)
-                        .HasColumnType("character varying(128)");
+                        .HasColumnType("varchar(128)");
 
                     b.Property<string>("CreatedBy")
                         .HasMaxLength(64)
-                        .HasColumnType("character varying(64)");
+                        .HasColumnType("varchar(64)");
 
                     b.Property<DateTime>("CreatedDate")
-                        .HasColumnType("timestamp with time zone");
+                        .HasColumnType("datetime(6)");
 
                     b.Property<string>("ErrorMessage")
-                        .HasColumnType("text");
+                        .HasColumnType("longtext");
 
                     b.Property<string>("ErrorPayload")
-                        .HasColumnType("text");
+                        .HasColumnType("longtext");
 
                     b.Property<string>("ModifiedBy")
                         .HasMaxLength(64)
-                        .HasColumnType("character varying(64)");
+                        .HasColumnType("varchar(64)");
 
                     b.Property<DateTime?>("ModifiedDate")
-                        .HasColumnType("timestamp with time zone");
+                        .HasColumnType("datetime(6)");
 
                     b.Property<string>("ProviderName")
                         .HasMaxLength(128)
-                        .HasColumnType("character varying(128)");
+                        .HasColumnType("varchar(128)");
 
                     b.Property<int>("Status")
-                        .HasColumnType("integer");
+                        .HasColumnType("int");
 
                     b.HasKey("Id");
 
@@ -103,39 +106,39 @@ namespace VirtoCommerce.EventBusModule.Data.PostgreSql.Migrations
                     b.Property<string>("Id")
                         .ValueGeneratedOnAdd()
                         .HasMaxLength(128)
-                        .HasColumnType("character varying(128)");
+                        .HasColumnType("varchar(128)");
 
                     b.Property<string>("ConnectionName")
                         .HasMaxLength(128)
-                        .HasColumnType("character varying(128)");
+                        .HasColumnType("varchar(128)");
 
                     b.Property<string>("CreatedBy")
                         .HasMaxLength(64)
-                        .HasColumnType("character varying(64)");
+                        .HasColumnType("varchar(64)");
 
                     b.Property<DateTime>("CreatedDate")
-                        .HasColumnType("timestamp with time zone");
+                        .HasColumnType("datetime(6)");
 
                     b.Property<string>("EventSettingsSerialized")
-                        .HasColumnType("text");
+                        .HasColumnType("longtext");
 
                     b.Property<string>("JsonPathFilter")
                         .HasMaxLength(512)
-                        .HasColumnType("character varying(512)");
+                        .HasColumnType("varchar(512)");
 
                     b.Property<string>("ModifiedBy")
                         .HasMaxLength(64)
-                        .HasColumnType("character varying(64)");
+                        .HasColumnType("varchar(64)");
 
                     b.Property<DateTime?>("ModifiedDate")
-                        .HasColumnType("timestamp with time zone");
+                        .HasColumnType("datetime(6)");
 
                     b.Property<string>("Name")
                         .HasMaxLength(128)
-                        .HasColumnType("character varying(128)");
+                        .HasColumnType("varchar(128)");
 
                     b.Property<string>("PayloadTransformationTemplate")
-                        .HasColumnType("text");
+                        .HasColumnType("longtext");
 
                     b.HasKey("Id");
 
@@ -147,30 +150,30 @@ namespace VirtoCommerce.EventBusModule.Data.PostgreSql.Migrations
                     b.Property<string>("Id")
                         .ValueGeneratedOnAdd()
                         .HasMaxLength(128)
-                        .HasColumnType("character varying(128)");
+                        .HasColumnType("varchar(128)");
 
                     b.Property<string>("CreatedBy")
                         .HasMaxLength(64)
-                        .HasColumnType("character varying(64)");
+                        .HasColumnType("varchar(64)");
 
                     b.Property<DateTime>("CreatedDate")
-                        .HasColumnType("timestamp with time zone");
+                        .HasColumnType("datetime(6)");
 
                     b.Property<string>("EventId")
                         .HasMaxLength(256)
-                        .HasColumnType("character varying(256)");
+                        .HasColumnType("varchar(256)");
 
                     b.Property<string>("ModifiedBy")
                         .HasMaxLength(64)
-                        .HasColumnType("character varying(64)");
+                        .HasColumnType("varchar(64)");
 
                     b.Property<DateTime?>("ModifiedDate")
-                        .HasColumnType("timestamp with time zone");
+                        .HasColumnType("datetime(6)");
 
                     b.Property<string>("SubscriptionId")
                         .IsRequired()
                         .HasMaxLength(128)
-                        .HasColumnType("character varying(128)");
+                        .HasColumnType("varchar(128)");
 
                     b.HasKey("Id");
 
