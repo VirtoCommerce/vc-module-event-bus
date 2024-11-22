@@ -1,8 +1,5 @@
-using System;
-using System.Collections.Generic;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.Options;
 using Newtonsoft.Json.Linq;
 using VirtoCommerce.EventBusModule.Core.Models;
 using VirtoCommerce.EventBusModule.Core.Options;
@@ -14,108 +11,99 @@ namespace VirtoCommerce.EventBusModule.Tests.IntegrationTests
     [Trait("Category", "IntegrationTest")]
     public class AzureEventBusProviderTests
     {
-        public IConfiguration Configuration { get; set; }
-
-        private AzureEventGridOptions options;
+        private readonly AzureEventGridOptions _options;
 
         public AzureEventBusProviderTests()
         {
-            var builder = new ConfigurationBuilder()
-                .AddUserSecrets<AzureEventBusProviderTests>();
+            var configuration = new ConfigurationBuilder().AddUserSecrets<AzureEventBusProviderTests>().Build();
 
-            Configuration = builder.Build();
-
-            options = new AzureEventGridOptions()
+            _options = new AzureEventGridOptions
             {
-                ConnectionString = Configuration["topicEndpoint"],
-                AccessKey = Configuration["topicAccessKey"]
+                ConnectionString = configuration["topicEndpoint"],
+                AccessKey = configuration["topicAccessKey"],
             };
         }
 
         [Fact]
-        public async Task AzureEventBusProviderSendTest()
+        public async Task AzureEventBusProvider_ShouldSucceed()
         {
             // Arrange
-            var subscription = new Subscription()
+            var @event = new Event
             {
-                Id = "testSubscription",                
-                ConnectionName = "AzureEventGrid",
-            };
-
-            var eventData = new Event()
-            {
-                Subscription = subscription,
-                Payload = new EventPayload() { EventId = "testEventId", Arg = new
+                Payload = new EventPayload
                 {
-                    ObjectId = Guid.NewGuid().ToString(),
-                    ObjectType = "testObjectType",
                     EventId = "testEventId",
-                } }
+                    Arg = new
+                    {
+                        EventId = "testEventId",
+                        ObjectId = "testObjectId",
+                        ObjectType = "testObjectType",
+                    },
+                },
             };
 
             var azureProvider = new AzureEventBusProvider();
-            azureProvider.SetConnectionOptions(JObject.FromObject(options));
+            azureProvider.SetConnectionOptions(JObject.FromObject(_options));
+
             //Act
-            var result = await azureProvider.SendEventsAsync(new List<Event>() { eventData });
+            var result = await azureProvider.SendEventsAsync([@event]);
 
             // Assert
             Assert.Equal(200, result.Status);
         }
 
         [Fact]
-        public async Task AzureEventBusProviderSendErrorTest()
+        public async Task AzureEventBusProvider_InvalidAccessKey_ShouldFail()
         {
             // Arrange
-            var subscription = new Subscription()
+            var @event = new Event
             {
-                Id = "testSubscription",
-                ConnectionName = "AzureEventGrid",
+                Payload = new EventPayload
+                {
+                    EventId = "testEventId",
+                    Arg = new
+                    {
+                        EventId = "testEventId",
+                        ObjectId = "testObjectId",
+                        ObjectType = "testObjectType",
+                    },
+                },
             };
 
-            var eventData = new Event()
-            {
-                Subscription = subscription,
-                Payload = new EventPayload() { EventId = "testEventId", Arg = new
-                {
-                    ObjectId = Guid.NewGuid().ToString(),
-                    ObjectType = "testObjectType",
-                    EventId = "testEventId",
-                } }
-            };
+            _options.AccessKey = "InvalidAccessKey";
 
             var azureProvider = new AzureEventBusProvider();
-            azureProvider.SetConnectionOptions(JObject.FromObject(options));
+            azureProvider.SetConnectionOptions(JObject.FromObject(_options));
+
             //Act
-            var result = await azureProvider.SendEventsAsync(new List<Event>() { eventData });
+            var result = await azureProvider.SendEventsAsync([@event]);
 
             // Assert
             Assert.Equal(401, result.Status);
             Assert.NotNull(result.ErrorMessage);
+            Assert.NotNull(result.ErrorPayload);
         }
 
         [Fact]
-        public async Task AzureEventBusProviderEmptyCredentials()
+        public async Task AzureEventBusProvider_EmptyEventData_ShouldSucceed()
         {
             // Arrange
-            var subscription = new Subscription()
+            var @event = new Event
             {
-                Id = "testSubscription",
-                ConnectionName = "AzureEventGrid",
-            };
-
-            var eventData = new Event()
-            {
-                Subscription = subscription,
-                Payload = new EventPayload() { EventId = "testEventId" }
+                Payload = new EventPayload
+                {
+                    EventId = "testEventId",
+                },
             };
 
             var azureProvider = new AzureEventBusProvider();
-            azureProvider.SetConnectionOptions(JObject.FromObject(options));
+            azureProvider.SetConnectionOptions(JObject.FromObject(_options));
+
             //Act
-            var result = await azureProvider.SendEventsAsync(new List<Event>() { eventData });
+            var result = await azureProvider.SendEventsAsync([@event]);
 
             // Assert
-            Assert.NotNull(result.ErrorMessage);
+            Assert.Null(result.ErrorMessage);
         }
     }
 }

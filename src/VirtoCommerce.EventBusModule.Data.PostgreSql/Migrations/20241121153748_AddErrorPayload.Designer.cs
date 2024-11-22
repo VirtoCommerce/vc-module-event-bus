@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using VirtoCommerce.EventBusModule.Data.Repositories;
@@ -11,9 +12,11 @@ using VirtoCommerce.EventBusModule.Data.Repositories;
 namespace VirtoCommerce.EventBusModule.Data.PostgreSql.Migrations
 {
     [DbContext(typeof(EventBusDbContext))]
-    partial class EventBusDbContextModelSnapshot : ModelSnapshot
+    [Migration("20241121153748_AddErrorPayload")]
+    partial class AddErrorPayload
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder

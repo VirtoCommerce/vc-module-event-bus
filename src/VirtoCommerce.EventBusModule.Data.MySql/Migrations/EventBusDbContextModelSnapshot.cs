@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using VirtoCommerce.EventBusModule.Data.Repositories;
 
@@ -16,8 +17,10 @@ namespace VirtoCommerce.EventBusModule.Data.MySql.Migrations
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "6.0.0")
+                .HasAnnotation("ProductVersion", "8.0.8")
                 .HasAnnotation("Relational:MaxIdentifierLength", 64);
+
+            MySqlModelBuilderExtensions.AutoIncrementColumns(modelBuilder);
 
             modelBuilder.Entity("VirtoCommerce.EventBusModule.Data.Model.ProviderConnectionEntity", b =>
                 {
@@ -71,6 +74,9 @@ namespace VirtoCommerce.EventBusModule.Data.MySql.Migrations
                         .HasColumnType("datetime(6)");
 
                     b.Property<string>("ErrorMessage")
+                        .HasColumnType("longtext");
+
+                    b.Property<string>("ErrorPayload")
                         .HasColumnType("longtext");
 
                     b.Property<string>("ModifiedBy")

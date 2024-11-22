@@ -7,5 +7,7 @@ namespace VirtoCommerce.EventBusModule.Core.Models
         public int Status { get; set; } = StatusCodes.Status200OK;
 
         public string ErrorMessage { get; set; }
+
+        public string ErrorPayload { get; set; }
     }
 }

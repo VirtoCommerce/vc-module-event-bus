@@ -6,6 +6,7 @@ using Azure;
 using Azure.Messaging;
 using Azure.Messaging.EventGrid;
 using Microsoft.AspNetCore.Http;
+using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using VirtoCommerce.EventBusModule.Core.Extensions;
 using VirtoCommerce.EventBusModule.Core.Models;
@@ -33,11 +34,10 @@ namespace VirtoCommerce.EventBusModule.Data.Services
         public override async Task<SendEventResult> SendEventsAsync(IEnumerable<Event> events)
         {
             var result = new SendEventResult();
+            var cloudEvents = new List<CloudEvent>();
 
             try
             {
-                var cloudEvents = new List<CloudEvent>();
-
                 foreach (var @event in events)
                 {
                     // Currently, AzureEventBusProvider does not have azure-specific event translation settings.
@@ -45,57 +45,58 @@ namespace VirtoCommerce.EventBusModule.Data.Services
                     // To allow this you should make a descendant from ProviderSpecificEventSettings,
                     // then add deserialization from @event.Subscription.EventSettings
 
-                    var subscriptionName = @event.Subscription.Name ?? nameof(AzureEventBusProvider);
+                    var subscription = @event.Subscription;
+                    var subscriptionName = subscription?.Name ?? nameof(AzureEventBusProvider);
                     var eventId = @event.Payload.EventId;
-                    var eventData = Array.Empty<object>();
+                    var eventData = @event.Payload.Arg;
 
-                    if (string.IsNullOrEmpty(@event.Subscription.PayloadTransformationTemplate) && @event.Payload.Arg is IEvent nativeEvent)
+                    var eventDataItems = new List<object>();
+
+                    if (string.IsNullOrEmpty(subscription?.PayloadTransformationTemplate) && eventData is IEvent nativeEvent)
                     {
-                        // Implement default behavior equal to previous version
-                        // of eventbus module (compatibility)
+                        // Implement default behavior equal to previous version of event bus module (compatibility)
 
-                        var entities = nativeEvent.GetObjectsWithDerived<IEntity>()
-                             .Select(x => new { ObjectId = x.Id, ObjectType = x.GetType().FullName, EventId = eventId });
+                        // Entities
+                        eventDataItems.AddRange(nativeEvent
+                            .GetObjectsWithDerived<IEntity>()
+                            .Select(x => new
+                            {
+                                EventId = eventId,
+                                ObjectId = x.Id,
+                                ObjectType = x.GetType().FullName,
+                            }));
 
-                        var valueObjects = nativeEvent.GetObjectsWithDerived<ValueObject>()
-                            .Select(x => new { ObjectId = x.GetCacheKey(), ObjectType = x.GetType().FullName, EventId = eventId });
-
-                        eventData = entities.Union(valueObjects).ToArray<object>();
+                        // Value objects
+                        eventDataItems.AddRange(nativeEvent
+                            .GetObjectsWithDerived<ValueObject>()
+                            .Select(x => new
+                            {
+                                EventId = eventId,
+                                ObjectId = x.GetCacheKey(),
+                                ObjectType = x.GetType().FullName,
+                            }));
                     }
 
-                    if (eventData.Length > 0)
+                    if (eventDataItems.Count == 0)
                     {
-                        cloudEvents.AddRange(eventData.Select(x => new CloudEvent(subscriptionName, eventId, x)));
+                        eventDataItems.Add(eventData);
                     }
-                    else
-                    {
-                        cloudEvents.Add(new CloudEvent(subscriptionName, eventId, @event.Payload.Arg));
-                    }
+
+                    cloudEvents.AddRange(eventDataItems.Select(x => new CloudEvent(subscriptionName, eventId, x)));
                 }
 
                 var eventGridResponse = await _client.SendEventsAsync(cloudEvents);
 
                 result.Status = eventGridResponse.Status;
             }
-            catch (ArgumentException)
-            {
-                result.Status = StatusCodes.Status400BadRequest;
-                result.ErrorMessage = "Either key or endpoint are empty";
-            }
-            catch (UriFormatException)
-            {
-                result.Status = StatusCodes.Status400BadRequest;
-                result.ErrorMessage = "Invalid endpoint URI format";
-            }
-            catch (RequestFailedException requestFailedEx)
-            {
-                result.Status = requestFailedEx.Status;
-                result.ErrorMessage = requestFailedEx.Message;
-            }
             catch (Exception ex)
             {
-                result.Status = StatusCodes.Status500InternalServerError;
+                result.Status = ex is RequestFailedException requestFailedEx
+                    ? requestFailedEx.Status
+                    : StatusCodes.Status500InternalServerError;
+
                 result.ErrorMessage = ex.Message;
+                result.ErrorPayload = JsonConvert.SerializeObject(cloudEvents);
             }
 
             return result;

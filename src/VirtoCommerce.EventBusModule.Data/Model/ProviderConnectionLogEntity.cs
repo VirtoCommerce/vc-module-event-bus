@@ -9,17 +9,17 @@ namespace VirtoCommerce.EventBusModule.Data.Model
     public class ProviderConnectionLogEntity : AuditableEntity, IDataEntity<ProviderConnectionLogEntity, ProviderConnectionLog>
     {
         public int Status { get; set; }
+
         public string ErrorMessage { get; set; }
+
+        public string ErrorPayload { get; set; }
 
         [StringLength(128)]
         public string ProviderName { get; set; }
 
         public virtual ProviderConnectionLog ToModel(ProviderConnectionLog providerConnectionLog)
         {
-            if (providerConnectionLog == null)
-            {
-                throw new ArgumentNullException(nameof(providerConnectionLog));
-            }
+            ArgumentNullException.ThrowIfNull(providerConnectionLog);
 
             providerConnectionLog.Id = Id;
             providerConnectionLog.CreatedBy = CreatedBy;
@@ -28,16 +28,14 @@ namespace VirtoCommerce.EventBusModule.Data.Model
             providerConnectionLog.ModifiedDate = ModifiedDate;
             providerConnectionLog.Status = Status;
             providerConnectionLog.ErrorMessage = ErrorMessage;
+            providerConnectionLog.ErrorPayload = ErrorPayload;
             providerConnectionLog.ProviderName = ProviderName;
             return providerConnectionLog;
         }
 
         public virtual ProviderConnectionLogEntity FromModel(ProviderConnectionLog providerConnectionLog, PrimaryKeyResolvingMap pkMap)
         {
-            if (providerConnectionLog == null)
-            {
-                throw new ArgumentNullException(nameof(providerConnectionLog));
-            }
+            ArgumentNullException.ThrowIfNull(providerConnectionLog);
 
             Id = providerConnectionLog.Id;
             CreatedBy = providerConnectionLog.CreatedBy;
@@ -46,6 +44,7 @@ namespace VirtoCommerce.EventBusModule.Data.Model
             ModifiedDate = providerConnectionLog.ModifiedDate;
             Status = providerConnectionLog.Status;
             ErrorMessage = providerConnectionLog.ErrorMessage;
+            ErrorPayload = providerConnectionLog.ErrorPayload;
             ProviderName = providerConnectionLog.ProviderName;
 
             pkMap.AddPair(providerConnectionLog, this);
@@ -57,6 +56,7 @@ namespace VirtoCommerce.EventBusModule.Data.Model
         {
             target.Status = Status;
             target.ErrorMessage = ErrorMessage;
+            target.ErrorPayload = ErrorPayload;
             target.ProviderName = ProviderName;
         }
     }
