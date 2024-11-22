@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
 using Newtonsoft.Json;
@@ -9,7 +8,6 @@ using Newtonsoft.Json.Linq;
 using Scriban;
 using VirtoCommerce.EventBusModule.Core.Models;
 using VirtoCommerce.EventBusModule.Core.Services;
-using VirtoCommerce.Platform.Core.Bus;
 using VirtoCommerce.Platform.Core.Common;
 using VirtoCommerce.Platform.Core.Events;
 using VirtoCommerce.Platform.Core.Exceptions;
@@ -51,7 +49,7 @@ namespace VirtoCommerce.EventBusModule.Data.Services
                 )
             {
                 result = request.ToModel();
-                await _subscriptionService.SaveChangesAsync(new[] { result });
+                await _subscriptionService.SaveChangesAsync([result]);
             }
 
             return result;
@@ -60,12 +58,10 @@ namespace VirtoCommerce.EventBusModule.Data.Services
         private async Task<bool> CheckConnection(string connectionName)
         {
             var connection = await _providerConnections.GetProviderConnectionAsync(connectionName);
-            if (connection == null)
-            {
-                throw new PlatformException($@"The provider connection {connectionName} is not registered");
-            }
 
-            return connection != null;
+            return connection == null
+                ? throw new PlatformException($"The provider connection {connectionName} is not registered")
+                : true;
         }
 
         #endregion Subscription
@@ -77,7 +73,7 @@ namespace VirtoCommerce.EventBusModule.Data.Services
             _eventHandlerRegistrar.RegisterEventHandler(this);
         }
 
-        public Task Handle(DomainEvent message, CancellationToken token = new CancellationToken())
+        public Task Handle(DomainEvent message, CancellationToken token = new())
         {
             return HandleEvent(message, token);
         }
@@ -101,9 +97,9 @@ namespace VirtoCommerce.EventBusModule.Data.Services
                         var provider = await _providerConnections.GetConnectedProviderAsync(subscription.ConnectionName);
                         await SendEvent(domainEvent, eventId, logs, domainEventJObject, subscription, provider);
                     }
-                    catch (Exception exc)
+                    catch (Exception ex)
                     {
-                        logs.Add(new ProviderConnectionLog() { ProviderName = subscription.ConnectionName, ErrorMessage = exc.ToString() });
+                        logs.Add(new ProviderConnectionLog { ProviderName = subscription.ConnectionName, ErrorMessage = ex.ToString() });
                     }
                 }
 
@@ -119,47 +115,34 @@ namespace VirtoCommerce.EventBusModule.Data.Services
                 var tokens = domainEventJObject.SelectTokens(subscription.JsonPathFilter);
                 if (tokens.Any())
                 {
-                    object payload = null;
+                    var payload = subscription.PayloadTransformationTemplate.IsNullOrEmpty()
+                        ? domainEvent
+                        : JsonConvert.DeserializeObject(await Template.Parse(subscription.PayloadTransformationTemplate).RenderAsync(domainEvent));
 
-                    if (!subscription.PayloadTransformationTemplate.IsNullOrEmpty())
+                    var eventData = new Event
                     {
-                        payload = JsonConvert.DeserializeObject(Template.Parse(subscription.PayloadTransformationTemplate).Render(domainEvent));
-                    }
-                    else
-                    {
-                        payload = domainEvent;
-                    }
+                        Subscription = subscription,
+                        Payload = new EventPayload
+                        {
+                            EventId = eventId,
+                            Arg = payload,
+                        }
+                    };
 
-                    var eventData = new Event() { Subscription = subscription, Payload = new EventPayload() { EventId = eventId, Arg = payload } };
-
-                    var result = await provider.SendEventsAsync(new List<Event>() { eventData });
+                    var result = await provider.SendEventsAsync([eventData]);
 
                     if (!string.IsNullOrEmpty(result.ErrorMessage))
                     {
-                        logs.Add(new ProviderConnectionLog() { ProviderName = subscription.ConnectionName, ErrorMessage = result.ErrorMessage, Status = result.Status });
+                        logs.Add(new ProviderConnectionLog
+                        {
+                            ProviderName = subscription.ConnectionName,
+                            Status = result.Status,
+                            ErrorMessage = result.ErrorMessage,
+                            ErrorPayload = result.ErrorPayload,
+                        });
                     }
                 }
             }
-        }
-
-        [Obsolete("Register event handler for DomainEvent", DiagnosticId = "VC0008", UrlFormat = "https://docs.virtocommerce.org/products/products-virto3-versions")]
-        protected virtual void InvokeHandler(Type eventType, IHandlerRegistrar registrar)
-        {
-            var registerExecutorMethod = registrar
-                .GetType()
-                .GetMethods(BindingFlags.Instance | BindingFlags.Public)
-                .Where(mi => mi.Name == nameof(IHandlerRegistrar.RegisterHandler))
-                .Where(mi => mi.IsGenericMethod)
-                .Where(mi => mi.GetGenericArguments().Length == 1)
-                .Single(mi => mi.GetParameters().Length == 1)
-                .MakeGenericMethod(eventType);
-
-            Func<DomainEvent, CancellationToken, Task> del = (x, token) =>
-            {
-                return HandleEvent(x, token);
-            };
-
-            registerExecutorMethod.Invoke(registrar, new object[] { del });
         }
 
         #endregion HandleEvent
@@ -172,11 +155,9 @@ namespace VirtoCommerce.EventBusModule.Data.Services
             {
                 return true;
             }
-            else
-            {
-                var notRegisteredEvents = eventIds.Where(e => !allEvents.Any(all => all.Id == e.EventId)).Select(x => x.EventId);
-                throw new PlatformException($"The events are not registered: {string.Join(",", notRegisteredEvents)}");
-            }
+
+            var notRegisteredEvents = eventIds.Where(e => allEvents.All(x => x.Id != e.EventId)).Select(x => x.EventId);
+            throw new PlatformException($"The events are not registered: {string.Join(",", notRegisteredEvents)}");
         }
     }
 }
