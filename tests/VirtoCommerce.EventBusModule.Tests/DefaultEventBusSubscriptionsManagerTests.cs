@@ -108,7 +108,8 @@ namespace VirtoCommerce.EventBusModule.Tests
                 subscriptionService,
                 Mock.Of<IProviderConnectionLogService>(),
                 Mock.Of<IEventBusSubscriptionsService>(),
-                eventBusProviderServiceMock.Object);
+                eventBusProviderServiceMock.Object,
+                Mock.Of<ILogger<DefaultEventBusSubscriptionsManager>>());
         }
 
         private static DefaultEventBusSubscriptionsManager GetEventBusSubscriptionsManager()
@@ -131,7 +132,8 @@ namespace VirtoCommerce.EventBusModule.Tests
                 Mock.Of<ISubscriptionService>(),
                 Mock.Of<IProviderConnectionLogService>(),
                 Mock.Of<IEventBusSubscriptionsService>(),
-                eventBusProviderConnectionsService);
+                eventBusProviderConnectionsService,
+                Mock.Of<ILogger<DefaultEventBusSubscriptionsManager>>());
         }
     }
 
