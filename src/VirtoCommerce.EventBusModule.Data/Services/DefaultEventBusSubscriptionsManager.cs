@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using Scriban;
@@ -22,6 +23,7 @@ namespace VirtoCommerce.EventBusModule.Data.Services
         private readonly RegisteredEventService _registeredEventService;
         private readonly IEventBusSubscriptionsService _subscriptionsService;
         private readonly IEventBusProviderConnectionsService _providerConnections;
+        private readonly ILogger<DefaultEventBusSubscriptionsManager> _logger;
 
         public DefaultEventBusSubscriptionsManager(
             IEventHandlerRegistrar eventHandlerRegistrar,
@@ -29,7 +31,8 @@ namespace VirtoCommerce.EventBusModule.Data.Services
             ISubscriptionService subscriptionService,
             IProviderConnectionLogService providerConnectionLogService,
             IEventBusSubscriptionsService subscriptionsService,
-            IEventBusProviderConnectionsService providerConnections)
+            IEventBusProviderConnectionsService providerConnections,
+            ILogger<DefaultEventBusSubscriptionsManager> logger)
         {
             _eventHandlerRegistrar = eventHandlerRegistrar;
             _registeredEventService = registeredEventService;
@@ -37,6 +40,7 @@ namespace VirtoCommerce.EventBusModule.Data.Services
             _subscriptionsService = subscriptionsService;
             _providerConnectionLogService = providerConnectionLogService;
             _providerConnections = providerConnections;
+            _logger = logger;
         }
 
         #region Subscription
@@ -103,7 +107,16 @@ namespace VirtoCommerce.EventBusModule.Data.Services
                     }
                 }
 
-                await _providerConnectionLogService.SaveChangesAsync(logs);
+                if (logs.Count > 0)
+                {
+                    foreach (var log in logs)
+                    {
+                        _logger.LogError("Failed to send an event. Provider: {Provider}, Status: {Status}, Message: {Message}, Payload: {Payload}",
+                            log.ProviderName, log.Status, log.ErrorMessage, log.ErrorPayload);
+                    }
+
+                    await _providerConnectionLogService.SaveChangesAsync(logs);
+                }
             }
         }
 
