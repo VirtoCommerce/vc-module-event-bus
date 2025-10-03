@@ -1,0 +1,10 @@
+{
+  "permissions": {
+    "eventbus:subscriptions:access": "Tilgang til abonnementer",
+    "eventbus:subscriptions:read": "Vis abonnementsrelaterte data",
+    "eventbus:subscriptions:сreate": "Opprett et abonnement",
+    "eventbus:events:read": "Vis hendelsesrelaterte data",
+    "eventbus:subscriptions:update": "Oppdater abonnementer",
+    "eventbus:subscriptions:delete": "Slett abonnementer"
+  }
+}
