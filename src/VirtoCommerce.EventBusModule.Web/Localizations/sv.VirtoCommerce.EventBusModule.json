@@ -1,0 +1,10 @@
+{
+  "permissions": {
+    "eventbus:subscriptions:access": "Åtkomst till prenumerationer",
+    "eventbus:subscriptions:read": "Visa prenumerationsrelaterade data",
+    "eventbus:subscriptions:сreate": "Skapa en prenumeration",
+    "eventbus:events:read": "Visa händelserelaterade data",
+    "eventbus:subscriptions:update": "Uppdatera prenumerationer",
+    "eventbus:subscriptions:delete": "Radera prenumerationer"
+  }
+}
