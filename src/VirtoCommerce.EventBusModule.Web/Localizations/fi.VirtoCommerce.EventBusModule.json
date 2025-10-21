@@ -1,0 +1,10 @@
+{
+  "permissions": {
+    "eventbus:subscriptions:access": "Pääsy tilauksiin",
+    "eventbus:subscriptions:read": "Näytä tilauksiin liittyviä tietoja",
+    "eventbus:subscriptions:сreate": "Luo tilaus",
+    "eventbus:events:read": "Näytä tapahtumiin liittyviä tietoja",
+    "eventbus:subscriptions:update": "Päivitä tilauksia",
+    "eventbus:subscriptions:delete": "Poista tilauksia"
+  }
+}

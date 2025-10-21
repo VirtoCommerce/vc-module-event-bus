@@ -2,7 +2,7 @@
 
 [![CI status](https://github.com/VirtoCommerce/vc-module-event-bus/workflows/Module%20CI/badge.svg?branch=dev)](https://github.com/VirtoCommerce/vc-module-event-bus/actions?query=workflow%3A"Module+CI") [![Quality gate](https://sonarcloud.io/api/project_badges/measure?project=VirtoCommerce_vc-module-event-bus&metric=alert_status&branch=dev)](https://sonarcloud.io/dashboard?id=VirtoCommerce_vc-module-event-bus) [![Reliability rating](https://sonarcloud.io/api/project_badges/measure?project=VirtoCommerce_vc-module-event-bus&metric=reliability_rating&branch=dev)](https://sonarcloud.io/dashboard?id=VirtoCommerce_vc-module-event-bus) [![Security rating](https://sonarcloud.io/api/project_badges/measure?project=VirtoCommerce_vc-module-event-bus&metric=security_rating&branch=dev)](https://sonarcloud.io/dashboard?id=VirtoCommerce_vc-module-event-bus) [![Sqale rating](https://sonarcloud.io/api/project_badges/measure?project=VirtoCommerce_vc-module-event-bus&metric=sqale_rating&branch=dev)](https://sonarcloud.io/dashboard?id=VirtoCommerce_vc-module-event-bus)
 
-This module enables you to be notified of new Virto Commerce events or changes via the message queue of your choice.
+The Virto Commerce Event Bus module enables you to be notified of new Virto Commerce events or changes via the message queue of your choice.
 
 The module is used to trigger an asynchronous background process in response to an event on the Virto Commerce platform.
 
@@ -10,10 +10,10 @@ The module is used to trigger an asynchronous background process in response to 
 
 As a payload, a Virto Commerce event delivers one of the predefined messages or any change to a resource. This enables event-driven reactive programming, which uses a publish-subscribe model. Publishers emit events but have no expectation about which events are handled. Subscribers decide which events they want to handle.
 
-The event description is based on *CloudEvents: "specification for describing event data in a common way*.
+The event description is based on CloudEvents: "specification for describing event data in a common way*.
 
 
-## Key Features
+## Key features
 
 * Notification on new events from any module
 * Supporting multiple destination providers
@@ -26,17 +26,18 @@ The event description is based on *CloudEvents: "specification for describing ev
 
 ## Documentation
 
-* [Module Documentation](https://virtocommerce.com/docs/latest/modules/event-bus/)
-* [View on GitHub](docs/index.md)
+* [Event Bus module user documentation](https://docs.virtocommerce.org/platform/user-guide/event-bus/overview/)
+* [REST API](https://virtostart-demo-admin.govirto.com/docs/index.html?urls.primaryName=VirtoCommerce.EventBus)
+* [View on GitHub](https://github.com/VirtoCommerce/vc-module-event-bus/)
 
 
 ## References
 
-* Deployment: https://virtocommerce.com/docs/latest/developer-guide/deploy-module-from-source-code/
-* Installation: https://www.virtocommerce.com/docs/latest/user-guide/modules/
-* Home: https://virtocommerce.com
-* Community: https://www.virtocommerce.org
-* [Download Latest Release](https://github.com/VirtoCommerce/vc-module-event-bus/releases/latest)
+* [Deployment](https://docs.virtocommerce.org/platform/developer-guide/Tutorials-and-How-tos/Tutorials/deploy-module-from-source-code/)
+* [Installation](https://docs.virtocommerce.org/platform/user-guide/modules-installation/)
+* [Home](https://virtocommerce.com)
+* [Community](https://www.virtocommerce.org)
+* [Download latest release](https://github.com/VirtoCommerce/vc-module-event-bus/releases/latest)
 
 ## License
 
