@@ -4,7 +4,7 @@
   <version>3.809.0</version>
   <version-tag />
 
-  <platformVersion>3.853.0</platformVersion>
+  <platformVersion>3.916.0-alpha.13164-vcst-4203-cleanup</platformVersion>
   <dependencies />
 
   <title>Event Bus module</title>
@@ -20,7 +20,7 @@
   <iconUrl>Modules/$(VirtoCommerce.EventBus)/Content/logo.svg</iconUrl>
   <requireLicenseAcceptance>false</requireLicenseAcceptance>
   <releaseNotes />
-  <copyright>Copyright © 2011-2024 Virto Commerce. All rights reserved</copyright>
+  <copyright>Copyright © 2011-2025 Virto Commerce. All rights reserved</copyright>
   <tags>eventbus azureveventgrid</tags>
   <assemblyFile>VirtoCommerce.EventBusModule.Web.dll</assemblyFile>
   <moduleType>VirtoCommerce.EventBusModule.Web.Module, VirtoCommerce.EventBusModule.Web</moduleType>
