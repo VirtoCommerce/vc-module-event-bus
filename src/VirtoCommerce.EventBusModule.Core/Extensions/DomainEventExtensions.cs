@@ -32,7 +32,7 @@ namespace VirtoCommerce.EventBusModule.Core.Extensions
                     foreach (var collectionObject in enumerable)
                     {
                         result.AddRange(collectionObject.GetType().GetProperties()
-                                                      .Where(x => x.Name.EqualsInvariant(nameof(GenericChangedEntry<TResult>.NewEntry)))
+                                                      .Where(x => x.Name.EqualsIgnoreCase(nameof(GenericChangedEntry<TResult>.NewEntry)))
                                                       .Select(p => p.GetValue(collectionObject))
                                                       .OfType<TResult>());
                     }
