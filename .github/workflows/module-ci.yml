@@ -364,13 +364,12 @@ jobs:
       && github.event_name == 'push'
       && needs.ci.outputs.deployment-folder-exists == 'true'}}
     needs: ci
-    uses: VirtoCommerce/.github/.github/workflows/deploy-cloud.yml@v3.800.25
+    uses: VirtoCommerce/.github/.github/workflows/deploy-cloud.yml@VCST-4746 #v3.800.25
     with:
       releaseSource: module
       moduleId: ${{ needs.ci.outputs.moduleId }}
       moduleVer: ${{ needs.ci.outputs.version }}
       moduleBlob: ${{ needs.ci.outputs.blobId }}
       jiraKeys: ${{ needs.ci.outputs.jira-keys }}
-      argoServer: 'argo.virtocommerce.cloud'
       matrix: '{"include":${{ needs.ci.outputs.matrix }}}'
     secrets: inherit
