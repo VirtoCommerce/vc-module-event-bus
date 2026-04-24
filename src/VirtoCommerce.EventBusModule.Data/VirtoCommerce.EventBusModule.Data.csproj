@@ -11,7 +11,7 @@
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="Azure.Messaging.EventGrid" Version="5.0.0" />
-    <PackageReference Include="Scriban" Version="6.5.2" />
+    <PackageReference Include="Scriban" Version="7.0.5" />
     <PackageReference Include="VirtoCommerce.Platform.Data" Version="3.1002.0" />
   </ItemGroup>
   <ItemGroup>
