@@ -38,7 +38,7 @@ namespace VirtoCommerce.EventBusModule.Data.Services
 
             try
             {
-                cloudEvents = BuildCloudEvents(events);
+                BuildCloudEvents(events, cloudEvents);
 
                 var eventGridResponse = await _client.SendEventsAsync(cloudEvents);
 
@@ -57,10 +57,8 @@ namespace VirtoCommerce.EventBusModule.Data.Services
             return result;
         }
 
-        protected virtual List<CloudEvent> BuildCloudEvents(IEnumerable<Event> events)
+        protected virtual void BuildCloudEvents(IEnumerable<Event> events, List<CloudEvent> cloudEvents)
         {
-            var cloudEvents = new List<CloudEvent>();
-
             foreach (var @event in events)
             {
                 // Currently, AzureEventBusProvider does not have azure-specific event translation settings.
@@ -107,8 +105,6 @@ namespace VirtoCommerce.EventBusModule.Data.Services
 
                 cloudEvents.AddRange(eventDataItems.Select(x => BuildCloudEvent(subscriptionName, eventId, x)));
             }
-
-            return cloudEvents;
         }
 
         public override void SetConnectionOptions(JObject options)

@@ -101,7 +101,12 @@ namespace VirtoCommerce.EventBusModule.Tests
 
         private sealed class TestableProvider : AzureEventBusProvider
         {
-            public List<CloudEvent> Build(IEnumerable<Event> events) => BuildCloudEvents(events);
+            public List<CloudEvent> Build(IEnumerable<Event> events)
+            {
+                var list = new List<CloudEvent>();
+                BuildCloudEvents(events, list);
+                return list;
+            }
         }
     }
 }
