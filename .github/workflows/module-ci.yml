@@ -1,5 +1,5 @@
-# v3.800.40
-# https://virtocommerce.atlassian.net/browse/VCST-5305
+# v3.1000.8
+# https://virtocommerce.atlassian.net/browse/VCST-6642
 name: Module CI
 
 on:
@@ -42,7 +42,7 @@ jobs:
     outputs:
       version-only: ${{ steps.detect.outputs.version-only }}
     steps:
-      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           fetch-depth: 0
           persist-credentials: false
@@ -94,7 +94,6 @@ jobs:
       CLIENT_SECRET: ${{secrets.CLIENT_SECRET}}
       SONAR_TOKEN: ${{secrets.SONAR_TOKEN}}
       GITHUB_TOKEN: ${{ secrets.REPO_TOKEN }}
-      NUGET_KEY: ${{ secrets.NUGET_KEY }}
       BLOB_SAS: ${{ secrets.BLOB_TOKEN }}
       VERSION_SUFFIX: ''
       BUILD_STATE: 'failed'
@@ -109,16 +108,17 @@ jobs:
       matrix: ${{ steps.deployment-matrix.outputs.matrix }}
       deployment-folder-exists: ${{ steps.check_deployment_folder.outputs.exists }}
       requiredModulesListUrl: ${{ steps.extract_required_modules_list_url_from_pr.outputs.url }}
+      moduleDependencies: ${{ steps.module_dependencies.outputs.ids }}
 
     steps:
 
       - name: Set up Node 24
-        uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e # v6.4.0
+        uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
         with:
             node-version: '24'
 
       - name: Set up Java 17
-        uses: actions/setup-java@1bcf9fb12cf4aa7d266a90ae39939e61372fe520 # v5.4.0
+        uses: actions/setup-java@b843ebf9b913146b38da2eaa7aeddf76074ae1ad # v6.1.0
         with:
           distribution: 'temurin'
           java-version: '17'
@@ -128,24 +128,53 @@ jobs:
         run: |
           echo "RELEASE_STATUS=true" >> $GITHUB_ENV
 
-      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           fetch-depth: 0
           persist-credentials: false
 
       - name: Install VirtoCommerce.GlobalTool
-        uses: VirtoCommerce/vc-github-actions/setup-vcbuild@master
+        uses: VirtoCommerce/.github/actions/setup-vcbuild@v3.1000.8
 
       - name: Install dotnet-sonarscanner
         run: dotnet tool install --global dotnet-sonarscanner
 
       - name: Get Changelog
         id: changelog
-        uses: VirtoCommerce/vc-github-actions/changelog-generator@master
+        uses: VirtoCommerce/.github/actions/changelog-generator@v3.1000.8
 
       - name: Get Artifact Version
-        uses: VirtoCommerce/vc-github-actions/get-image-version@master
+        uses: VirtoCommerce/.github/actions/get-image-version@v3.1000.8
         id: artifact_ver
+
+      # Read here because this job already has the checkout: module.manifest is the only place
+      # naming the engine the module needs (the packages manifest comes from the PR body and is
+      # empty on a dispatch). Ids only — the test workflow owns the id -> engine mapping.
+      - name: Read module dependencies
+        id: module_dependencies
+        shell: pwsh
+        run: |
+          # samples ship their own manifests and are not what is being tested
+          $manifests = @(Get-ChildItem -Path . -Filter module.manifest -Recurse -File |
+                         Where-Object { $_.FullName -notmatch '[\\/](samples|tests)[\\/]' })
+
+          $declared = @(foreach ($manifest in $manifests) {
+            try { $xml = [xml](Get-Content -Raw $manifest.FullName) }
+            catch {
+              Write-Host "::warning title=Module dependencies::$($manifest.FullName) is not valid XML; its dependencies are ignored."
+              continue
+            }
+            # Optional dependencies are not installed: an engine named by one would be picked
+            # for testing and then not be there.
+            $xml.module.dependencies.dependency |
+              Where-Object { $_.id -and $_.optional -ne 'true' } | ForEach-Object { $_.id }
+          })
+          $ids = @($declared | Sort-Object -Unique)
+
+          Write-Host "Module dependencies: $(if ($ids) { $ids -join ', ' } else { 'none' })"
+          # ConvertTo-Json on an empty array yields nothing, and the consumer parses this
+          $json = if ($ids.Count -gt 0) { $ids | ConvertTo-Json -Compress -AsArray } else { '[]' }
+          Add-Content -Path $env:GITHUB_OUTPUT -Value "ids=$json"
 
       - name: Check if .deployment folder exists
         id: check_deployment_folder
@@ -171,12 +200,12 @@ jobs:
 
       - name: Add version suffix
         if: ${{ github.ref != 'refs/heads/master' && github.ref != 'refs/heads/main' }}
-        uses: VirtoCommerce/vc-github-actions/add-version-suffix@master
+        uses: VirtoCommerce/.github/actions/add-version-suffix@v3.1000.8
         with:
           versionSuffix: ${{ env.VERSION_SUFFIX }}
 
       - name: SonarCloud Begin
-        uses: VirtoCommerce/vc-github-actions/sonar-scanner-begin@master
+        uses: VirtoCommerce/.github/actions/sonar-scanner-begin@v3.1000.8
         with:
           repoOrg: ${{ github.repository_owner }}
           sonarOrg: ${{secrets.SONAR_ORG_KEY}}
@@ -188,24 +217,33 @@ jobs:
         run: vc-build Test -skip
 
       - name: SonarCloud End
-        uses: VirtoCommerce/vc-github-actions/sonar-scanner-end@master
+        uses: VirtoCommerce/.github/actions/sonar-scanner-end@v3.1000.8
 
       - name: Quality Gate
-        uses: VirtoCommerce/vc-github-actions/sonar-quality-gate@master
+        uses: VirtoCommerce/.github/actions/sonar-quality-gate@v3.1000.8
         with:
           login: ${{secrets.SONAR_TOKEN}}
 
       - name: Packaging
         run: vc-build Compress -skip Clean+Restore+Compile+Test
 
+      - name: Pack Nuget
+        if: ${{ github.ref == 'refs/heads/master' || github.ref == 'refs/heads/main' }}
+        run: vc-build Pack -skip Clean+Restore+Compile+Test
+
+      # Trusted Publishing: vc-nuget-publisher holds the one nuget.org policy and pushes the packages.
       - name: Publish Nuget
         if: ${{ github.ref == 'refs/heads/master' || github.ref == 'refs/heads/main' }}
-        uses: VirtoCommerce/vc-github-actions/publish-nuget@master
+        # Bounds the wait for the publisher run; a normal publish takes under a minute.
+        timeout-minutes: 30
+        uses: VirtoCommerce/.github/actions/publish-nuget-central@v3.1000.8
+        with:
+          githubToken: ${{ secrets.REPO_TOKEN }}
 
       - name: Publish to Blob
         if: ${{ github.ref == 'refs/heads/master' || github.ref == 'refs/heads/main' || github.ref == 'refs/heads/dev' || github.event_name == 'pull_request' || (github.event_name == 'workflow_dispatch' && github.ref != 'refs/heads/master') || (github.event_name == 'workflow_dispatch' && github.ref != 'refs/heads/main') }}
         id: blobRelease
-        uses: VirtoCommerce/vc-github-actions/publish-blob-release@master
+        uses: VirtoCommerce/.github/actions/publish-blob-release@v3.1000.8
         with:
           blobSAS: ${{ secrets.BLOB_TOKEN }}
           blobUrl: ${{ vars.BLOB_URL }}
@@ -227,7 +265,7 @@ jobs:
 
       - name: Add Jira link
         if: ${{ github.event_name == 'pull_request' }}
-        uses: VirtoCommerce/vc-github-actions/publish-jira-link@master
+        uses: VirtoCommerce/.github/actions/publish-jira-link@v3.1000.8
         with:
           branchName: ${{ steps.sanitize_branch.outputs.branchName }}
           repoOrg: ${{ github.repository_owner }}
@@ -236,7 +274,7 @@ jobs:
 
       - name: Add link to PR
         if: ${{ github.event_name == 'pull_request' }}
-        uses: VirtoCommerce/vc-github-actions/publish-artifact-link@master
+        uses: VirtoCommerce/.github/actions/publish-artifact-link@v3.1000.8
         with:
           artifactUrl: ${{ steps.blobRelease.outputs.packageUrl }}
           repoOrg: ${{ github.repository_owner }}
@@ -248,7 +286,7 @@ jobs:
         with:
           changelog: ${{ steps.changelog.outputs.changelog }}
           organization: ${{ github.repository_owner }}
-        uses: VirtoCommerce/vc-github-actions/publish-github-release@master
+        uses: VirtoCommerce/.github/actions/publish-github-release@v3.1000.8
 
       - name: Set artifactUrl value
         id: artifactUrl
@@ -264,7 +302,7 @@ jobs:
 
       - name: Create deployment matrix
         if: ${{ github.ref == 'refs/heads/dev' || github.ref == 'refs/heads/master' || github.ref == 'refs/heads/main' }}
-        uses: VirtoCommerce/vc-github-actions/cloud-create-deploy-matrix@master
+        uses: VirtoCommerce/.github/actions/cloud-create-deploy-matrix@v3.1000.8
         id: deployment-matrix
         with:
           deployConfigPath: '.deployment/module/cloudDeploy.json'
@@ -302,19 +340,19 @@ jobs:
 
       - name: Setup Git Credentials
         if: ${{ (github.ref == 'refs/heads/dev' && github.event_name != 'workflow_dispatch') || github.ref == 'refs/heads/master' || github.ref == 'refs/heads/main' }}
-        uses: VirtoCommerce/vc-github-actions/setup-git-credentials-github@master
+        uses: VirtoCommerce/.github/actions/setup-git-credentials-github@v3.1000.8
         with:
           githubToken: ${{ secrets.REPO_TOKEN }}
 
       # Not gated on swagger-validation: PRs into dev already validate it, and direct pushes are blocked by branch protection.
       - name: Publish Manifest
         if: ${{ (github.ref == 'refs/heads/dev' && github.event_name != 'workflow_dispatch') || github.ref == 'refs/heads/master' || github.ref == 'refs/heads/main' }}
-        uses: VirtoCommerce/vc-github-actions/publish-manifest@master
+        uses: VirtoCommerce/.github/actions/publish-manifest@v3.1000.8
         with:
           packageUrl: ${{ steps.artifactUrl.outputs.download_url }}
 
       - name: Parse Jira Keys from All Commits
-        uses: VirtoCommerce/vc-github-actions/get-jira-keys@master
+        uses: VirtoCommerce/.github/actions/get-jira-keys@v3.1000.8
         if: always()
         id: jira_keys
         with:
@@ -355,16 +393,17 @@ jobs:
         ((github.ref == 'refs/heads/dev') && (github.event_name == 'push')) ||
         (github.event_name == 'workflow_dispatch') || ((github.base_ref == 'dev') && (github.event_name == 'pull_request'))) }}
     needs: ci
-    uses: VirtoCommerce/.github/.github/workflows/pytest-tests.yml@v3.800.40
+    uses: VirtoCommerce/.github/.github/workflows/playwright-tests.yml@v3.1000.8
     with:
       installModules: 'false'
       installCustomModule: 'true'
       customModuleId:  ${{ needs.ci.outputs.moduleId }}
       customModuleUrl:  ${{ needs.ci.outputs.artifactUrl }}
       requiredModulesListUrl: ${{ needs.ci.outputs.requiredModulesListUrl }}
+      moduleDependencies: ${{ needs.ci.outputs.moduleDependencies }}
       vctestingRepoBranch: 'dev'
       frontendZipUrl: 'latest'
-      testSuites: 'graphql,restapi,e2e'   
+      testSuites: 'graphql,restapi,e2e'
     secrets:
       appInsightsInstrumentationKey: ${{ secrets.E2E_APPINSIGHTSINSTRUMENTATIONKEY }}
       envPAT: ${{ secrets.REPO_TOKEN }}
@@ -383,10 +422,10 @@ jobs:
       packages: read
     steps:
       - name: Install VirtoCommerce.GlobalTool
-        uses: VirtoCommerce/vc-github-actions/setup-vcbuild@master
+        uses: VirtoCommerce/.github/actions/setup-vcbuild@v3.1000.8
 
       - name: Swagger validation
-        uses: VirtoCommerce/vc-github-actions/docker-env@master
+        uses: VirtoCommerce/.github/actions/docker-env@v3.1000.8
         with:
           appInsightsInstrumentationKey: ${{ secrets.E2E_APPINSIGHTSINSTRUMENTATIONKEY }}
           githubUser: ${{ github.actor }}
@@ -412,7 +451,7 @@ jobs:
     permissions:
       contents: read
       deployments: write
-    uses: VirtoCommerce/.github/.github/workflows/deploy-cloud.yml@v3.800.40
+    uses: VirtoCommerce/.github/.github/workflows/deploy-cloud.yml@v3.1000.8
     with:
       releaseSource: module
       moduleId: ${{ needs.ci.outputs.moduleId }}
@@ -420,4 +459,4 @@ jobs:
       moduleBlob: ${{ needs.ci.outputs.blobId }}
       jiraKeys: ${{ needs.ci.outputs.jira-keys }}
       matrix: '{"include":${{ needs.ci.outputs.matrix }}}'
-    secrets: inherit # zizmor: ignore[secrets-inherit] deploy-cloud.yml@v3.800.40 reads undeclared org secrets; explicit passing needs a new release + tag bump
+    secrets: inherit # zizmor: ignore[secrets-inherit] deploy-cloud.yml@v3.1000.4 reads undeclared org secrets; explicit passing needs a new release + tag bump
