@@ -12,7 +12,7 @@
   <ItemGroup>
     <PackageReference Include="Azure.Messaging.EventGrid" Version="5.0.0" />
     <PackageReference Include="Scriban" Version="7.2.5" />
-    <PackageReference Include="VirtoCommerce.Platform.Data" Version="3.1007.10" />
+    <PackageReference Include="VirtoCommerce.Platform.Data" Version="3.1095.0" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\VirtoCommerce.EventBusModule.Core\VirtoCommerce.EventBusModule.Core.csproj" />
